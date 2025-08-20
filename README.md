@@ -1,6 +1,6 @@
 <div align="center">
 
- <!-- <img src="https://github.com/user-attachments/assets/cd2f6252-aa6d-4376-9bf5-1e3a69d626d8" alt="Xplorta Project Banner" style="border-radius: 15px;"/> -->
+ <img src="https://github.com/user-attachments/assets/a9190153-e4fa-4855-9d34-ae184aca680a" alt="Xplorta Project Banner" style="border-radius: 15px;"/>
 
   <h1>Xplorta: The Open-Source Backup Explorer</h1>
   
@@ -12,16 +12,16 @@
 
 <!-- Badges -->
 <p>
-  <a href="https://github.com/samtract-project/SamTract/blob/main/LICENSE">
+  <a href="https://github.com/xplorta/Xplorta/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License">
   </a>
-  <a href="https://github.com/samtract-project/SamTract/stargazers">
-    <img src="https://img.shields.io/github/stars/samtract-project/SamTract?style=for-the-badge&logo=github&color=yellow" alt="Stars">
+  <a href="https://github.com/xplorta/Xplorta/stargazers">
+    <img src="https://img.shields.io/github/stars/xplorta/Xplorta?style=for-the-badge&logo=github&color=yellow" alt="Stars">
   </a>
-  <a href="https://github.com/samtract-project/SamTract/issues">
-    <img src="https://img.shields.io/github/issues/samtract-project/SamTract?style=for-the-badge" alt="Issues">
+  <a href="https://github.com/xplorta/Xplorta/issues">
+    <img src="https://img.shields.io/github/issues/xplorta/Xplorta?style=for-the-badge" alt="Issues">
   </a>
-  <a href="https://github.com/samtract-project/SamTract/blob/main/CONTRIBUTING.md">
+  <a href="https://github.com/xplorta/Xplorta/blob/main/CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge" alt="PRs Welcome">
   </a>
 </p>
@@ -35,24 +35,24 @@
 **Xplorta** is a powerful, self-hosted tool that gives you a window into your old device backups. Built with privacy and ease-of-use in mind, it decrypts and presents your data in a beautiful, intuitive interface right on your computer. No cloud uploads, no privacy risks.
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/d2bc8ef2-c748-4ebf-831b-01293b543137" alt="Xplorta Dashboard" style="border-radius: 15px;">
+  <img src="https://github.com/user-attachments/assets/5cdab433-c446-4926-a342-786ea631439d" alt="Xplorta Dashboard" style="border-radius: 15px;">
 </div>
 
 ---
-
-### 📲 Supported Platforms
+<div align="center">
+<h1> 📲 Supported Platforms </h1>
 
 Xplorta is designed to work with backups from the world's leading mobile brands.
 
 <table>
   <tr>
     <td align="center">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg" width="150" alt="Samsung Logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg" width="140" alt="Samsung Logo">
       <br>
       <strong>Samsung Smart Switch</strong>
     </td>
     <td align="center">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Xiaomi_logo_%282021-%29.svg/langfr-250px-Xiaomi_logo_%282021-%29.svg.png" width="150" alt="Xiaomi Logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Xiaomi_logo_%282021-%29.svg/langfr-250px-Xiaomi_logo_%282021-%29.svg.png" width="50" alt="Xiaomi Logo">
       <br>
       <strong>Xiaomi Mi PC Suite</strong>
     </td>
@@ -63,6 +63,7 @@ Xplorta is designed to work with backups from the world's leading mobile brands.
     </td>
   </tr>
 </table>
+</div>
 
 ---
 
@@ -71,22 +72,22 @@ Xplorta is designed to work with backups from the world's leading mobile brands.
 <table>
   <tr>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/key-round.svg" width="48" alt="Decryption Icon">
+      <img src="https://github.com/user-attachments/assets/307658ae-32b9-4121-a9f3-a204ee755d69" width="48" alt="Decryption Icon">
       <br><strong>Full Decryption</strong><br>
       <p><small>Unlocks data from encrypted backups across all supported platforms.</small></p>
     </td>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/server.svg" width="48" alt="Self-Hosted Icon">
+      <img src="https://github.com/user-attachments/assets/3fa40179-a672-4e0f-bf1e-106024dab2b3" width="48" alt="Self-Hosted Icon">
       <br><strong>100% Self-Hosted</strong><br>
       <p><small>Your personal data never leaves your own computer.</small></p>
     </td>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/layout-template.svg" width="48" alt="Modern UI Icon">
+      <img src="https://github.com/user-attachments/assets/2c4c9b29-5595-4f9a-81fd-8dd628c34c2d" width="48" alt="Modern UI Icon">
       <br><strong>Unified UI</strong><br>
       <p><small>A clean, consistent interface to browse data from any brand.</small></p>
     </td>
     <td align="center">
-      <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="48" alt="Easy Setup Icon">
+      <img src="https://github.com/user-attachments/assets/0da07dad-669f-4a95-8191-77f10c240817" width="48" alt="Easy Setup Icon">
       <br><strong>One-Click Setup</strong><br>
       <p><small>A smart script handles the entire installation process for you.</small></p>
     </td>
@@ -95,22 +96,60 @@ Xplorta is designed to work with backups from the world's leading mobile brands.
 
 ---
 
+### 📂 What Data Can You Preview?
+
+Xplorta brings your phone's data to your desktop. Below is an example of data extracted from a Samsung backup. *(Supported data types may vary by brand).*
+
+<table>
+  <tr>
+    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/2bf8bff1-b031-4c4c-bcf7-b85d88d7339b" width="48" alt="Samsung Contacts Icon"><br><b>Contacts</b></td>
+    <td>View all saved contacts with numbers, emails, and associated info.</td>
+  </tr>
+  <tr>
+    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/61f1551f-f679-40c0-80e0-e5459d73275a" width="48" alt="Samsung Messages Icon"><br><b>Messages</b></td>
+    <td>Read through your SMS and MMS conversations.</td>
+  </tr>
+  <tr>
+    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/0242ba87-2080-4870-8703-c936fbddd52b" width="48" alt="Samsung Call Log Icon"><br><b>Call Logs</b></td>
+    <td>Browse the history of your incoming, outgoing, and missed calls.</td>
+  </tr>
+  <tr>
+    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/6e62026f-7b27-43a1-98cd-c151589c8377" width="48" alt="Samsung Internet Icon"><br><b>Browser</b></td>
+    <td>Explore your browsing history, saved bookmarks, and downloads.</td>
+  </tr>
+  <tr>
+    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/b1618b01-22ba-4e42-bd45-f397f3b826f3" width="48" alt="Samsung My Files Icon"><br><b>My Files</b></td>
+    <td>Navigate through the files and documents from your device's storage.</td>
+  </tr>
+  <tr>
+    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/3dd775d8-a7ae-4b47-9880-d898ac91ba60" width="48" alt="Samsung Clock Icon"><br><b>Alarms</b></td>
+    <td>Check all the alarms you have configured.</td>
+  </tr>
+  <tr>
+    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/f001be73-0b56-4099-9bea-f6015867ff3f" width="48" alt="Samsung Settings Icon"><br><b>And More...</b></td>
+    <td>Discover data from your <b>Applications</b>, saved <b>Wi-Fi Networks</b>, <b>Bluetooth</b> devices, and even your <b>Homescreen</b> layout.</td>
+  </tr>
+</table>
+
+---
 ### 🚀 Getting Started
 
 Get your local copy up and running in minutes.
 
 #### Prerequisites
-* [**Python**](https://www.python.org/downloads/) (version 3.8+)
-* [**Node.js**](https://nodejs.org/en/download/) (version 18+)
+* <img width="25" height="25" alt="Python-logo-notext svg" src="https://github.com/user-attachments/assets/3023b87a-6407-4d4d-83b6-da9c2cc70dfb" /> [**Python**](https://www.python.org/downloads/) (version 3.8+) 
+* <img width="30" height="20" alt="Node js_logo svg" src="https://github.com/user-attachments/assets/b7732b74-dca2-4e01-90e9-f164f37e047e" /> [**Node.js**](https://nodejs.org/en/download/) (version 18+) 
+
+
 
 #### Installation
 1.  Clone the repo:
     ```sh
-    git clone [https://github.com/samtract-project/SamTract.git](https://github.com/samtract-project/SamTract.git)
+    git clone https://github.com/xplorta/Xplorta.git
     ```
 2.  Navigate to the project directory:
     ```sh
-    cd SamTract
+    cd xplorta
     ```
 3.  Run the smart setup script. It will handle everything!
     * **For Linux & macOS**:
@@ -122,43 +161,6 @@ Get your local copy up and running in minutes.
         ```sh
         ./start.sh
         ```
-
----
-
-### 📂 What Data Can You Preview?
-
-Xplorta brings your phone's data to your desktop. Below is an example of data extracted from a Samsung backup. *(Supported data types may vary by brand).*
-
-<table>
-  <tr>
-    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/30668593-ba09-4924-8df7-abea06791e19" width="48" alt="Samsung Contacts Icon"><br><b>Contacts</b></td>
-    <td>View all saved contacts with numbers, emails, and associated info.</td>
-  </tr>
-  <tr>
-    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/6d868cfe-fb74-4b1b-9c7c-0335a76fb0e7" width="48" alt="Samsung Messages Icon"><br><b>Messages</b></td>
-    <td>Read through your SMS and MMS conversations.</td>
-  </tr>
-  <tr>
-    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/9ce6c0fc-997f-41e7-8953-9e2607518403" width="48" alt="Samsung Call Log Icon"><br><b>Call Logs</b></td>
-    <td>Browse the history of your incoming, outgoing, and missed calls.</td>
-  </tr>
-  <tr>
-    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/e787d0e2-3cc5-4710-9cf3-423b07431c34" width="48" alt="Samsung Internet Icon"><br><b>Browser</b></td>
-    <td>Explore your browsing history, saved bookmarks, and downloads.</td>
-  </tr>
-  <tr>
-    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/62ae299a-9cfb-4c85-90ca-6ce59ac21d23" width="48" alt="Samsung My Files Icon"><br><b>My Files</b></td>
-    <td>Navigate through the files and documents from your device's storage.</td>
-  </tr>
-  <tr>
-    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/0333f2ff-6df8-4493-9e17-032d7de3ba58" width="48" alt="Samsung Clock Icon"><br><b>Alarms</b></td>
-    <td>Check all the alarms you have configured.</td>
-  </tr>
-  <tr>
-    <td align="center" width="120"><img src="https://github.com/user-attachments/assets/54bfa435-075d-41c9-abd6-4a134cb93219" width="48" alt="Samsung Settings Icon"><br><b>And More...</b></td>
-    <td>Discover data from your <b>Applications</b>, saved <b>Wi-Fi Networks</b>, <b>Bluetooth</b> devices, and even your <b>Homescreen</b> layout.</td>
-  </tr>
-</table>
 
 ---
 
@@ -184,4 +186,4 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ### 📧 Contact
 
-Project Link: [https://github.com/samtract-project/SamTract](https://github.com/samtract-project/SamTract)
+Project Link: [https://github.com/xplorta/Xplorta](https://github.com/xplorta/Xplorta)
