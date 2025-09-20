@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+@plugin "daisyui";
+
+/* Wave loader animation */
+@keyframes wave {
+  0%,
+  40%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  20% {
+    transform: scaleY(1);
+  }
+}
+
+@theme {
+  --breakpoint-3xl: 2000px;
+  --font-primary: "Roboto Mono", monospace;
+}
+
+body {
+  font-family: "Roboto Mono", monospace !important;
+}
+
+.animate-wave {
+  animation: wave 1.2s ease-in-out infinite;
+}
