@@ -62,7 +62,7 @@ check_prereq() {
 clear
 echo
 echo "┌───────────────────────────────────────────────────┐"
-echo "│  Welcome to the Simplified Xplorta Setup Script!  │"
+echo "│  Welcome to the Simplified keepita Setup Script!  │"
 echo "└───────────────────────────────────────────────────┘"
 echo
 
@@ -90,7 +90,7 @@ echo "-----------------------------------------------------"
 echo
 
 echo "--- Starting Backend Setup ---"
-BACKEND_DIR="xplorta-backend"
+BACKEND_DIR="keepita-backend"
 VENV_DIR="${BACKEND_DIR}/venv"
 PYTHON_EXEC="python"
 PIP_EXEC="pip"
@@ -119,7 +119,7 @@ DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 CSRF_TRUSTED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
-MAIN_SERVER_API_URL=https://api.xplorta.com/api/v1/dashboard/decrypt/
+MAIN_SERVER_API_URL=https://api.keepita.com/api/v1/dashboard/decrypt/
 SELF_HOSTED_CALLBACK_URL=http://localhost:8000/api/v1/dashboard/decryption-callback/
 MAIN_SERVER_API_KEY=
 EOF
@@ -148,7 +148,7 @@ echo "-----------------------------------------------------"
 echo
 
 echo "--- Starting Frontend Setup ---"
-FRONTEND_DIR="xplorta-frontend"
+FRONTEND_DIR="keepita-frontend"
 
 if [ -d "${FRONTEND_DIR}/node_modules" ] && [ -f "${FRONTEND_DIR}/.env" ]; then
     echo -e "${SKIP} Frontend setup already found. Skipping installation."
@@ -176,7 +176,7 @@ fi
 
 echo
 echo "┌───────────────────────────────────────────────────┐"
-echo "│  Setup complete! Starting the Xplorta server...   │"
+echo "│  Setup complete! Starting the Keepita server...   │"
 echo "└───────────────────────────────────────────────────┘"
 echo
 echo -e "  Backend is running. You can log in with:"
