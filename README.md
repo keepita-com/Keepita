@@ -1,27 +1,27 @@
 <div align="center">
 
- <img src="https://github.com/user-attachments/assets/a9190153-e4fa-4855-9d34-ae184aca680a" alt="Xplorta Project Banner" style="border-radius: 15px;"/>
+ <img src="https://github.com/user-attachments/assets/b61cf6cf-7013-41c5-9aa6-4eb32845b855" alt="Keepita Project Banner" style="border-radius: 15px;"/>
 
-  <h1>Xplorta: The Open-Source Backup Explorer</h1>
+  <h1>Keepita: The Open-Source Backup Explorer</h1>
   
   <h2><i>Keeps your data alive.</i></h2>
 
   <p>
-    Ever switched phones and left a universe of data behind? Xplorta lets you <b>preview</b> and <b>explore</b> your old phone backups directly on your PC, without needing the original device.
+    Ever switched phones and left a universe of data behind? Keepita lets you <b>preview</b> and <b>explore</b> your old phone backups directly on your PC, without needing the original device.
   </p>
 
 <!-- Badges -->
 <p>
-  <a href="https://github.com/xplorta/Xplorta/blob/main/LICENSE">
+  <a href="https://github.com/keepita-com/Keepita/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License">
   </a>
-  <a href="https://github.com/xplorta/Xplorta/stargazers">
-    <img src="https://img.shields.io/github/stars/xplorta/Xplorta?style=for-the-badge&logo=github&color=yellow" alt="Stars">
+  <a href="https://github.com/keepita-com/Keepita/stargazers">
+    <img src="https://img.shields.io/github/stars/keepita-com/Keepita?style=for-the-badge&logo=github&color=yellow" alt="Stars">
   </a>
-  <a href="https://github.com/xplorta/Xplorta/issues">
-    <img src="https://img.shields.io/github/issues/xplorta/Xplorta?style=for-the-badge" alt="Issues">
+  <a href="https://github.com/keepita-com/Keepita/issues">
+    <img src="https://img.shields.io/github/issues/keepita-com/Keepita?style=for-the-badge" alt="Issues">
   </a>
-  <a href="https://github.com/xplorta/Xplorta/blob/main/CONTRIBUTING.md">
+  <a href="https://github.com/keepita-com/Keepita/blob/main/CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge" alt="PRs Welcome">
   </a>
 </p>
@@ -32,17 +32,17 @@
 
 ### <p align="center">Your Data, Your Machine, Your Rules.</p>
 
-**Xplorta** is a powerful, self-hosted tool that gives you a window into your old device backups. Built with privacy and ease-of-use in mind, it decrypts and presents your data in a beautiful, intuitive interface right on your computer. No cloud uploads, no privacy risks.
+**Keepita** is a powerful, self-hosted tool that gives you a window into your old device backups. Built with privacy and ease-of-use in mind, it decrypts and presents your data in a beautiful, intuitive interface right on your computer. No cloud uploads, no privacy risks.
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/5cdab433-c446-4926-a342-786ea631439d" alt="Xplorta Dashboard" style="border-radius: 15px;">
+  <img src="https://github.com/user-attachments/assets/b5c78b44-b538-4b87-b413-2b77c5f1d797" alt="Keepita Dashboard" style="border-radius: 15px;">
 </div>
 
 ---
 <div align="center">
 <h1> 📲 Supported Platforms </h1>
 
-Xplorta is designed to work with backups from the world's leading mobile brands.
+Keepita is designed to work with backups from the world's leading mobile brands.
 
 <table>
   <tr>
@@ -98,7 +98,7 @@ Xplorta is designed to work with backups from the world's leading mobile brands.
 
 ### 📂 What Data Can You Preview?
 
-Xplorta brings your phone's data to your desktop. Below is an example of data extracted from a Samsung backup. *(Supported data types may vary by brand).*
+Keepita brings your phone's data to your desktop. Below is an example of data extracted from a Samsung backup. *(Supported data types may vary by brand).*
 
 <table>
   <tr>
@@ -145,11 +145,11 @@ Get your local copy up and running in minutes.
 #### Installation
 1.  Clone the repo:
     ```sh
-    git clone https://github.com/xplorta/Xplorta.git
+    git clone https://github.com/keepita-com/Keepita.git
     ```
 2.  Navigate to the project directory:
     ```sh
-    cd xplorta
+    cd keepita-com
     ```
 3.  Run the smart setup script. It will handle everything!
     * **For Linux & macOS**:
@@ -186,4 +186,4 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ### 📧 Contact
 
-Project Link: [https://github.com/xplorta/Xplorta](https://github.com/xplorta/Xplorta)
+Project Link: [https://github.com/keepita-com/Keepita](https://github.com/xplorta/Keepita)
