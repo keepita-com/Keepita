@@ -1,4 +1,4 @@
-import { Database, Home } from "lucide-react";
+import { Database, Home, LifeBuoy } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { type NavItem } from "../types";
@@ -10,6 +10,7 @@ export const useNavigation = () => {
   const navItems: NavItem[] = [
     { name: "Home", icon: <Home size={18} />, path: "/" },
     { name: "Backups", icon: <Database size={18} />, path: "/backups" },
+    { name: "Support", icon: <LifeBuoy size={18} />, path: "/support" },
   ];
 
   const toggleDrawer = useCallback(() => {
@@ -27,7 +28,7 @@ export const useNavigation = () => {
       }
       return location.pathname.startsWith(path);
     },
-    [location.pathname]
+    [location.pathname],
   );
 
   return {

@@ -1,8 +1,8 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { Lock, AlertTriangle, User } from "lucide-react";
+import { Lock, AlertTriangle, User, Eye, EyeOff } from "lucide-react";
 import { useLogin } from "../hooks/login.hooks";
 
 interface LoginFormInputs {
@@ -11,6 +11,8 @@ interface LoginFormInputs {
 }
 
 const LoginForm: React.FC = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -21,6 +23,10 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = (data: LoginFormInputs) => {
     login({ username: data.username, password: data.password });
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
   };
 
   return (
@@ -71,6 +77,7 @@ const LoginForm: React.FC = () => {
             </p>
           )}
         </div>
+
         <div>
           <div className="flex justify-between items-center mb-2">
             <label className="block text-gray-300 text-sm font-medium">
@@ -85,8 +92,9 @@ const LoginForm: React.FC = () => {
             >
               <Lock size={18} />
             </div>
+
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               {...register("password", {
                 required: "Password is required",
                 minLength: {
@@ -94,11 +102,40 @@ const LoginForm: React.FC = () => {
                   message: "Password must be at least 6 characters",
                 },
               })}
-              className={`w-full py-2.5 pl-10 pr-4 bg-gray-800/50 border ${
+              className={`w-full py-2.5 pl-10 pr-10 bg-gray-800/50 border ${
                 errors.password ? "border-rose-500/50" : "border-gray-600/50"
               } rounded-lg text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30`}
               placeholder="••••••••"
             />
+
+            <div
+              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              onClick={togglePasswordVisibility}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {showPassword ? (
+                  <motion.div
+                    key="hide"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <EyeOff size={18} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="show"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <Eye size={18} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
           {errors.password && (
             <p className="text-rose-400 text-xs mt-1">

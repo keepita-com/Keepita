@@ -1,9 +1,3 @@
-/**
- * App Constants
- * Defines sort options based on backend ordering_fields
- */
-
-// Local SortOption interface to match the Samsung component
 interface SortOption {
   value: string;
   label: string;
@@ -11,7 +5,6 @@ interface SortOption {
   direction: "asc" | "desc";
 }
 
-// App sort options based on backend ordering_fields: ['apk_name', 'size', 'last_time_used', 'created_at']
 export const APP_SORT_OPTIONS: SortOption[] = [
   {
     value: "apk_name",
@@ -63,7 +56,6 @@ export const APP_SORT_OPTIONS: SortOption[] = [
   },
 ];
 
-// Default sort configuration
 export const DEFAULT_APP_SORT_CONFIG = {
   field: "apk_name",
   direction: "asc" as const,

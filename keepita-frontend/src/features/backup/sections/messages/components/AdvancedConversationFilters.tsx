@@ -1,7 +1,3 @@
-/**
- * SamsungAdvancedConversationFilters.tsx
- * Advanced filter component for filtering messages within a conversation
- */
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Filter, X, ChevronDown, Search, Calendar, Hash } from "lucide-react";
@@ -11,32 +7,141 @@ import {
 } from "../constants/message.constants";
 import type { ChatMessageFilters } from "../types/message.types";
 
+type Theme = "Samsung" | "Xiaomi" | "Apple";
+
 interface AdvancedConversationFiltersProps {
   filters: ChatMessageFilters;
   onFiltersChange: (filters: ChatMessageFilters) => void;
   isOpen: boolean;
   onToggle: () => void;
+  theme?: Theme;
 }
 
 export const AdvancedConversationFilters: React.FC<
   AdvancedConversationFiltersProps
-> = ({ filters, onFiltersChange, isOpen, onToggle }) => {
+> = ({ filters, onFiltersChange, isOpen, onToggle, theme = "Samsung" }) => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (key: string, value: unknown) => {
     const newFilters = { ...filters };
 
     if (value === "" || value === null || value === undefined) {
       delete newFilters[key as keyof ChatMessageFilters];
     } else {
-      (newFilters as any)[key] = value;
+      (newFilters as Record<string, unknown>)[key] = value;
     }
 
     onFiltersChange(newFilters);
   };
 
+  const getActiveFiltersCount = () => {
+    return Object.keys(filters).filter(
+      (key) =>
+        key !== "page" &&
+        key !== "page_size" &&
+        key !== "ordering" &&
+        filters[key as keyof ChatMessageFilters] !== undefined,
+    ).length;
+  };
+
+  const themeConfig = {
+    Samsung: {
+      advancedButtonClass: (condition: boolean) =>
+        `flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+          condition
+            ? "bg-blue-50 border-blue-200 text-blue-700"
+            : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+        }`,
+      panelClass:
+        "w-full mt-3 overflow-hidden bg-white border border-gray-200 rounded-xl shadow-lg",
+      headerIconContainerClass:
+        "w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center",
+      headerIconClass: "w-4 h-4 text-blue-600",
+      headerTitleClass: "text-lg font-semibold text-gray-900",
+      closeButtonClass: "p-2 hover:bg-gray-100 rounded-lg transition-colors",
+      closeIconClass: "w-4 h-4 text-gray-500",
+      sectionClass: "bg-gray-50 rounded-xl p-5 border border-gray-200",
+      sectionButtonClass: "flex items-center gap-3 w-full text-left mb-4",
+      sectionIconContainerClass:
+        "w-6 h-6 rounded-lg bg-blue-100 text-blue-600 shadow-sm flex items-center justify-center",
+      sectionTitleClass: "font-semibold text-gray-900",
+      sectionChevronClass: "w-4 h-4 ml-auto transition-transform text-blue-600",
+      labelClass: "block text-sm font-medium text-gray-700",
+      inputClasses: {
+        text: "text-black border-gray-200 focus:bg-white focus:border-blue-500",
+        date: "text-black border-gray-200 focus:border-blue-500 focus:bg-white",
+        number:
+          "text-black border-gray-200 focus:bg-white focus:border-blue-500",
+      },
+    },
+    Xiaomi: {
+      advancedButtonClass: (condition: boolean) =>
+        `flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all ${
+          condition
+            ? "bg-red-300/50 text-stone-700"
+            : "bg-red-200/50 text-stone-700"
+        }`,
+      panelClass:
+        "w-full mt-3 overflow-hidden bg-gray-100 border border-red-200/50 rounded-xl shadow-lg",
+      headerIconContainerClass:
+        "w-8 h-8 rounded-lg bg-red-200/50 flex items-center justify-center",
+      headerIconClass: "w-4 h-4 text-stone-700",
+      headerTitleClass: "text-lg font-semibold text-stone-700",
+      closeButtonClass:
+        "p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer",
+      closeIconClass: "w-4 h-4 text-stone-700",
+      sectionClass: "bg-red-100 rounded-xl p-4 border border-gray-200",
+      sectionButtonClass: "flex items-center gap-3 w-full text-left mb-0",
+      sectionIconContainerClass:
+        "w-6 h-6 rounded-lg bg-red-100 text-stone-700 shadow-sm flex items-center justify-center",
+      sectionTitleClass: "font-semibold text-stone-700",
+      sectionChevronClass:
+        "w-4 h-4 ml-auto transition-transform text-stone-700",
+      labelClass: "block text-sm font-medium text-stone-800",
+      inputClasses: {
+        text: "text-stone-700 border-red-100 focus:border-red-200",
+        date: "text-stone-700 border-red-100 focus:border-red-200",
+        number: "text-stone-700 border-red-100 focus:border-red-200",
+      },
+    },
+    Apple: {
+      advancedButtonClass: (condition: boolean) =>
+        `flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200 font-medium text-sm shadow-sm ${
+          condition
+            ? "bg-[#0061D9] text-white border-[#0061D9]"
+            : "bg-[#007AFF] text-white border-[#007AFF] hover:bg-[#0066D6] hover:shadow-md"
+        }`,
+
+      panelClass:
+        "w-full mt-3 overflow-hidden bg-white border border-gray-200 rounded-xl shadow-lg",
+      headerIconContainerClass:
+        "w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center",
+      headerIconClass: "w-4 h-4 text-blue-600",
+      headerTitleClass: "text-lg font-semibold text-gray-900",
+      closeButtonClass: "p-2 hover:bg-gray-100 rounded-lg transition-colors",
+      closeIconClass: "w-4 h-4 text-gray-500",
+      sectionClass: "bg-gray-50 rounded-xl p-5 border border-gray-200",
+      sectionButtonClass: "flex items-center gap-3 w-full text-left mb-4",
+      sectionIconContainerClass:
+        "w-6 h-6 rounded-lg bg-blue-100 text-blue-600 shadow-sm flex items-center justify-center",
+      sectionTitleClass: "font-semibold text-gray-900",
+      sectionChevronClass: "w-4 h-4 ml-auto transition-transform text-blue-600",
+      labelClass: "block text-sm font-medium text-gray-700",
+      inputClasses: {
+        text: "text-gray-900 border-gray-300 focus:bg-white focus:border-blue-500",
+        date: "text-gray-900 border-gray-300 focus:border-blue-500 focus:bg-white",
+        number:
+          "text-gray-900 border-gray-300 focus:bg-white focus:border-blue-500",
+      },
+    },
+  };
+
+  const currentTheme = themeConfig[theme];
+
   const renderFilterField = (field: FilterField) => {
-    const value = (filters as any)[field.key] || "";
+    const value = (filters as Record<string, unknown>)[field.key] || "";
+    const inputClass =
+      currentTheme.inputClasses[field.type as "text" | "number" | "date"];
 
     switch (field.type) {
       case "text":
@@ -44,10 +149,10 @@ export const AdvancedConversationFilters: React.FC<
           <div className="relative">
             <input
               type="text"
-              value={value}
+              value={value as string}
               onChange={(e) => handleFilterChange(field.key, e.target.value)}
               placeholder={field.placeholder}
-              className="w-full pl-10 pr-10 py-3 border text-black border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:border-blue-500 focus:outline-none transition-all duration-200"
+              className={`w-full pl-10 pr-10 py-3 border ${inputClass} rounded-xl text-sm bg-gray-50 focus:outline-none transition-all duration-200`}
             />
             <Search className="absolute left-4 top-3.5 w-4 h-4 text-gray-400" />
           </div>
@@ -58,15 +163,15 @@ export const AdvancedConversationFilters: React.FC<
           <div className="relative">
             <input
               type="number"
-              value={value}
+              value={value as string}
               onChange={(e) =>
                 handleFilterChange(
                   field.key,
-                  e.target.value ? parseInt(e.target.value) : ""
+                  e.target.value ? parseInt(e.target.value) : "",
                 )
               }
               placeholder={field.placeholder}
-              className="w-full pl-10 pr-10 py-3 border text-black border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:border-blue-500 focus:outline-none transition-all duration-200"
+              className={`w-full pl-10 pr-10 py-3 border ${inputClass} rounded-xl text-sm bg-gray-50 focus:outline-none transition-all duration-200`}
             />
             <Hash className="absolute left-4 top-3.5 w-4 h-4 text-gray-400" />
           </div>
@@ -77,9 +182,9 @@ export const AdvancedConversationFilters: React.FC<
           <div className="relative">
             <input
               type="date"
-              value={value}
+              value={value as string}
               onChange={(e) => handleFilterChange(field.key, e.target.value)}
-              className="w-full pl-10 pr-10 py-3 border text-black border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:border-blue-500 focus:outline-none transition-all duration-200"
+              className={`w-full pl-10 pr-10 py-3 border ${inputClass} rounded-xl text-sm bg-gray-50 focus:outline-none transition-all duration-200`}
             />
             <Calendar className="absolute left-4 top-3.5 w-4 h-4 text-gray-400" />
           </div>
@@ -90,26 +195,13 @@ export const AdvancedConversationFilters: React.FC<
     }
   };
 
-  const getActiveFiltersCount = () => {
-    return Object.keys(filters).filter(
-      (key) =>
-        key !== "page" &&
-        key !== "page_size" &&
-        key !== "ordering" &&
-        filters[key as keyof ChatMessageFilters] !== undefined
-    ).length;
-  };
-
   return (
     <div className="flex flex-wrap items-center gap-3">
-      {/* Advanced Filters Button */}
       <button
         onClick={onToggle}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
-          isOpen || getActiveFiltersCount() > 2
-            ? "bg-blue-50 border-blue-200 text-blue-700"
-            : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-        }`}
+        className={currentTheme.advancedButtonClass(
+          isOpen || getActiveFiltersCount() > 2,
+        )}
       >
         <Filter className="w-4 h-4" />
         <span className="text-sm font-medium">More Filters</span>
@@ -119,63 +211,62 @@ export const AdvancedConversationFilters: React.FC<
           </span>
         )}
         <ChevronDown
-          className={`w-4 h-4 transition-transform  ${
+          className={`w-4 h-4 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
 
-      {/* Advanced Filters Panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="w-full mt-3 overflow-hidden bg-white border border-gray-200 rounded-xl shadow-lg"
+            className={currentTheme.panelClass}
           >
             <div className="p-6">
-              {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <Filter className="w-4 h-4 text-blue-600" />
+                  <div className={currentTheme.headerIconContainerClass}>
+                    <Filter className={currentTheme.headerIconClass} />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className={currentTheme.headerTitleClass}>
                     Advanced Filters
                   </h3>
                 </div>
                 <button
                   onClick={onToggle}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className={currentTheme.closeButtonClass}
                 >
-                  <X className="w-4 h-4 text-gray-500" />
+                  <X className={currentTheme.closeIconClass} />
                 </button>
               </div>
 
-              {/* Filter Sections */}
               <div className="space-y-6">
                 {MESSAGE_CONVERSATION_FILTER_SECTIONS.map((section) => (
                   <div
                     key={section.title}
-                    className="bg-gray-50 rounded-xl p-5 border border-gray-200"
+                    className={currentTheme.sectionClass}
                   >
                     <button
                       onClick={() =>
                         setActiveSection(
-                          activeSection === section.title ? null : section.title
+                          activeSection === section.title
+                            ? null
+                            : section.title,
                         )
                       }
-                      className="flex items-center gap-3 w-full text-left mb-4"
+                      className={currentTheme.sectionButtonClass}
                     >
-                      <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 shadow-sm flex items-center justify-center">
+                      <div className={currentTheme.sectionIconContainerClass}>
                         {section.icon}
                       </div>
-                      <span className="font-semibold text-gray-900">
+                      <span className={currentTheme.sectionTitleClass}>
                         {section.title}
                       </span>
                       <ChevronDown
-                        className={`w-4 h-4 ml-auto transition-transform  text-blue-600 ${
+                        className={`${currentTheme.sectionChevronClass} ${
                           activeSection === section.title ? "rotate-180" : ""
                         }`}
                       />
@@ -193,7 +284,7 @@ export const AdvancedConversationFilters: React.FC<
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                             {section.fields.map((field) => (
                               <div key={field.key} className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">
+                                <label className={currentTheme.labelClass}>
                                   {field.label}
                                 </label>
                                 <div className="relative">

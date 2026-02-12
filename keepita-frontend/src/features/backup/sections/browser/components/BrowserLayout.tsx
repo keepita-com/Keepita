@@ -21,14 +21,12 @@ const BrowserLayout: React.FC<BrowserLayoutProps> = ({
   subtitle,
 }) => {
   return (
-    // Assuming SamsungSectionLayout is a shared component
     <div className="flex flex-col h-full bg-gray-50">
       <header className="p-4 border-b bg-white">
         <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
         {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
       </header>
 
-      {/* Tab Navigation */}
       <nav className="flex space-x-2 p-2 bg-white border-b sticky top-0 z-10">
         {BROWSER_TABS.map((tab) => (
           <button
@@ -38,7 +36,7 @@ const BrowserLayout: React.FC<BrowserLayoutProps> = ({
               "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
               activeTab === tab.key
                 ? "bg-blue-600 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"
+                : "text-gray-600 hover:bg-gray-100",
             )}
           >
             <tab.icon className="w-4 h-4" />
@@ -47,7 +45,6 @@ const BrowserLayout: React.FC<BrowserLayoutProps> = ({
         ))}
       </nav>
 
-      {/* Tab Content */}
       <main className="flex-1 p-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div

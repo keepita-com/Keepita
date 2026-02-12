@@ -14,12 +14,7 @@ import {
 } from "lucide-react";
 import type { FileCategory } from "../types/myFiles.types";
 
-// ================================
-// FILE ICONS CONSTANTS
-// ================================
-
 export const FILE_ICONS = {
-  // Image files
   image: {
     default: "FileImage",
     jpg: "FileImage",
@@ -32,7 +27,6 @@ export const FILE_ICONS = {
     ico: "FileImage",
   },
 
-  // Video files
   video: {
     default: "FileVideo",
     mp4: "FileVideo",
@@ -45,7 +39,6 @@ export const FILE_ICONS = {
     m4v: "FileVideo",
   },
 
-  // Audio files
   audio: {
     default: "FileAudio2",
     mp3: "FileAudio2",
@@ -57,7 +50,6 @@ export const FILE_ICONS = {
     m4a: "FileAudio2",
   },
 
-  // Document files
   document: {
     default: "FileText",
     pdf: "FileCheck",
@@ -71,13 +63,11 @@ export const FILE_ICONS = {
     rtf: "FileText",
   },
 
-  // APK files
   apk: {
     default: "Smartphone",
     apk: "Smartphone",
   },
 
-  // ZIP files
   zip: {
     default: "Archive",
     zip: "Archive",
@@ -87,7 +77,6 @@ export const FILE_ICONS = {
     gz: "Archive",
   },
 
-  // Other files
   other: {
     default: "File",
     json: "FileText",
@@ -119,7 +108,6 @@ export const getCategoryIcon = (category: string) => {
 export const getFileIcon = (extension: string, category?: string) => {
   const ext = extension.toLowerCase();
 
-  // Try to get specific icon by extension first
   if (category && FILE_ICONS[category as keyof typeof FILE_ICONS]) {
     const categoryIcons = FILE_ICONS[
       category as keyof typeof FILE_ICONS
@@ -130,7 +118,6 @@ export const getFileIcon = (extension: string, category?: string) => {
     return getIconComponent(categoryIcons.default);
   }
 
-  // Fallback to extension-based lookup
   for (const cat of Object.keys(FILE_ICONS)) {
     const categoryIcons = FILE_ICONS[cat as keyof typeof FILE_ICONS] as Record<
       string,
@@ -163,26 +150,20 @@ const getIconComponent = (iconName: string) => {
   return iconMap[iconName as keyof typeof iconMap] || File;
 };
 
-// ================================
-// ONE UI DESIGN SYSTEM CONSTANTS
-// ================================
-
 export const ONE_UI_COLORS = {
-  // Primary Colors
   primary: {
     50: "#E3F2FD",
     100: "#BBDEFB",
     200: "#90CAF9",
     300: "#64B5F6",
     400: "#42A5F5",
-    500: "#2196F3", // Main Samsung Blue
+    500: "#2196F3",
     600: "#1E88E5",
     700: "#1976D2",
     800: "#1565C0",
     900: "#0D47A1",
   },
 
-  // Samsung One UI Specific Colors
   samsung: {
     blue: "#1C5EBA",
     lightBlue: "#7BB3FF",
@@ -194,7 +175,6 @@ export const ONE_UI_COLORS = {
     teal: "#00BCD4",
   },
 
-  // Neutral Colors (One UI)
   neutral: {
     50: "#FAFAFA",
     100: "#F5F5F5",
@@ -208,7 +188,6 @@ export const ONE_UI_COLORS = {
     900: "#212121",
   },
 
-  // Background Colors
   background: {
     light: "#FFFFFF",
     lightGray: "#F8F9FA",
@@ -216,7 +195,6 @@ export const ONE_UI_COLORS = {
     dark: "#121212",
   },
 
-  // Text Colors
   text: {
     primary: "#1C1C1E",
     secondary: "#6C6C70",
@@ -225,7 +203,6 @@ export const ONE_UI_COLORS = {
     inverse: "#FFFFFF",
   },
 
-  // Status Colors
   status: {
     success: "#00C853",
     warning: "#FF9800",
@@ -233,7 +210,6 @@ export const ONE_UI_COLORS = {
     info: "#2196F3",
   },
 
-  // Surface Colors
   surface: {
     background: "#FFFFFF",
     card: "#FFFFFF",
@@ -241,7 +217,6 @@ export const ONE_UI_COLORS = {
     disabled: "#F5F5F5",
   },
 
-  // Border Colors
   border: {
     light: "#E0E0E0",
     medium: "#BDBDBD",
@@ -285,10 +260,6 @@ export const FILE_CATEGORY_COLORS = {
   other: ONE_UI_COLORS.neutral[600],
 } as const;
 
-// ================================
-// SORT OPTIONS CONSTANTS
-// ================================
-
 export const MY_FILES_SORT_OPTIONS = [
   { label: "Name (A-Z)", value: "file_name", icon: "ArrowUpAZ" },
   { label: "Name (Z-A)", value: "-file_name", icon: "ArrowDownZA" },
@@ -328,10 +299,6 @@ export const MY_FILES_SORT_ORDERS = {
   DESC: "-",
 } as const;
 
-// ================================
-// FILTER OPTIONS CONSTANTS
-// ================================
-
 export const MY_FILES_CATEGORY_FILTERS: {
   key: FileCategory;
   label: string;
@@ -359,23 +326,18 @@ export const MY_FILES_SIZE_FILTERS = [
 ] as const;
 
 export const MY_FILES_EXTENSION_FILTERS: Record<FileCategory, string[]> = {
-  // Image extensions
   image: ["jpg", "jpeg", "png", "gif", "svg", "webp", "bmp", "ico"],
-  // Video extensions
+
   video: ["mp4", "avi", "mov", "wmv", "flv", "webm", "mkv", "m4v"],
-  // Audio extensions
+
   audio: ["mp3", "wav", "flac", "aac", "ogg", "wma", "m4a"],
-  // Document extensions
+
   document: ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "rtf"],
-  // APK extensions
+
   apk: ["apk"],
-  // Archive extensions
+
   zip: ["zip", "rar", "7z", "tar", "gz"],
 };
-
-// ================================
-// VIEW MODE CONSTANTS
-// ================================
 
 export const MY_FILES_VIEW_MODES = {
   GRID: "grid",
@@ -387,10 +349,6 @@ export const MY_FILES_VIEW_MODE_OPTIONS = [
   { value: "list", label: "List View", icon: "List" },
 ] as const;
 
-// ================================
-// PAGE SIZE OPTIONS
-// ================================
-
 export const MY_FILES_PAGE_SIZE_OPTIONS = [
   { label: "12 per page", value: 12 },
   { label: "24 per page", value: 24 },
@@ -400,28 +358,20 @@ export const MY_FILES_PAGE_SIZE_OPTIONS = [
 
 export const MY_FILES_DEFAULT_PAGE_SIZE = 24;
 
-// ================================
-// SEARCH CONSTANTS
-// ================================
-
 export const MY_FILES_SEARCH_PLACEHOLDER =
   "Search files by name, extension, or category...";
 export const MY_FILES_SEARCH_DEBOUNCE_MS = 300;
 
-// ================================
-// UTILITY FUNCTIONS
-// ================================
-
 export const getCategoryDisplayName = (category: FileCategory): string => {
   const categoryItem = MY_FILES_CATEGORY_FILTERS.find(
-    (cat) => cat.key === category
+    (cat) => cat.key === category,
   );
   return categoryItem ? categoryItem.label : category;
 };
 
 export const getSortDisplayName = (ordering: string): string => {
   const sortOption = MY_FILES_SORT_OPTIONS.find(
-    (option) => option.value === ordering
+    (option) => option.value === ordering,
   );
   return sortOption ? sortOption.label : "Custom Sort";
 };
@@ -435,13 +385,13 @@ export const getFileSizeCategory = (sizeInBytes: number): string => {
 
 export const isValidFileExtension = (
   extension: string,
-  category?: FileCategory
+  category?: FileCategory,
 ): boolean => {
   const ext = extension.toLowerCase();
 
   if (!category) {
     return Object.values(MY_FILES_EXTENSION_FILTERS).some((extensions) =>
-      extensions.includes(ext)
+      extensions.includes(ext),
     );
   }
 

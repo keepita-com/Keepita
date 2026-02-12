@@ -116,7 +116,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   return (
-    <div className={`relative group ${className}`}>
+    <div className={`relative group flex flex-col items-center ${className}`}>
       <input
         type="file"
         ref={fileInputRef}
@@ -142,19 +142,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             disabled
               ? "border-gray-700"
               : isLoading
-              ? "border-amber-500"
-              : error
-              ? "border-rose-500"
-              : isDragging
-              ? "border-sky-500"
-              : "border-indigo-500"
+                ? "border-amber-500"
+                : error
+                  ? "border-rose-500"
+                  : isDragging
+                    ? "border-sky-500"
+                    : "border-indigo-500"
           } 
           ${
             !disabled && !isLoading
               ? "cursor-pointer"
               : isLoading
-              ? "cursor-wait"
-              : ""
+                ? "cursor-wait"
+                : ""
           } 
           transition-all duration-300 shadow-xl`}
       >
@@ -240,19 +240,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         </AnimatePresence>
       </motion.div>
 
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 5 }}
-            className="absolute -bottom-6 left-0 right-0 text-center text-xs text-rose-400"
-          >
-            {error}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {!disabled && previewUrl && !isLoading && (
         <motion.button
           type="button"
@@ -267,16 +254,20 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         </motion.button>
       )}
 
-      {!disabled && !previewUrl && !isLoading && (
+      {!disabled && !isLoading && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="mt-3 text-center"
         >
-          <span className="text-xs text-indigo-300/80 italic">
-            Click or drop to upload
-          </span>
+          {error ? (
+            <span className="text-xs text-rose-400">{error}</span>
+          ) : !previewUrl ? (
+            <span className="text-xs text-indigo-300/80 italic">
+              Click or drop to upload
+            </span>
+          ) : null}
         </motion.div>
       )}
     </div>

@@ -3,25 +3,24 @@ import { useParams } from "react-router-dom";
 import { useDocumentTitle } from "../../../../../shared/hooks/useDocumentTitle";
 import { AppList, AppListSkeleton, AppListLayout } from "../components";
 import { useAppManager } from "../hooks/app.hooks";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
 
-/**
- * Main Apps page component with Samsung One UI design
- * Integrates all app-related functionality following existing patterns
- */
+import { useBackupDetails } from "../../../hooks/backup.hooks";
+import BackupNotFound from "@/features/backup/components/BackupNotFound";
+
 export const AppPage: React.FC = () => {
   const { backupId } = useParams<{ backupId: string }>();
+  const { theme } = useBackupTheme();
+  useDocumentTitle("Apps-Backup Manager | Keepita");
 
-  useDocumentTitle("Apps-Backup Manager | xplorta");
+  const {
+    backup,
+    isLoading: isBackupLoading,
+    error: backupError,
+  } = useBackupDetails(backupId);
 
-  if (!backupId) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="text-gray-500 mb-2">⚠️</div>
-          <div className="text-gray-600">Invalid backup ID</div>
-        </div>
-      </div>
-    );
+  if (!backupId || backupError || (!isBackupLoading && !backup)) {
+    return <BackupNotFound />;
   }
 
   const {
@@ -39,12 +38,10 @@ export const AppPage: React.FC = () => {
     setSortConfig,
   } = useAppManager(backupId);
 
-  // Handle back navigation
   const handleBack = () => {
     window.history.back();
   };
 
-  // Handle sort change
   const handleSortChange = (field: string, order: "asc" | "desc") => {
     setSortConfig({
       field: field as any,
@@ -52,7 +49,6 @@ export const AppPage: React.FC = () => {
     });
   };
 
-  // Handle error state
   if (error) {
     return (
       <AppListLayout
@@ -96,6 +92,7 @@ export const AppPage: React.FC = () => {
       sortOrder={sortConfig.direction}
       onSortChange={handleSortChange}
       totalApps={stats.total}
+      theme={theme as "Samsung" | "Xiaomi"}
     >
       {isLoading ? (
         <AppListSkeleton />
@@ -109,8 +106,8 @@ export const AppPage: React.FC = () => {
           backupId={backupId}
           onAppSelect={(app) => {
             console.log("Selected app:", app);
-            // App details modal will be handled by AppList component
           }}
+          theme={theme as "Xiaomi" | "Samsung"}
         />
       )}
     </AppListLayout>

@@ -1,9 +1,5 @@
 import type { ApiResponseList } from "../../../../../core/types/apiResponse";
 
-//==============================
-// CORE DOMAIN TYPES
-//==============================
-
 export type BrowserTabType =
   | "Overview"
   | "Bookmarks"
@@ -65,7 +61,7 @@ export interface BrowserTab {
 
 export interface TopDomain {
   domain: string;
-  visit_count: number;
+  count: number;
 }
 
 export interface DownloadStats {
@@ -85,16 +81,13 @@ export interface BrowserOverviewInterface {
   recent_bookmarks: Bookmark[];
   recent_history: HistoryEntry[];
   recent_downloads: DownloadItem[];
+  top_domains: TopDomain[];
 }
 
 export interface BrowserStatistics extends BrowserOverviewInterface {
   top_domains: TopDomain[];
   download_stats: DownloadStats;
 }
-
-//==============================
-// API RESPONSE TYPES
-//==============================
 
 export type BookmarksResponse = ApiResponseList<Bookmark[]>;
 export type HistoryResponse = ApiResponseList<HistoryEntry[]>;
@@ -103,12 +96,7 @@ export type SearchesResponse = ApiResponseList<SearchQuery[]>;
 export type TabsResponse = ApiResponseList<BrowserTab[]>;
 export type TopDomainsResponse = ApiResponseList<TopDomain[]>;
 
-//==============================
-// ZUSTAND STORE TYPES
-//==============================
-
 export interface BrowserFilters {
-  // Only search functionality
   search?: string;
 }
 

@@ -13,15 +13,20 @@ import {
   Maximize,
   SkipBack,
   SkipForward,
+  Files,
 } from "lucide-react";
 import { getBackupMedia } from "@/features/backup/api/backup.api";
 import { downloadMedias } from "@/features/backup/utils/backup.utils";
 
 interface FilePreviewProps {
   onDownload?: (fileId: number) => void;
+  theme?: "Samsung" | "Xiaomi";
 }
 
-const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
+const FilePreview: React.FC<FilePreviewProps> = ({
+  onDownload,
+  theme = "Samsung",
+}) => {
   const {
     previewData,
     closePreview,
@@ -36,6 +41,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
   const [isLoadingText, setIsLoadingText] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const file = previewData?.file;
   const isOpen = previewData?.isPreviewOpen || false;
@@ -44,7 +50,6 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
     if (file && getPreviewType(file) === "text") {
       loadTextContent();
     } else {
-      // Clear text content when not viewing text files
       setTextContent("");
     }
   }, [file]);
@@ -65,12 +70,19 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
   };
 
   const handleDownload = async () => {
-    if (file) {
+    if (!file || isDownloading) return;
+
+    setIsDownloading(true);
+    try {
       onDownload?.(file.id);
 
       const { download_url } = await getBackupMedia(file.id);
 
-      downloadMedias([{ blob: download_url, name: file.file_name }]);
+      await downloadMedias([{ blob: download_url, name: file.file_name }]);
+    } catch (error) {
+      console.error("Download failed", error);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -135,9 +147,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
                     className="relative w-full max-w-5xl bg-gray-900 rounded-xl shadow-2xl overflow-hidden"
                     style={{ aspectRatio: "16/10", minHeight: "500px" }}
                   >
-                    {/* Video content placeholder with pulse animation */}
                     <div className="relative w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center overflow-hidden">
-                      {/* Center play button skeleton */}
                       <motion.div
                         animate={{
                           scale: [1, 1.1, 1],
@@ -154,9 +164,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
                       </motion.div>
                     </div>
 
-                    {/* Video controls skeleton */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6">
-                      {/* Progress bar skeleton */}
                       <div className="mb-4">
                         <div className="h-2 bg-white/20 rounded-full overflow-hidden">
                           <motion.div
@@ -171,7 +179,6 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
                         </div>
                       </div>
 
-                      {/* Control buttons skeleton */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <motion.div
@@ -228,7 +235,6 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
                           </div>
                         </div>
 
-                        {/* Time display and fullscreen skeleton */}
                         <div className="flex items-center space-x-4">
                           <motion.div
                             animate={{ opacity: [0.4, 0.8, 0.4] }}
@@ -259,7 +265,6 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
                       </div>
                     </div>
 
-                    {/* Loading indicator overlay */}
                     <motion.div
                       animate={{ opacity: [0.8, 1, 0.8] }}
                       transition={{ duration: 1, repeat: Infinity }}
@@ -420,9 +425,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleDownload}
+                disabled={isDownloading}
                 className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
               >
-                <Download className="w-4 h-4" />
+                {isDownloading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
                 Download
               </motion.button>
             </div>
@@ -447,21 +457,39 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleDownload}
+              disabled={isDownloading}
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
             >
-              <Download className="w-4 h-4" />
+              {isDownloading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
               Download File
             </motion.button>
           </motion.div>
         );
     }
   };
-
+  const filePreviewTheme = {
+    Samsung: {
+      headerIcon: null,
+      headerWrapperClassNames: "flex-1 min-w-0",
+    },
+    Xiaomi: {
+      headerIcon: (
+        <div className="size-9 bg-slate-500 rounded-xs flex items-center justify-center">
+          <Files className="size-5 text-white" />
+        </div>
+      ),
+      headerWrapperClassNames: "flex-1 min-w-0 ",
+    },
+  };
+  const currentTheme = filePreviewTheme[theme];
   return (
     <AnimatePresence>
       {isOpen && (
         <div className="modal modal-open">
-          {/* Blur Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -470,7 +498,6 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
             onClick={closePreview}
           />
 
-          {/* Modal Box */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -478,17 +505,26 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="modal-box w-11/12 max-w-4xl h-[80vh] min-h-[400px] max-h-[90vh] p-0 flex flex-col"
           >
-            {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="flex justify-between items-center px-5 py-4 border-b border-gray-200 bg-gray-50 flex-shrink-0"
             >
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">
-                  {file.file_name}
-                </h3>
+              <div className={currentTheme.headerWrapperClassNames}>
+                {currentTheme.headerIcon ? (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 truncate">
+                    {currentTheme.headerIcon}
+                    <h3 className="text-[16px] sm:text-lg font-semibold text-gray-800 truncate">
+                      {file.file_name}
+                    </h3>
+                  </div>
+                ) : (
+                  <h3 className="text-lg font-semibold text-gray-800 truncate">
+                    {file.file_name}
+                  </h3>
+                )}
+
                 <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
                   <span>{file.file_size_human}</span>
                   <span className="text-gray-400">•</span>
@@ -503,10 +539,15 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => handleDownload()}
+                  disabled={isDownloading}
                   className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
                   title="Download"
                 >
-                  <Download className="w-4 h-4" />
+                  {isDownloading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -520,7 +561,6 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
               </div>
             </motion.div>
 
-            {/* Scrollable Content */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -532,7 +572,6 @@ const FilePreview: React.FC<FilePreviewProps> = ({ onDownload }) => {
               </div>
             </motion.div>
 
-            {/* Footer */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

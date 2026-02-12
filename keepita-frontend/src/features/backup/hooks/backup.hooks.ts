@@ -130,7 +130,7 @@ export const useBackupFilters = (
     showCreateForm,
     deletingId,
 
-    // actions
+    
     handleDelete,
     handleCreateSuccess,
     handleSearch,
@@ -157,7 +157,7 @@ export const useBackupManager = ({
   const filters = useBackupStore((s) => s.filters);
   const sortConfig = useBackupStore((s) => s.sortConfig);
 
-  // Build API parameters using useMemo for optimization
+  
   const params = useMemo(
     () =>
       buildBackupParams(
@@ -170,7 +170,7 @@ export const useBackupManager = ({
     [pagination.page, pagination.pageSize, searchQuery, filters, sortConfig]
   );
 
-  // Create a stable query key that includes all search/filter/sort parameters
+  
   const queryKey = [
     "backups",
     params.page || 1,
@@ -198,12 +198,12 @@ export const useBackupManager = ({
     backups: data?.results || [],
     pagination: data
       ? {
-          currentPage: params.page || 1,
-          totalPages: data.total_pages,
-          hasNext: data.has_next,
-          hasPrevious: data.has_previous,
-          totalResults: data.total_results,
-        }
+        currentPage: params.page || 1,
+        totalPages: data.total_pages,
+        hasNext: data.has_next,
+        hasPrevious: data.has_previous,
+        totalResults: data.total_results,
+      }
       : null,
     error,
     isLoading: isFetching,
@@ -214,22 +214,16 @@ export const useBackupManager = ({
 export const useBackupDetails = (id: string | undefined) => {
   const { selectBackup } = useBackupStore();
   const { getBackup } = useBackupApi();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const { data, error, refetch } = useQuery({
+  const { data, error, refetch, isLoading } = useQuery({
     queryKey: ["backup", id],
     queryFn: async () => {
       if (!id) return null;
-      setIsLoading(true);
-      try {
-        const response = await getBackup(id);
-        if (response) {
-          selectBackup(response);
-        }
-        return response;
-      } finally {
-        setIsLoading(false);
+      const response = await getBackup(id);
+      if (response) {
+        selectBackup(response);
       }
+      return response;
     },
     enabled: !!id,
   });
@@ -263,7 +257,12 @@ export const useCreateBackup = () => {
     setStoreUploadPhase(uploadPhase);
   }, [uploadPhase]);
 
-  const createBackup = async (params: { name: string; backup_file: File }) => {
+  const createBackup = async (params: {
+    name: string;
+    backup_file: File;
+    device_brand: string;
+    ios_password?: string;
+  }) => {
     try {
       setIsLoading(true);
       setBackupInProgress(true);
@@ -275,17 +274,19 @@ export const useCreateBackup = () => {
       const response = await createBackupWithProgress({
         name: params.name,
         backup_file: params.backup_file,
+        device_brand: params.device_brand,
+        ios_password: params.ios_password,
         onUploadProgress: (progressEvent) => {
           if (progressEvent.lengthComputable) {
             const percentComplete =
               (progressEvent.loaded / progressEvent.total) * 100;
-            // Cap at 98% until server responds to avoid appearance of being stuck at 100%
+            
             setUploadProgress(Math.min(percentComplete, 98));
           }
         },
       });
 
-      // Upload completed successfully
+      
       setUploadProgress(100);
       setUploadPhase("processing");
 
@@ -378,7 +379,7 @@ export const useBackupProgress = (logId?: string) => {
   const { setBackupInProgress } = useBackupStore();
   const { getBackupProgress } = useBackupApi();
 
-  // Memoize fetchProgress with useCallback to avoid recreating on every render
+  
   const fetchProgress = useCallback(async () => {
     if (!logId) return null;
 
@@ -388,7 +389,7 @@ export const useBackupProgress = (logId?: string) => {
 
       const formattedStepsData = progressData.steps_data || {};
 
-      // Guard against malformed progress data
+      
       const normalizedProgressData = {
         ...progressData,
         current_step: progressData.current_step || 1,
@@ -460,17 +461,17 @@ export const useBackupProgress = (logId?: string) => {
     let isMounted = true;
 
     const startPolling = () => {
-      // Only start polling if we have a logId, no existing polling interval, and we haven't initialized yet
+      
       if (
         logId &&
         !pollingIntervalRef.current &&
         !initializedRef.current &&
         isMounted
       ) {
-        // Mark as initialized to prevent duplicate initialization
+        
         initializedRef.current = true;
 
-        // Show initial "pending" state immediately for better UX
+        
         setProgress((prevProgress) => ({
           ...prevProgress,
           status: "processing",
@@ -485,14 +486,14 @@ export const useBackupProgress = (logId?: string) => {
           updated_at: new Date().toISOString(),
         }));
 
-        // Immediately fetch progress, then start polling every 5 seconds
+        
         const initialFetch = async () => {
           setBackupCreationId(logId);
 
           try {
             const initialData = await fetchProgressRef.current();
 
-            // Start regular polling - only if component is still mounted and first fetch succeeded
+            
             if (isMounted && initialData) {
               pollingIntervalRef.current = window.setInterval(
                 () => {
@@ -500,7 +501,7 @@ export const useBackupProgress = (logId?: string) => {
                     fetchProgressRef.current();
                   }
                 },
-                5000 // Continue polling every 5 seconds
+                5000 
               );
             }
           } catch (error) {
@@ -514,7 +515,7 @@ export const useBackupProgress = (logId?: string) => {
 
     startPolling();
 
-    // Cleanup function to prevent memory leaks
+    
     return () => {
       isMounted = false;
 

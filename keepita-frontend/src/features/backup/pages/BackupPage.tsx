@@ -16,8 +16,10 @@ const BackupPage = ({
   apiPagination,
   pagination,
   deletingId,
-  handleDelete,
   isDeleting,
+  handleDelete,
+  hasActiveFilters,
+  onClearFilters,
 }: {
   backups: BackupItemT[];
   isBackupsLoading: boolean;
@@ -26,6 +28,8 @@ const BackupPage = ({
   handleDelete: ReturnType<typeof useBackupFilters>["handleDelete"];
   isDeleting: boolean;
   deletingId: BackupState["deletingId"];
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
 }) => {
   return (
     <>
@@ -46,27 +50,27 @@ const BackupPage = ({
               {!apiPagination?.totalResults
                 ? "No backups found"
                 : apiPagination.totalResults === 1
-                ? "Showing 1 backup"
-                : (() => {
-                    const range = pagination.getVisibleRange(
-                      pagination.page,
-                      pagination.pageSize,
-                      apiPagination.totalResults
-                    );
-                    return (
-                      <>
-                        Showing{" "}
-                        <span className="text-white font-medium">
-                          {range.start}-{range.end}
-                        </span>{" "}
-                        of{" "}
-                        <span className="text-white font-medium">
-                          {apiPagination.totalResults}
-                        </span>{" "}
-                        backups
-                      </>
-                    );
-                  })()}
+                  ? "Showing 1 backup"
+                  : (() => {
+                      const range = pagination.getVisibleRange(
+                        pagination.page,
+                        pagination.pageSize,
+                        apiPagination.totalResults,
+                      );
+                      return (
+                        <>
+                          Showing{" "}
+                          <span className="text-white font-medium">
+                            {range.start}-{range.end}
+                          </span>{" "}
+                          of{" "}
+                          <span className="text-white font-medium">
+                            {apiPagination.totalResults}
+                          </span>{" "}
+                          backups
+                        </>
+                      );
+                    })()}
             </motion.p>
           </motion.div>
         </>
@@ -105,7 +109,7 @@ const BackupPage = ({
                 </motion.div>
               ))}
             </AnimatePresence>
-            {/* pagination */}
+
             {apiPagination && apiPagination.totalPages > 1 && (
               <motion.div
                 className="col-span-full"
@@ -128,9 +132,9 @@ const BackupPage = ({
           </>
         ) : (
           <EmptyState
-            icon="no-backups"
-            title="No Backups Found"
-            description="Create your first backup to ensure your data is safe and easily recoverable when needed."
+            icon={hasActiveFilters ? "no-results" : "no-backups"}
+            isFiltered={hasActiveFilters}
+            onClearFilters={onClearFilters}
           />
         )}
       </motion.div>

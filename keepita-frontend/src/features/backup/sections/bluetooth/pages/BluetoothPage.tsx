@@ -8,13 +8,20 @@ import {
 import { useBluetoothStore } from "../store/bluetooth.store";
 import type { BluetoothFilters } from "../types/bluetooth.types";
 
+import { useBackupDetails } from "../../../hooks/backup.hooks";
+import BackupNotFound from "@/features/backup/components/BackupNotFound";
+
 const BluetoothPage: React.FC = () => {
-  // Get backup ID from URL params (assuming route structure like /backup/:backupId/bluetooth)
   const { backupId } = useParams<{ backupId: string }>();
   const navigate = useNavigate();
-  const backupIdNumber = backupId ? parseInt(backupId, 10) : 1; // fallback to 1 for demo
+  const backupIdNumber = backupId ? parseInt(backupId, 10) : 1;
 
-  // Get sorting state from store
+  const {
+    backup,
+    isLoading: isBackupLoading,
+    error: backupError,
+  } = useBackupDetails(backupId);
+
   const { sortConfig, setSortConfig } = useBluetoothStore();
 
   const {
@@ -22,6 +29,7 @@ const BluetoothPage: React.FC = () => {
     stats,
     isLoading,
     isInitialLoading,
+    isRefreshing,
     error,
     hasNextPage,
     fetchNextPage,
@@ -33,7 +41,6 @@ const BluetoothPage: React.FC = () => {
 
   const totalDevices = stats.total;
 
-  // Parse current sort configuration
   const currentOrdering = sortConfig.ordering || "-last_connected";
   const isDescending = currentOrdering.startsWith("-");
   const sortBy = isDescending ? currentOrdering.slice(1) : currentOrdering;
@@ -44,15 +51,19 @@ const BluetoothPage: React.FC = () => {
       const ordering = newSortOrder === "desc" ? `-${newSortBy}` : newSortBy;
       setSortConfig({ ordering });
     },
-    [setSortConfig]
+    [setSortConfig],
   );
 
   const handleFilterChange = useCallback(
     (newFilters: BluetoothFilters) => {
       updateFilters(newFilters);
     },
-    [updateFilters]
+    [updateFilters],
   );
+
+  if (!backupId || backupError || (!isBackupLoading && !backup)) {
+    return <BackupNotFound />;
+  }
 
   return (
     <>
@@ -72,12 +83,12 @@ const BluetoothPage: React.FC = () => {
         onSortChange={handleSortChange}
         totalDevices={totalDevices}
       >
-        {/* Device List Section */}
         <div className="p-6 bg-white">
           <BluetoothDeviceList
             devices={devices}
             isLoading={isLoading}
             isInitialLoading={isInitialLoading}
+            isRefreshing={isRefreshing}
             error={error}
             groupByType={false}
             hasNextPage={hasNextPage}

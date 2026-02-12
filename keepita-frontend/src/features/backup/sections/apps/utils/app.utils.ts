@@ -1,11 +1,8 @@
 import type { GetAppParams, GetAppPermissionsParams } from "../types/app.types";
 import { buildQueryParamsWithDefaults } from "../../../../../shared/utils/queryParams";
 
-/**
- * Build query parameters for app API requests, filtering out undefined values
- */
 export const buildAppQueryParams = (
-  params: GetAppParams
+  params: GetAppParams,
 ): Record<string, any> => {
   const defaults = {
     page: 1,
@@ -15,11 +12,8 @@ export const buildAppQueryParams = (
   return buildQueryParamsWithDefaults(params, defaults);
 };
 
-/**
- * Build query parameters for app permissions API requests, filtering out undefined values
- */
 export const buildAppPermissionsQueryParams = (
-  params: GetAppPermissionsParams
+  params: GetAppPermissionsParams,
 ): Record<string, any> => {
   const defaults = {
     page: 1,
@@ -29,13 +23,6 @@ export const buildAppPermissionsQueryParams = (
   return buildQueryParamsWithDefaults(params, defaults);
 };
 
-/**
- * Utility functions for app management
- */
-
-/**
- * Format file size in bytes to human readable format
- */
 export const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 B";
 
@@ -46,18 +33,14 @@ export const formatFileSize = (bytes: number): string => {
   return `${formattedSize} ${sizes[i]}`;
 };
 
-/**
- * Format date string to human readable format
- */
 export const formatDate = (dateString: string): string => {
   try {
     const date = new Date(dateString);
     const now = new Date();
     const diffInDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
     );
 
-    // If it's today
     if (diffInDays === 0) {
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -66,12 +49,10 @@ export const formatDate = (dateString: string): string => {
       });
     }
 
-    // If it's within the last week
     if (diffInDays < 7) {
       return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
     }
 
-    // If it's within the current year
     if (date.getFullYear() === now.getFullYear()) {
       return date.toLocaleDateString("en-US", {
         month: "short",
@@ -79,7 +60,6 @@ export const formatDate = (dateString: string): string => {
       });
     }
 
-    // Otherwise, show full date
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -91,22 +71,15 @@ export const formatDate = (dateString: string): string => {
   }
 };
 
-/**
- * Format app permissions count for display
- */
 export const formatPermissionsCount = (count: number): string => {
   if (count === 0) return "No permissions";
   if (count === 1) return "1 permission";
   return `${count} permissions`;
 };
 
-/**
- * Get app category display name
- */
 export const formatAppCategory = (category?: string): string => {
   if (!category) return "Uncategorized";
 
-  // Convert from CATEGORY_CONSTANT to readable format
   const categoryMap: Record<string, string> = {
     CATEGORY_GAME: "Games",
     CATEGORY_AUDIO: "Audio",
@@ -126,26 +99,17 @@ export const formatAppCategory = (category?: string): string => {
   );
 };
 
-/**
- * Get app type display text
- */
 export const getAppTypeText = (isSystemApp: boolean): string => {
   return isSystemApp ? "System App" : "User App";
 };
 
-/**
- * Get app status display text
- */
 export const getAppStatusText = (enabled: boolean): string => {
   return enabled ? "Enabled" : "Disabled";
 };
 
-/**
- * Format version information
- */
 export const formatVersion = (
   versionName?: string,
-  versionCode?: number
+  versionCode?: number,
 ): string => {
   if (versionName && versionCode) {
     return `${versionName} (${versionCode})`;
@@ -159,13 +123,10 @@ export const formatVersion = (
   return "Unknown version";
 };
 
-/**
- * Format SDK version information
- */
 export const formatSdkVersion = (
   targetSdk?: number,
   minSdk?: number,
-  compileSdk?: number
+  compileSdk?: number,
 ): string => {
   const parts: string[] = [];
 
@@ -176,32 +137,23 @@ export const formatSdkVersion = (
   return parts.length > 0 ? parts.join(" • ") : "Unknown SDK";
 };
 
-/**
- * Determine if an app is potentially dangerous based on permissions
- */
 export const isHighRiskApp = (permissionsCount: number): boolean => {
-  return permissionsCount > 10; // Apps with more than 10 permissions might be risky
+  return permissionsCount > 10;
 };
 
-/**
- * Get app size category
- */
 export const getAppSizeCategory = (size: number): string => {
-  if (size < 1024 * 1024) return "Small"; // < 1MB
-  if (size < 50 * 1024 * 1024) return "Medium"; // < 50MB
-  if (size < 200 * 1024 * 1024) return "Large"; // < 200MB
-  return "Very Large"; // >= 200MB
+  if (size < 1024 * 1024) return "Small";
+  if (size < 50 * 1024 * 1024) return "Medium";
+  if (size < 200 * 1024 * 1024) return "Large";
+  return "Very Large";
 };
 
-/**
- * Generate app summary text
- */
 export const generateAppSummary = (
   totalApps: number,
   systemApps: number,
   userApps: number,
   enabledApps: number,
-  disabledApps: number
+  disabledApps: number,
 ): string => {
   const parts: string[] = [];
 
@@ -226,9 +178,6 @@ export const generateAppSummary = (
   return parts.join(" • ");
 };
 
-/**
- * Filter apps based on search query
- */
 export const filterAppsBySearch = (apps: any[], searchQuery: string): any[] => {
   if (!searchQuery.trim()) return apps;
 
@@ -238,17 +187,14 @@ export const filterAppsBySearch = (apps: any[], searchQuery: string): any[] => {
     (app) =>
       app.name?.toLowerCase().includes(query) ||
       app.package_name?.toLowerCase().includes(query) ||
-      app.category?.toLowerCase().includes(query)
+      app.category?.toLowerCase().includes(query),
   );
 };
 
-/**
- * Sort apps based on criteria
- */
 export const sortApps = (
   apps: any[],
   sortBy: string,
-  sortOrder: "asc" | "desc"
+  sortOrder: "asc" | "desc",
 ): any[] => {
   const sorted = [...apps].sort((a, b) => {
     let aValue: any;

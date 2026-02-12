@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from "react";
-
+import React, { useState, type MouseEvent } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
-import { AlertTriangle, Save, Upload } from "lucide-react";
+import {
+  AlertTriangle,
+  Save,
+  Upload,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
-import { useCreateBackup, useBackupProgress } from "../hooks/backup.hooks";
-
+import { useCreateBackup } from "../hooks/backup.hooks";
+import { useBackupProgress } from "../hooks/backup.hooks";
 import BackupProgressTracker from "./BackupProgressTracker";
 import { useBackupStore } from "../store/backup.store";
 import { useBackupToastStore } from "../store/uploadToastStore";
@@ -14,6 +19,8 @@ import { useBackupToastStore } from "../store/uploadToastStore";
 interface CreateBackupFormInputs {
   name: string;
   backup_file: FileList;
+  device_brand: string;
+  ios_password?: string;
 }
 
 interface CreateBackupFormProps {
@@ -27,7 +34,12 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
     formState: { errors },
     reset,
     watch,
-  } = useForm<CreateBackupFormInputs>();
+    setValue,
+  } = useForm<CreateBackupFormInputs>({
+    defaultValues: {
+      device_brand: "samsung",
+    },
+  });
 
   const {
     createBackup,
@@ -36,91 +48,79 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
     uploadProgress,
     uploadPhase,
     error,
+    success,
   } = useCreateBackup();
+
   const [animateSuccess, setAnimateSuccess] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [showProgress, setShowProgress] = useState(false);
   const fileInput = watch("backup_file");
 
   const backupCreationId = useBackupToastStore(
-    (state) => state.backupCreationId
+    (state) => state.backupCreationId,
   );
   const setBackupCreationId = useBackupToastStore(
-    (state) => state.setBackupCreationId
+    (state) => state.setBackupCreationId,
   );
 
-  const [canSubmit, setCanSubmit] = useState(true);
-
-  const {
-    progress,
-    setProgress,
-    refetch: refetchProgress,
-  } = useBackupProgress(backupCreationData?.log_id);
+  const { progress, setProgress } = useBackupProgress(
+    backupCreationData?.log_id ?? undefined,
+  );
 
   const uploadToastId = useBackupStore((state) => state.uploadToastId);
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
-      console.log(uploadPhase);
       if (uploadPhase === "uploading") {
         toast.dismiss(uploadToastId);
       }
     };
-  }, []); // eslint-disable-line
+  }, []);
 
-  useEffect(() => {
-    if (backupCreationData?.log_id) {
+  React.useEffect(() => {
+    if (success && backupCreationData?.log_id) {
       setShowProgress(true);
+      setBackupCreationId(backupCreationData.log_id);
     }
+  }, [success, backupCreationData]);
 
-    setBackupCreationId(backupCreationData?.log_id);
-  }, [backupCreationData]); // eslint-disable-line
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (progress && progress.status === "completed") {
       setAnimateSuccess(true);
       setTimeout(() => {
         setAnimateSuccess(false);
-        onSuccess?.();
+        if (onSuccess) onSuccess();
+
         setProgress(null);
       }, 5000);
     }
-  }, [progress, onSuccess]); // eslint-disable-line
+  }, [progress, onSuccess]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (fileInput && fileInput.length > 0) {
       setSelectedFileName(fileInput[0].name);
+    } else {
+      setSelectedFileName("");
     }
   }, [fileInput]);
 
-  // handling: user should not be able to upload multiple backups
-  useEffect(() => {
-    if (backupCreationId && !backupCreationData?.log_id) {
-      setCanSubmit(false);
-    }
-  }, [backupCreationId]); // eslint-disable-line
-
   const onSubmit = async (data: CreateBackupFormInputs) => {
-    if (!canSubmit) {
+    if (backupCreationId && !backupCreationData?.log_id) {
       toast.error("You have one upload in progress!", {
         className: "!text-white",
       });
-
       return;
     }
+
     if (!data.backup_file || data.backup_file.length === 0) return;
+    const file = data.backup_file[0];
 
-    const params = {
+    await createBackup({
       name: data.name,
-      backup_file: data.backup_file[0],
-    };
-
-    const response = await createBackup(params);
-
-    if (response) {
-      setShowProgress(true);
-      refetchProgress();
-    }
+      backup_file: file,
+      device_brand: data.device_brand,
+      ios_password: data.device_brand === "ios" ? data.ios_password : undefined,
+    });
   };
 
   const handleCloseProgress = () => {
@@ -130,9 +130,23 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
     if (onSuccess) onSuccess();
   };
 
-  // Check if form should be disabled (during upload/processing)
+  const handleChangeDeviceBrand = (e: MouseEvent<HTMLInputElement>) => {
+    const target = e.target as HTMLInputElement;
+    setValue("device_brand", target.value);
+  };
+
   const isFormDisabled =
-    isLoading || uploadPhase === "uploading" || uploadPhase === "processing";
+    isLoading ||
+    uploadPhase === "uploading" ||
+    uploadPhase === "processing" ||
+    uploadPhase === "completed";
+
+  const brandOptions = [
+    { label: "Samsung", value: "samsung" },
+    { label: "Xiaomi", value: "xiaomi" },
+    { label: "IOS", value: "ios" },
+    { label: "Android", value: "android" },
+  ];
 
   return (
     <motion.div
@@ -172,21 +186,72 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
             {...register("name")}
             className={`w-full bg-gray-900/60 border ${
               errors.name ? "border-red-500/50" : "border-gray-700"
-            } rounded-lg px-3 py-2 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+            } rounded-lg px-3 py-2 text-white placeholder:text-gray-500 focus:outline-none focus:border-blue-500 transition-colors ${
               isFormDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
-            placeholder="My Backup"
+            placeholder="Enter a name for your backup"
           />
-          {errors.name && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-1 text-sm text-red-400"
-            >
-              {errors.name.message}
-            </motion.p>
-          )}
         </div>
+
+        <div className="mb-4">
+          <label
+            htmlFor="Device-Brand"
+            className="block text-sm font-medium text-gray-300 mb-1"
+          >
+            Device Brand
+          </label>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-10 mt-2">
+            {brandOptions.map((option) => (
+              <div
+                key={option.value}
+                className={`flex flex-row items-center gap-2.5 ${
+                  isFormDisabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  {...register("device_brand")}
+                  className={`radio size-5 ${
+                    isFormDisabled ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  checked={option.value === watch("device_brand")}
+                  value={option.value}
+                  onClick={handleChangeDeviceBrand}
+                  disabled={isFormDisabled}
+                />
+                <span className="block text-sm font-medium text-gray-300">
+                  {option.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {watch("device_brand") === "ios" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-4 overflow-hidden"
+          >
+            <label
+              htmlFor="ios_password"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Backup Password (Optional)
+            </label>
+            <input
+              id="ios_password"
+              type="password"
+              disabled={isFormDisabled}
+              {...register("ios_password")}
+              className={`w-full bg-gray-900/60 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder:text-gray-500 focus:outline-none focus:border-blue-500 transition-colors ${
+                isFormDisabled ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              placeholder="Enter password if encrypted"
+            />
+          </motion.div>
+        )}
         <div className="mb-6">
           <label
             htmlFor="file"
@@ -205,11 +270,22 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
               id="file"
               type="file"
               disabled={isFormDisabled}
+              accept=".zip"
               className={`absolute inset-0 opacity-0 w-full h-full z-10 ${
                 isFormDisabled ? "cursor-not-allowed" : "cursor-pointer"
               }`}
               {...register("backup_file", {
                 required: "Please select a file for backup",
+                validate: {
+                  isZip: (files) => {
+                    if (!files || files.length === 0) return true;
+                    const file = files[0];
+                    return (
+                      file.name.toLowerCase().endsWith(".zip") ||
+                      "Invalid format. Only zip files are allowed."
+                    );
+                  },
+                },
               })}
             />
             <div className="flex items-center p-3">
@@ -235,6 +311,10 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
+                ) : uploadPhase === "completed" ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                ) : error ? (
+                  <XCircle className="w-5 h-5 text-red-400" />
                 ) : (
                   <Upload className="w-5 h-5 text-blue-400" />
                 )}
@@ -244,8 +324,8 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
                   {uploadPhase === "uploading"
                     ? `Uploading ${selectedFileName}...`
                     : uploadPhase === "processing"
-                    ? `Processing ${selectedFileName}...`
-                    : selectedFileName || "Choose a file for backup"}
+                      ? `Processing ${selectedFileName}...`
+                      : selectedFileName || "Choose a .zip file for backup"}
                 </p>
                 {uploadPhase === "uploading" && (
                   <div className="mt-1">
@@ -287,7 +367,7 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
             </motion.p>
           )}
         </div>
-        {/* Show Create button only when not uploading/processing/showing progress */}
+
         {uploadPhase !== "uploading" &&
           uploadPhase !== "processing" &&
           !showProgress && (
@@ -342,14 +422,13 @@ const CreateBackupForm: React.FC<CreateBackupFormProps> = ({ onSuccess }) => {
               )}
             </motion.button>
           )}
-        {/* Cancel button during upload/processing */}
+
         {(uploadPhase === "uploading" || uploadPhase === "processing") && (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             type="button"
             onClick={() => {
-              // Reset form state
               reset();
               setSelectedFileName("");
               setShowProgress(false);

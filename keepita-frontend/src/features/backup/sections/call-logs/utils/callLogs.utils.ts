@@ -41,7 +41,7 @@ export const formatCallDate = (dateString: string): string => {
   const callDate = new Date(
     date.getFullYear(),
     date.getMonth(),
-    date.getDate()
+    date.getDate(),
   );
 
   const timeFormat = new Intl.DateTimeFormat("en-US", {
@@ -58,7 +58,6 @@ export const formatCallDate = (dateString: string): string => {
     return `Yesterday, ${timeFormat.format(date)}`;
   }
 
-  // Check if it was within the last week
   if (now.getTime() - callDate.getTime() < 7 * 24 * 60 * 60 * 1000) {
     const dayFormat = new Intl.DateTimeFormat("en-US", { weekday: "long" });
     return `${dayFormat.format(date)}, ${timeFormat.format(date)}`;
@@ -75,11 +74,11 @@ export const formatCallDate = (dateString: string): string => {
 
 export const getCallTypeColor = (type: CallType): string => {
   const colors: Record<CallType, string> = {
-    INCOMING: "#1976D2", // Blue
-    OUTGOING: "#388E3C", // Green
-    MISSED: "#D32F2F", // Red
+    INCOMING: "#1976D2",
+    OUTGOING: "#388E3C",
+    MISSED: "#D32F2F",
   };
-  return colors[type] || "#8E8E93"; // Default gray
+  return colors[type] || "#8E8E93";
 };
 
 export const getCallTypeIcon = (type: CallType): string => {
@@ -88,11 +87,11 @@ export const getCallTypeIcon = (type: CallType): string => {
     OUTGOING: "call_made",
     MISSED: "call_missed",
   };
-  return icons[type] || "call"; // Default icon
+  return icons[type] || "call";
 };
 
 export const buildCallLogsQueryParams = (
-  params: Partial<GetCallLogsParams>
+  params: Partial<GetCallLogsParams>,
 ): Record<string, any> => {
   return buildQueryParams(params);
 };

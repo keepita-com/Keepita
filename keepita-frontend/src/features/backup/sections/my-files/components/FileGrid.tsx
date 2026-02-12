@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, FolderOpen, MoreVertical } from "lucide-react";
-import React from "react";
+import { Download, FolderOpen, Loader2 } from "lucide-react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 import { getFileIcon } from "../constants/myFiles.constants";
 import { useFilePreview } from "../hooks/myFiles.hooks";
 import { useMyFilesStore } from "../store/myFiles.store";
@@ -13,21 +14,29 @@ interface FileGridProps {
   files: MyFile[];
   onFileDownload?: (fileId: number) => void;
   isDownloading?: boolean;
+  theme?: "Samsung" | "Xiaomi";
 }
 
 const FileGrid: React.FC<FileGridProps> = ({
   files,
   onFileDownload,
   isDownloading = false,
+  theme = "Samsung",
 }) => {
   const { selectedFiles, selectFile, viewMode } = useMyFilesStore();
   const { openPreview, isPreviewable } = useFilePreview();
+
+  const [downloadingFileId, setDownloadingFileId] = useState<number | null>(
+    null,
+  );
 
   const handleFileClick = (file: MyFile) => {
     if (isPreviewable(file)) {
       openPreview(file);
     } else {
-      selectFile(file.id);
+      toast.info("Preview not available", {
+        description: "This file type cannot be previewed.",
+      });
     }
   };
 
@@ -39,26 +48,81 @@ const FileGrid: React.FC<FileGridProps> = ({
   const handleDownload = async (
     e: React.MouseEvent,
     fileId: number,
-    fileName: string
+    fileName: string,
   ) => {
     e.stopPropagation();
-    onFileDownload?.(fileId);
 
-    const { download_url } = await getBackupMedia(fileId);
+    if (downloadingFileId !== null) return;
 
-    downloadMedias([{ blob: download_url, name: fileName }]);
+    setDownloadingFileId(fileId);
+
+    try {
+      onFileDownload?.(fileId);
+      const { download_url } = await getBackupMedia(fileId);
+      await downloadMedias([{ blob: download_url, name: fileName }]);
+    } catch (error) {
+      toast.error("Download failed");
+    } finally {
+      setDownloadingFileId(null);
+    }
   };
+
+  const filesTheme = {
+    Samsung: {
+      categoryColors: {
+        image: "bg-blue-500",
+        video: "bg-red-500",
+        audio: "bg-green-500",
+        document: "bg-orange-500",
+        apk: "bg-purple-500",
+        zip: "bg-gray-500",
+        archive: "bg-purple-500",
+        other: "bg-gray-500",
+      },
+      selectionWrapperClassNames: "absolute top-2 left-2 z-10",
+      filePreviewWrapper:
+        "relative w-full aspect-square mb-3 bg-gray-50 rounded-xl overflow-hidden",
+      container: {
+        baseClassNames:
+          "relative bg-white rounded-2xl p-3 cursor-pointer transition-all duration-200 hover:shadow-lg group",
+        selectedClassNames: "ring-2 ring-blue-500 bg-blue-50",
+        unSelecetdClassNames: "hover:shadow-md border border-gray-100",
+      },
+    },
+    Xiaomi: {
+      categoryColors: {
+        image: "bg-emerald-400",
+        video: "bg-orange-600",
+        audio: "bg-pink-500",
+        document: "bg-purple-600",
+        apk: "bg-green-500",
+        zip: "bg-stone-500",
+        archive: "bg-purple-500",
+        other: "bg-red-500",
+      },
+      selectionWrapperClassNames: "absolute bottom-18 right-4 z-10",
+      filePreviewWrapper:
+        "relative w-full aspect-square mb-3 bg-gray-50 rounded-none overflow-hidden",
+      container: {
+        baseClassNames:
+          "relative bg-white rounded-2xl p-3 cursor-pointer transition-all duration-200 hover:shadow-lg group",
+        selectedClassNames: "ring-2 ring-blue-500 bg-blue-50",
+        unSelecetdClassNames: "hover:shadow-md",
+      },
+    },
+  };
+  const currentTheme = filesTheme[theme];
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      image: "bg-blue-500",
-      video: "bg-red-500",
-      audio: "bg-green-500",
-      document: "bg-orange-500",
-      apk: "bg-purple-500",
-      zip: "bg-gray-500",
-      archive: "bg-purple-500",
-      other: "bg-gray-500",
+      image: currentTheme.categoryColors.image,
+      video: currentTheme.categoryColors.video,
+      audio: currentTheme.categoryColors.audio,
+      document: currentTheme.categoryColors.document,
+      apk: currentTheme.categoryColors.apk,
+      zip: currentTheme.categoryColors.zip,
+      archive: currentTheme.categoryColors.archive,
+      other: currentTheme.categoryColors.other,
     };
     return colors[category] || colors.other;
   };
@@ -128,7 +192,6 @@ const FileGrid: React.FC<FileGridProps> = ({
   if (viewMode === "list") {
     return (
       <div className="bg-white rounded-2xl overflow-hidden">
-        {/* List Header */}
         <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 border-b border-gray-100 text-sm font-medium text-gray-600">
           <div className="col-span-6">Name</div>
           <div className="col-span-2">Size</div>
@@ -136,7 +199,6 @@ const FileGrid: React.FC<FileGridProps> = ({
           <div className="col-span-2">Modified</div>
         </div>
 
-        {/* File List */}
         <AnimatePresence>
           {files.map((file, index) => (
             <motion.div
@@ -150,7 +212,6 @@ const FileGrid: React.FC<FileGridProps> = ({
               }`}
               onClick={() => handleFileClick(file)}
             >
-              {/* Name Column */}
               <div className="col-span-6 flex items-center gap-3 min-w-0">
                 <motion.div
                   whileTap={{ scale: 0.95 }}
@@ -187,7 +248,7 @@ const FileGrid: React.FC<FileGridProps> = ({
                     getFileIcon(file.file_extension, file.category),
                     {
                       className: "w-6 h-6 text-gray-600",
-                    }
+                    },
                   )}
                 </div>
 
@@ -201,25 +262,22 @@ const FileGrid: React.FC<FileGridProps> = ({
                 </div>
               </div>
 
-              {/* Size Column */}
               <div className="col-span-2 flex items-center">
                 <span className="text-gray-600 text-sm">
                   {file.file_size_human}
                 </span>
               </div>
 
-              {/* Type Column */}
               <div className="col-span-2 flex items-center">
                 <span
                   className={`px-2 py-1 rounded-md text-xs font-medium text-white ${getCategoryColor(
-                    file.category
+                    file.category,
                   )}`}
                 >
                   {getFileTypeLabel(file.file_extension)}
                 </span>
               </div>
 
-              {/* Modified Column */}
               <div className="col-span-2 flex items-center justify-between">
                 <span className="text-gray-500 text-xs">
                   {formatFileDate(file.modified_date)}
@@ -230,20 +288,15 @@ const FileGrid: React.FC<FileGridProps> = ({
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={(e) => handleDownload(e, file.id, file.file_name)}
-                    disabled={isDownloading}
+                    disabled={isDownloading || downloadingFileId === file.id}
                     className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
                     title="Download"
                   >
-                    <Download className="w-4 h-4 text-gray-600" />
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
-                    title="More options"
-                  >
-                    <MoreVertical className="w-4 h-4 text-gray-600" />
+                    {downloadingFileId === file.id ? (
+                      <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4 text-gray-600" />
+                    )}
                   </motion.button>
                 </div>
               </div>
@@ -269,16 +322,15 @@ const FileGrid: React.FC<FileGridProps> = ({
               stiffness: 260,
               damping: 20,
             }}
-            className={`relative bg-white rounded-2xl p-3 cursor-pointer transition-all duration-200 hover:shadow-lg group ${
+            className={`${currentTheme.container.baseClassNames} ${
               selectedFiles.includes(file.id)
-                ? "ring-2 ring-blue-500 bg-blue-50"
-                : "hover:shadow-md border border-gray-100"
+                ? currentTheme.container.selectedClassNames
+                : currentTheme.container.unSelecetdClassNames
             }`}
             onClick={() => handleFileClick(file)}
           >
-            {/* Selection Checkbox */}
             <motion.div
-              className="absolute top-2 left-2 z-10"
+              className={currentTheme.selectionWrapperClassNames}
               whileTap={{ scale: 0.95 }}
               onClick={(e) => handleFileSelect(e, file.id)}
             >
@@ -308,7 +360,6 @@ const FileGrid: React.FC<FileGridProps> = ({
               </div>
             </motion.div>
 
-            {/* Quick Actions */}
             <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 5 }}
@@ -316,25 +367,19 @@ const FileGrid: React.FC<FileGridProps> = ({
                 onClick={async (e) => {
                   handleDownload(e, file.id, file.file_name);
                 }}
-                disabled={isDownloading}
+                disabled={isDownloading || downloadingFileId === file.id}
                 className="p-1.5 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
                 title="Download"
               >
-                <Download className="w-3.5 h-3.5 text-blue-600" />
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-1.5 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
-                title="More options"
-              >
-                <MoreVertical className="w-3.5 h-3.5 text-gray-600" />
+                {downloadingFileId === file.id ? (
+                  <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5 text-blue-600" />
+                )}
               </motion.button>
             </div>
 
-            {/* File Preview/Icon */}
-            <div className="relative w-full aspect-square mb-3 bg-gray-50 rounded-xl overflow-hidden">
+            <div className={currentTheme.filePreviewWrapper}>
               {file.category === "image" ? (
                 <>
                   <motion.img
@@ -359,7 +404,7 @@ const FileGrid: React.FC<FileGridProps> = ({
                       getFileIcon(file.file_extension, file.category),
                       {
                         className: "w-12 h-12 text-gray-400",
-                      }
+                      },
                     )}
                   </div>
                 </>
@@ -374,22 +419,20 @@ const FileGrid: React.FC<FileGridProps> = ({
                     getFileIcon(file.file_extension, file.category),
                     {
                       className: "w-12 h-12 text-gray-400",
-                    }
+                    },
                   )}
                 </motion.div>
               )}
 
-              {/* Category Badge */}
               <div
                 className={`absolute bottom-2 left-2 px-2 py-1 rounded-md text-xs font-bold text-white ${getCategoryColor(
-                  file.category
+                  file.category,
                 )}`}
               >
                 {getFileTypeLabel(file.file_extension)}
               </div>
             </div>
 
-            {/* File Info */}
             <div className="space-y-1">
               <h3
                 className="font-medium text-gray-900 text-sm truncate"
@@ -406,7 +449,6 @@ const FileGrid: React.FC<FileGridProps> = ({
               </div>
             </div>
 
-            {/* Touch Ripple Effect */}
             <motion.div
               className="absolute inset-0 bg-blue-400 opacity-0 rounded-2xl pointer-events-none"
               initial={false}

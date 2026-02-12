@@ -8,12 +8,9 @@ const MY_FILES_API_ENDPOINTS = {
   LIST: (backupId: string) => `${RESOURCE}/backups/${backupId}/files/`,
 } as const;
 
-/**
- * Get files for a specific backup (function-based)
- */
 export const getMyFiles = async (
   backupId: string | number,
-  params: Partial<GetMyFilesParams> = {}
+  params: Partial<GetMyFilesParams> = {},
 ): Promise<MyFilesResponse> => {
   if (!backupId) {
     throw new Error("Backup ID is required");
