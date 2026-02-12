@@ -1,9 +1,3 @@
-/**
- * Route preloading utilities for better UX
- * These functions help preload components when users hover over navigation items
- */
-
-// Preload functions for each major route group
 export const preloadAuthRoutes = () => {
   import("../../features/auth/pages/LoginPage");
   import("../../features/auth/pages/RegisterPage");
@@ -20,19 +14,25 @@ export const preloadBackupSections = () => {
   import("../../features/backup/sections/call-logs/pages/CallLogsPage");
   import("../../features/backup/sections/browser/pages/BrowserPage");
   import("../../features/backup/sections/messages").then(
-    (module) => module.MessagesPage
+    (module) => module.MessagesPage,
   );
   import("../../features/backup/sections/my-files").then(
-    (module) => module.MyFilesPage
+    (module) => module.MyFilesPage,
   );
   import("../../features/backup/sections/bluetooth").then(
-    (module) => module.BluetoothPage
+    (module) => module.BluetoothPage,
   );
   import("../../features/backup/sections/apps").then(
-    (module) => module.AppPage
+    (module) => module.AppPage,
+  );
+  import("../../features/backup/sections/alarms").then(
+    (module) => module.AlarmsPage,
   );
   import("../../features/backup/sections/wifi").then(
-    (module) => module.WiFiPage
+    (module) => module.WiFiPage,
+  );
+  import("../../features/backup/sections/homescreen").then(
+    (module) => module.HomescreenPage,
   );
 };
 
@@ -44,9 +44,7 @@ export const preloadLayoutComponents = () => {
   import("../../features/layout/pages/MainLayout");
 };
 
-// Preload critical routes on app initialization
 export const preloadCriticalRoutes = () => {
-  // Preload the most commonly accessed routes
   preloadHomeRoute();
   preloadBackupRoutes();
   preloadLayoutComponents();
