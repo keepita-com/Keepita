@@ -1,7 +1,3 @@
-/**
- * Simple utility function to conditionally join class names
- * Replacement for clsx with basic functionality
- */
 export function cn(
   ...inputs: (
     | string
