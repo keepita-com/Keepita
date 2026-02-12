@@ -1,9 +1,9 @@
-const AUTH_STORAGE_KEY = "xplorta_auth";
+const AUTH_STORAGE_KEY = "keepita_auth";
 
 export const getAuthToken = (): string | undefined => {
   try {
     const authData = JSON.parse(
-      localStorage.getItem(AUTH_STORAGE_KEY) || "null"
+      localStorage.getItem(AUTH_STORAGE_KEY) || "null",
     );
     if (authData?.isAuthenticated) {
       return `Bearer ${authData.token}`;

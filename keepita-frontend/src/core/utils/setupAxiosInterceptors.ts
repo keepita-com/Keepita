@@ -1,10 +1,7 @@
 import { AxiosError, type AxiosInstance } from "axios";
-
 import { AUTH_STORAGE_KEY, useAuthStore } from "../../features/auth/store";
-
 import type { CustomizedAxiosConfig, RetryFn } from "../types/axiosInstance";
 import { ApiResponseConstructor, type ApiResponse } from "../types/apiResponse";
-
 import { getAuthToken } from "./getAuthToken";
 import { getLanguage } from "./getLanguage";
 import {
@@ -27,7 +24,20 @@ export function setupAxiosInterceptors(axiosInstance: AxiosInstance) {
       req._retryCount = DEFAULT_MAX_RETRIES;
     }
 
-    config.headers.Authorization = getAuthToken();
+    const isRefreshRequest =
+      config.url === AUTH_API_ENDPOINTS.REFRESH_TOKEN ||
+      config.url?.includes("/token/refresh/");
+
+    if (isRefreshRequest) {
+      delete config.headers.Authorization;
+      delete config.headers["Authorization"];
+    } else {
+      const token = getAuthToken();
+      if (token) {
+        config.headers.Authorization = token;
+      }
+    }
+
     config.headers["Accept-Language"] = getLanguage();
 
     return config;
@@ -38,36 +48,55 @@ export function setupAxiosInterceptors(axiosInstance: AxiosInstance) {
     async (err: AxiosError<ApiResponse<null>>) => {
       const config = err.config as CustomizedAxiosConfig;
 
-      // retry limit check
-      if (!config._retryCount || config._retryCount <= 0) {
-        throw new ApiResponseConstructor(
-          getResponseMessage(err),
-          {} as unknown,
-          false
+      if (!config || !config._retryCount || config._retryCount <= 0) {
+        return Promise.reject(
+          new ApiResponseConstructor(
+            getResponseMessage(err),
+            {} as unknown,
+            false,
+          ),
         );
       }
 
-      // token exp check
-      if (
+      const isAuthError =
         err.response &&
-        [401, 403].includes(err.response.status) &&
-        err.response?.data?.message === EXPIRED_TOKEN_MESSAGE &&
-        err?.config?.url !== AUTH_API_ENDPOINTS.REFRESH_TOKEN
+        (err.response.status === 401 || err.response.status === 403);
+
+      const isRefreshUrl =
+        config.url === AUTH_API_ENDPOINTS.REFRESH_TOKEN ||
+        config.url?.includes("/token/refresh/");
+
+      if (
+        isAuthError &&
+        !isRefreshUrl &&
+        (err.response?.data?.message === EXPIRED_TOKEN_MESSAGE ||
+          err.response?.status === 401)
       ) {
         config._retryCount--;
+        console.log("Token expired - attempting refresh...");
+
         const { refresh, setAuthData, clearAuth } = useAuthStore.getState();
+
+        if (!refresh) {
+          console.error("No refresh token available - logging out");
+          clearAuth();
+          return Promise.reject(err);
+        }
 
         failedQueue.push(() => axiosInstance(config));
 
         if (!refreshTokenPromise) {
-          refreshTokenPromise = getNewJWTToken(refresh!)
+          refreshTokenPromise = getNewJWTToken(refresh)
             .then((res) => {
+              console.log("Token refresh successful");
+
               setAuthData({
                 user: res.user,
                 access: res.access,
                 refresh: res.refresh,
                 isAuthenticated: true,
               });
+
               localStorage.setItem(
                 AUTH_STORAGE_KEY,
                 JSON.stringify({
@@ -75,37 +104,63 @@ export function setupAxiosInterceptors(axiosInstance: AxiosInstance) {
                   refresh: res.refresh,
                   token: res.access,
                   isAuthenticated: true,
-                })
+                }),
               );
 
               return res.access;
             })
-            .catch((error) => {
-              failedQueue.length = 0;
-              clearAuth();
+            .catch((error: AxiosError) => {
+              console.error("Token refresh failed:", error);
 
-              throw new ApiResponseConstructor(
-                getResponseMessage(error),
-                {} as unknown,
-                false
-              );
+              const status = error.response?.status;
+              const isRefreshTokenInvalid =
+                status === 401 || status === 403 || status === 400;
+
+              if (isRefreshTokenInvalid) {
+                console.error(
+                  "Refresh token is invalid/expired - logging out.",
+                );
+                failedQueue.length = 0;
+                clearAuth();
+              } else {
+                console.warn(
+                  "Refresh network/server error - keeping session.",
+                );
+                failedQueue.length = 0;
+              }
+
+              return Promise.reject(error);
             })
             .finally(clearPromise);
         }
 
-        const newAccessToken = await refreshTokenPromise;
+        return refreshTokenPromise
+          .then((newAccessToken) => {
+            if (!newAccessToken)
+              return Promise.reject(new Error("No token returned"));
 
-        axiosInstance.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
+            if (!config.headers) {
+              config.headers = {};
+            }
 
-        await Promise.allSettled(failedQueue.map((retry) => retry()));
-        failedQueue.length = 0;
-      } else {
-        throw new ApiResponseConstructor(
+            config.headers.Authorization = `Bearer ${newAccessToken}`;
+
+            return Promise.allSettled(failedQueue.map((retry) => retry())).then(
+              () => axiosInstance(config),
+            );
+          })
+          .catch((refreshErr) => {
+            return Promise.reject(refreshErr);
+          });
+      }
+
+      return Promise.reject(
+        new ApiResponseConstructor(
           getResponseMessage(err),
           {} as unknown,
-          false
-        );
-      }
-    }
+          false,
+        ),
+      );
+    },
   );
 }

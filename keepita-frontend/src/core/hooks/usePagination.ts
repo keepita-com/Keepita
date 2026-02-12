@@ -1,10 +1,5 @@
 import { useState, useCallback } from "react";
 
-/**
- * A simple pagination hook that manages page state and provides navigation methods
- * @param initialPage - The initial page number
- * @param initialPageSize - The initial page size
- */
 export function usePagination(initialPage = 1, initialPageSize = 10) {
   const [page, setPage] = useState<number>(initialPage);
   const [pageSize, setPageSize] = useState<number>(initialPageSize);
@@ -17,7 +12,7 @@ export function usePagination(initialPage = 1, initialPageSize = 10) {
 
   const handlePageSizeChange = useCallback((newPageSize: number) => {
     setPageSize(newPageSize);
-    setPage(1); // Reset to first page when changing page size
+    setPage(1);
   }, []);
 
   const nextPage = useCallback(() => {
@@ -38,12 +33,10 @@ export function usePagination(initialPage = 1, initialPageSize = 10) {
     }
   }, []);
 
-  // Method to reset pagination to first page (useful for filters/search)
   const resetToFirstPage = useCallback(() => {
     setPage(1);
   }, []);
 
-  // Calculate visible range based on external pagination data
   const getVisibleRange = useCallback(
     (currentPage: number, currentPageSize: number, totalResults: number) => {
       if (!totalResults) return { start: 0, end: 0 };
@@ -53,15 +46,13 @@ export function usePagination(initialPage = 1, initialPageSize = 10) {
 
       return { start, end };
     },
-    []
+    [],
   );
 
   return {
-    // Current state
     page,
     pageSize,
 
-    // Navigation methods
     handlePageChange,
     handlePageSizeChange,
     nextPage,
@@ -70,7 +61,6 @@ export function usePagination(initialPage = 1, initialPageSize = 10) {
     goToLastPage,
     resetToFirstPage,
 
-    // Utility methods
     getVisibleRange,
   };
 }
