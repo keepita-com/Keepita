@@ -10,6 +10,10 @@ export default {
         primary: "#7c3aed",
         "primary-content": "#ffffff",
       },
+      fontFamily: {
+        'sf': ['SF Pro Display', 'sans-serif'], 
+      },
+      // --- END: Add Custom Font 'sf' --
     },
   },
   plugins: [require("daisyui")],
