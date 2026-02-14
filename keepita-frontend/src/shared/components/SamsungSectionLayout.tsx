@@ -1,7 +1,3 @@
-/**
- * SamsungSectionLayout.tsx
- * Samsung One UI inspired layout component matching Samsung Settings design
- */
 import React, { type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Wifi, Battery, Signal } from "lucide-react";
@@ -31,7 +27,6 @@ const SamsungSectionLayout: React.FC<SamsungSectionLayoutProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Samsung Status Bar */}
       <div className="h-7 bg-white flex items-center justify-between px-4 text-xs font-medium text-black border-b border-gray-100">
         <div className="flex items-center space-x-1">
           <span>{currentTime}</span>
@@ -44,7 +39,6 @@ const SamsungSectionLayout: React.FC<SamsungSectionLayoutProps> = ({
         </div>
       </div>
 
-      {/* Header with Back Button and Title */}
       <div className="bg-white border-b border-gray-100">
         <div className="px-4 py-4 flex items-center">
           {showBackButton && (
@@ -66,7 +60,6 @@ const SamsungSectionLayout: React.FC<SamsungSectionLayoutProps> = ({
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 bg-white relative flex flex-col min-h-0">
         {isLoading && (
           <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">

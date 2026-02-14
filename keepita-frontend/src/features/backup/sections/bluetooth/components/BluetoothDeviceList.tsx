@@ -11,14 +11,16 @@ import { type BluetoothDevice } from "../types/bluetooth.types";
 import { BluetoothDeviceListSkeleton } from "../components";
 import BluetoothDeviceItem from "./BluetoothDeviceItem";
 import { groupByType as groupDevicesByType } from "../utils/bluetooth.utils";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
 
 interface BluetoothDeviceListProps {
   devices: BluetoothDevice[];
   isLoading?: boolean;
   isInitialLoading?: boolean;
+  isRefreshing?: boolean;
   error?: string | null;
   groupByType?: boolean;
-  // Infinite scroll props
+
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   isFetchingNextPage?: boolean;
@@ -39,7 +41,6 @@ const DeviceGroup: React.FC<DeviceGroupProps> = ({
 }) => {
   return (
     <div className="mb-6">
-      {/* Group Header */}
       <motion.button
         onClick={onToggleExpanded}
         className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl mb-3 hover:bg-gray-100 transition-colors"
@@ -62,7 +63,6 @@ const DeviceGroup: React.FC<DeviceGroupProps> = ({
         )}
       </motion.button>
 
-      {/* Group Content */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -70,9 +70,17 @@ const DeviceGroup: React.FC<DeviceGroupProps> = ({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
+            className="bg-white overflow-hidden"
           >
-            {devices.map((device) => (
-              <BluetoothDeviceItem key={device.id} device={device} />
+            {devices.map((device, index) => (
+              <BluetoothDeviceItem
+                key={device.id}
+                device={device}
+                isLast={index === devices.length - 1}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              />
             ))}
           </motion.div>
         )}
@@ -85,12 +93,14 @@ const BluetoothDeviceList: React.FC<BluetoothDeviceListProps> = ({
   devices,
   isLoading = false,
   isInitialLoading = false,
+  isRefreshing = false,
   error = null,
   groupByType = true,
   hasNextPage = false,
   fetchNextPage,
   isFetchingNextPage = false,
 }) => {
+  const { theme } = useBackupTheme();
   const [expandedGroups, setExpandedGroups] = React.useState<
     Record<string, boolean>
   >({
@@ -103,11 +113,10 @@ const BluetoothDeviceList: React.FC<BluetoothDeviceListProps> = ({
     unknown: true,
   });
 
-  // Infinite scroll functionality
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastDeviceRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (isLoading || isFetchingNextPage) return;
+      if (isLoading || isFetchingNextPage || isRefreshing) return;
       if (observerRef.current) observerRef.current.disconnect();
 
       observerRef.current = new IntersectionObserver((entries) => {
@@ -118,7 +127,7 @@ const BluetoothDeviceList: React.FC<BluetoothDeviceListProps> = ({
 
       if (node) observerRef.current.observe(node);
     },
-    [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]
+    [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, isRefreshing],
   );
 
   const handleToggleGroup = (groupName: string) => {
@@ -128,17 +137,14 @@ const BluetoothDeviceList: React.FC<BluetoothDeviceListProps> = ({
     }));
   };
 
-  // Initial Loading State - Show skeleton
-  if (isInitialLoading) {
+  if (isInitialLoading || isRefreshing) {
     return <BluetoothDeviceListSkeleton count={6} />;
   }
 
-  // Loading State (legacy - for backward compatibility)
   if (isLoading && devices.length === 0) {
     return <BluetoothDeviceListSkeleton count={6} />;
   }
 
-  // Error State
   if (error) {
     return (
       <motion.div
@@ -159,7 +165,6 @@ const BluetoothDeviceList: React.FC<BluetoothDeviceListProps> = ({
     );
   }
 
-  // Empty State
   if (devices.length === 0) {
     return (
       <motion.div
@@ -181,7 +186,6 @@ const BluetoothDeviceList: React.FC<BluetoothDeviceListProps> = ({
     );
   }
 
-  // Group devices if groupByType is enabled
   if (groupByType) {
     const groupedDevices = groupDevicesByType(devices);
 
@@ -204,27 +208,35 @@ const BluetoothDeviceList: React.FC<BluetoothDeviceListProps> = ({
     );
   }
 
-  // Simple list without grouping
   return (
-    <div className="space-y-2">
+    <div
+      className={
+        theme === "Apple" ? "bg-white rounded-3xl overflow-hidden" : "space-y-2"
+      }
+    >
       <AnimatePresence>
         {devices.map((device, index) => {
           const isLast = index === devices.length - 1;
           return (
-            <motion.div
+            <BluetoothDeviceItem
               key={device.id}
+              device={device}
+              isLast={isLast}
               ref={isLast ? lastDeviceRef : undefined}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <BluetoothDeviceItem device={device} />
-            </motion.div>
+              initial={
+                theme === "Apple" ? { opacity: 0 } : { opacity: 0, y: 20 }
+              }
+              animate={
+                theme === "Apple" ? { opacity: 1 } : { opacity: 1, y: 0 }
+              }
+              transition={
+                theme === "Apple" ? { duration: 0.2 } : { delay: index * 0.05 }
+              }
+            />
           );
         })}
       </AnimatePresence>
 
-      {/* Loading indicator for infinite scroll */}
       {isFetchingNextPage && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -238,8 +250,7 @@ const BluetoothDeviceList: React.FC<BluetoothDeviceListProps> = ({
         </motion.div>
       )}
 
-      {/* End of list indicator */}
-      {!hasNextPage && devices.length > 0 && (
+      {!hasNextPage && devices.length > 0 && theme !== "Apple" && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -11,18 +11,12 @@ import type {
   FileCategory,
 } from "../types/myFiles.types";
 
-// ================================
-// useMyFiles Hook - React Query for server state
-// ================================
-
 export const useMyFiles = (backupId: number) => {
   const queryClient = useQueryClient();
 
-  // Get client state from Zustand (no server state!)
   const { currentPage, searchQuery, filters, sortConfig, selectedCategory } =
     useMyFilesStore();
 
-  // Convert internal sort config to API format
   const getOrderingParam = (): GetMyFilesParams["ordering"] => {
     const { field, order } = sortConfig;
     const fieldMap: Record<FileSortField, string> = {
@@ -37,7 +31,6 @@ export const useMyFiles = (backupId: number) => {
     return ordering as GetMyFilesParams["ordering"];
   };
 
-  // Build query params using the utility function
   const buildQueryParams = (): GetMyFilesParams => {
     const params: GetMyFilesParams = {
       page: currentPage,
@@ -53,14 +46,12 @@ export const useMyFiles = (backupId: number) => {
       params.category = selectedCategory;
     }
 
-    // Add filters using the utility function
     return buildMyFilesQueryParams({
       ...params,
       ...filters,
     });
   };
 
-  // React Query handles ALL server state - no Zustand server state!
   const filesQuery = useQuery({
     queryKey: [
       "myFiles",
@@ -77,17 +68,15 @@ export const useMyFiles = (backupId: number) => {
       return response;
     },
     enabled: !!backupId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     retry: 2,
   });
 
-  // Refresh files
   const refreshFiles = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["myFiles", backupId] });
   }, [queryClient, backupId]);
 
   return {
-    // Server state from React Query only
     files: filesQuery.data?.results || [],
     totalResults: filesQuery.data?.total_results || 0,
     totalPages: filesQuery.data?.total_pages || 1,
@@ -97,17 +86,11 @@ export const useMyFiles = (backupId: number) => {
     isError: filesQuery.isError,
     error: filesQuery.error,
 
-    // Actions
     refreshFiles,
 
-    // Query objects (for advanced usage)
     filesQuery,
   };
 };
-
-// ================================
-// useFilePreview Hook - Client state only
-// ================================
 
 export const useFilePreview = () => {
   const { previewData, openPreview, closePreview } = useMyFilesStore();
@@ -120,7 +103,7 @@ export const useFilePreview = () => {
       setIsImageLoading(true);
       openPreview(file);
     },
-    [openPreview]
+    [openPreview],
   );
 
   const handleClosePreview = useCallback(() => {
@@ -140,18 +123,17 @@ export const useFilePreview = () => {
 
   const isPreviewable = useCallback((file: MyFile): boolean => {
     const previewableTypes = [
-      // Images
       "image/jpeg",
       "image/jpg",
       "image/png",
       "image/gif",
       "image/webp",
       "image/svg+xml",
-      // Videos (most browsers support these)
+
       "video/mp4",
       "video/webm",
       "video/ogg",
-      // Audio files
+
       "audio/mp3",
       "audio/mpeg",
       "audio/wav",
@@ -159,23 +141,23 @@ export const useFilePreview = () => {
       "audio/aac",
       "audio/flac",
       "audio/m4a",
-      // Text files
+
       "text/plain",
       "text/html",
       "text/css",
       "text/javascript",
       "application/json",
       "application/xml",
-      // PDFs
+
       "application/pdf",
     ];
 
-    return previewableTypes.includes(file.mime_type.toLowerCase());
+    return previewableTypes.includes(file.mime_type?.toLowerCase());
   }, []);
 
   const getPreviewType = useCallback(
     (
-      file: MyFile
+      file: MyFile,
     ): "image" | "video" | "audio" | "text" | "pdf" | "unsupported" => {
       const mimeType = file.mime_type.toLowerCase();
 
@@ -192,36 +174,28 @@ export const useFilePreview = () => {
 
       return "unsupported";
     },
-    []
+    [],
   );
 
   const canDownload = useCallback((): boolean => {
-    // All files can be downloaded
     return true;
   }, []);
 
   return {
-    // State
     previewData,
     isImageLoading,
     imageError,
 
-    // Actions
     openPreview: handleOpenPreview,
     closePreview: handleClosePreview,
     handleImageLoad,
     handleImageError,
 
-    // Utilities
     isPreviewable,
     getPreviewType,
     canDownload,
   };
 };
-
-// ================================
-// useMyFilesActions Hook - Client state actions only
-// ================================
 
 export const useMyFilesActions = () => {
   const {
@@ -234,85 +208,71 @@ export const useMyFilesActions = () => {
     clearFilters,
   } = useMyFilesStore();
 
-  // Search actions - automatically reset page
   const handleSearch = useCallback(
     (query: string) => {
       setSearchQuery(query);
     },
-    [setSearchQuery]
+    [setSearchQuery],
   );
 
   const handleClearSearch = useCallback(() => {
     setSearchQuery("");
   }, [setSearchQuery]);
 
-  // Filter actions - automatically reset page
   const handleCategoryFilter = useCallback(
     (category: FileCategory | null) => {
       setSelectedCategory(category);
     },
-    [setSelectedCategory]
+    [setSelectedCategory],
   );
 
   const handleFiltersChange = useCallback(
     (newFilters: any) => {
       setFilters(newFilters);
     },
-    [setFilters]
+    [setFilters],
   );
 
   const handleClearFilters = useCallback(() => {
     clearFilters();
   }, [clearFilters]);
 
-  // Sort actions - automatically reset page
   const handleSortChange = useCallback(
     (field: FileSortField, order: "asc" | "desc") => {
       setSortConfig({ field, order });
     },
-    [setSortConfig]
+    [setSortConfig],
   );
 
-  // View mode actions
   const handleViewModeChange = useCallback(
     (mode: "grid" | "list") => {
       setViewMode(mode);
     },
-    [setViewMode]
+    [setViewMode],
   );
 
-  // Pagination actions
   const handlePageChange = useCallback(
     (page: number) => {
       setCurrentPage(page);
     },
-    [setCurrentPage]
+    [setCurrentPage],
   );
 
   return {
-    // Search
     handleSearch,
     handleClearSearch,
 
-    // Filters
     handleCategoryFilter,
     handleFiltersChange,
     handleClearFilters,
 
-    // Sort
     handleSortChange,
 
-    // View
     handleViewModeChange,
 
-    // Pagination
     handlePageChange,
   };
 };
-
-// ================================
-// useMyFilesSelection Hook - Client state for file selection
-// ================================
 
 export const useMyFilesSelection = () => {
   const {
@@ -329,7 +289,7 @@ export const useMyFilesSelection = () => {
     (fileIds: number[]) => {
       selectMultipleFiles(fileIds);
     },
-    [selectMultipleFiles]
+    [selectMultipleFiles],
   );
 
   const handleClearSelection = useCallback(() => {
@@ -346,15 +306,13 @@ export const useMyFilesSelection = () => {
 
   const isSelected = useCallback(
     (fileId: number) => selectedFiles.includes(fileId),
-    [selectedFiles]
+    [selectedFiles],
   );
 
   return {
-    // State
     selectedFiles,
     isSelectionMode,
 
-    // Actions
     toggleSelection,
     selectFile,
     selectAll,
@@ -362,15 +320,10 @@ export const useMyFilesSelection = () => {
     toggleSelectionMode,
     isSelected,
 
-    // Computed
     selectedCount: selectedFiles.length,
     hasSelection: selectedFiles.length > 0,
   };
 };
-
-// ================================
-// useMyFilesExport Hook - Server action with React Query
-// ================================
 
 export const useMyFilesExport = () => {
   const [isExporting, setIsExporting] = useState(false);
@@ -382,11 +335,8 @@ export const useMyFilesExport = () => {
       setExportError(null);
 
       try {
-        // This would call the export API function
-        // await exportMyFiles(backupId, { file_ids: fileIds });
         console.log("Exporting files:", { backupId, fileIds });
 
-        // Simulate export delay
         await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch (error) {
         const errorMessage =
@@ -397,7 +347,7 @@ export const useMyFilesExport = () => {
         setIsExporting(false);
       }
     },
-    []
+    [],
   );
 
   const clearExportError = useCallback(() => {
@@ -405,11 +355,9 @@ export const useMyFilesExport = () => {
   }, []);
 
   return {
-    // State
     isExporting,
     exportError,
 
-    // Actions
     exportFiles,
     clearExportError,
   };

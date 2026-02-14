@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import type { BackupFilters } from "../components/SearchAndFilterBar";
 import type { UploadPhaseUnion } from "../hooks/backup.hooks";
+import { useAuthStore } from "../../auth/store";
 
 export interface BackupItem {
   id: number;
@@ -24,6 +25,7 @@ export interface BackupItem {
   home_screen_items_count: number;
   browser_count: number;
   wallpapers_count: number;
+  device_brand: string;
 }
 
 export interface BackupStats {
@@ -43,7 +45,7 @@ export interface BackupState {
   isLoading: boolean;
   selectedBackup: BackupItem | null;
   backupInProgress: boolean;
-  // filters
+
   searchQuery: string;
   filters: BackupFilters;
   sortConfig: SortConfig;
@@ -62,7 +64,7 @@ interface BackupActions {
   addBackup: (backup: BackupItem) => void;
   removeBackup: (id: number | string) => void;
   updateBackup: (id: number | string, data: Partial<BackupItem>) => void;
-  // filters
+
   setSearchQuery: (query: BackupState["searchQuery"]) => void;
   setFilters: (filters: BackupFilters) => void;
   setSortConfig: (conf: SortConfig) => void;
@@ -71,16 +73,15 @@ interface BackupActions {
   setBackupCreationLogId: (id: BackupState["backupCreationLogId"]) => void;
   setUploadPhase: (phase: BackupState["uploadPhase"]) => void;
   setUploadToastId: (id: BackupState["uploadToastId"]) => void;
+  resetState: () => void;
 }
-
-// const BACKUP_STORAGE_KEY = "xplorta_backup_settings";
 
 const initialState: BackupState = {
   backups: [],
   isLoading: false,
   selectedBackup: null,
   backupInProgress: false,
-  // filters
+
   searchQuery: "",
   filters: {
     status: null,
@@ -124,7 +125,6 @@ export const useBackupStore = create<BackupState & BackupActions>((set) => ({
 
   removeBackup: (id) => {
     set((state) => {
-      // Convert id to number if it's a string
       const numId = typeof id === "string" ? parseInt(id, 10) : id;
       const removedBackup = state.backups.find((backup) => backup.id === numId);
       if (!removedBackup) return state;
@@ -140,10 +140,9 @@ export const useBackupStore = create<BackupState & BackupActions>((set) => ({
 
   updateBackup: (id, data) => {
     set((state) => {
-      // Convert id to number if it's a string
       const numId = typeof id === "string" ? parseInt(id, 10) : id;
       const backupIndex = state.backups.findIndex(
-        (backup) => backup.id === numId
+        (backup) => backup.id === numId,
       );
       if (backupIndex === -1) return state;
 
@@ -161,7 +160,6 @@ export const useBackupStore = create<BackupState & BackupActions>((set) => ({
     });
   },
 
-  // filters
   setFilters: (filters) => {
     set({
       filters,
@@ -207,6 +205,22 @@ export const useBackupStore = create<BackupState & BackupActions>((set) => ({
       uploadToastId: id,
     });
   },
+
+  resetState: () => {
+    set(initialState);
+  },
 }));
+
+let prevUserId: string | null = useAuthStore.getState().user?.id ?? null;
+
+useAuthStore.subscribe((state) => {
+  const currentUserId = state.user?.id ?? null;
+
+  if (prevUserId !== null && currentUserId !== prevUserId) {
+    useBackupStore.getState().resetState();
+  }
+
+  prevUserId = currentUserId;
+});
 
 export * from "./backup.store";

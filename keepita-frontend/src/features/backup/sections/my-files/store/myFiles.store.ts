@@ -8,7 +8,6 @@ import type {
 } from "../types/myFiles.types";
 
 interface MyFilesClientState {
-  // Client-side UI State only
   selectedFiles: number[];
   viewMode: FileViewMode;
   selectedCategory: FileCategory | null;
@@ -17,36 +16,29 @@ interface MyFilesClientState {
   sortConfig: FileSortConfig;
   currentPage: number;
 
-  // Preview state (client-side)
   previewData: FilePreviewData | null;
 }
 
 interface MyFilesClientActions {
-  // Selection actions
   selectFile: (fileId: number) => void;
   selectMultipleFiles: (fileIds: number[]) => void;
   deselectFile: (fileId: number) => void;
   clearSelection: () => void;
   toggleSelection: (fileId: number) => void;
 
-  // UI actions
   setViewMode: (mode: FileViewMode) => void;
   setSelectedCategory: (category: FileCategory | null) => void;
 
-  // Search & Filter actions
   setSearchQuery: (query: string) => void;
   setFilters: (filters: Partial<MyFilesFilters>) => void;
   clearFilters: () => void;
   setSortConfig: (config: FileSortConfig) => void;
 
-  // Pagination actions
   setCurrentPage: (page: number) => void;
 
-  // Preview actions
   openPreview: (file: any) => void;
   closePreview: () => void;
 
-  // Utility actions
   reset: () => void;
 }
 
@@ -69,7 +61,6 @@ export const useMyFilesStore = create<
 >((set) => ({
   ...initialState,
 
-  // Selection actions
   selectFile: (fileId) =>
     set((state) => ({
       selectedFiles: state.selectedFiles.includes(fileId)
@@ -93,12 +84,10 @@ export const useMyFilesStore = create<
 
   clearSelection: () => set({ selectedFiles: [] }),
 
-  // UI actions
   setViewMode: (viewMode) => set({ viewMode }),
   setSelectedCategory: (selectedCategory) =>
     set({ selectedCategory, currentPage: 1 }),
 
-  // Search & Filter actions
   setSearchQuery: (searchQuery) => set({ searchQuery, currentPage: 1 }),
   setFilters: (newFilters) =>
     set((state) => ({
@@ -114,16 +103,13 @@ export const useMyFilesStore = create<
     }),
   setSortConfig: (sortConfig) => set({ sortConfig, currentPage: 1 }),
 
-  // Pagination actions
   setCurrentPage: (currentPage) => set({ currentPage }),
 
-  // Preview actions
   openPreview: (file) =>
     set({
       previewData: { file, isPreviewOpen: true },
     }),
   closePreview: () => set({ previewData: null }),
 
-  // Utility actions
   reset: () => set(initialState),
 }));

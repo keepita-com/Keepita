@@ -41,19 +41,19 @@ const circleVariants = {
   completed: {
     scale: 1,
     opacity: 1,
-    background: "linear-gradient(135deg, #8b5cf6 0%, #10b981 100%)", // Purple to green gradient
+    background: "linear-gradient(135deg, #8b5cf6 0%, #10b981 100%)",
     boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)",
   },
   active: {
     scale: 1.1,
     opacity: 1,
-    background: "linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)", // Blue-purple gradient
+    background: "linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)",
     boxShadow: "0 0 15px rgba(99, 102, 241, 0.6)",
   },
   pending: {
     scale: 0.9,
     opacity: 0.6,
-    backgroundColor: "#1e293b", // Dark blue-gray for pending
+    backgroundColor: "#1e293b",
     boxShadow: "none",
   },
 };
@@ -97,24 +97,34 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
   isOpen,
 }) => {
   if (!isOpen || !progress) return null;
+  const steps = [];
+  const stepsData = progress.steps_data || {};
+  for (let i = 1; i <= progress.total_steps; i++) {
+    const stepKey = `step_${i}`;
+    const existingData = stepsData[stepKey];
+    steps.push({
+      id: stepKey,
+      name: existingData?.name || `Step ${i}`,
+      label: existingData?.description || `Waiting for step ${i} details...`,
+      status:
+        existingData?.status ||
+        (i < progress.current_step
+          ? "completed"
+          : i === progress.current_step
+            ? "processing"
+            : "pending"),
+    });
+  }
 
-  const steps = progress.steps_data
-    ? Object.entries(progress.steps_data)
-        .sort((a, b) => {
-          const aNum = parseInt(a[0].replace("step_", ""));
-          const bNum = parseInt(b[0].replace("step_", ""));
-          return aNum - bNum;
-        })
-        .map(([key, data]) => ({
-          id: key,
-          name: data.name,
-          label: data.description,
-          status: data.status,
-        }))
-    : [];
-
-  const activeStep = progress.current_step - 1;
-  const pct = progress.progress_percentage || 0;
+  const activeStep = Math.min(
+    Math.max(progress.current_step - 1, 0),
+    steps.length - 1,
+  );
+  const pct =
+    progress.progress_percentage && progress.progress_percentage > 0
+      ? progress.progress_percentage
+      : Math.round((progress.current_step / progress.total_steps) * 100) || 0;
+  const totalSteps = progress.total_steps;
 
   const [visibleRange, setVisibleRange] = useState({
     start: 0,
@@ -127,17 +137,18 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
       return;
     }
 
+    let newStart = visibleRange.start;
+    let newEnd = visibleRange.end;
+
     if (activeStep < visibleRange.start) {
-      setVisibleRange({
-        start: Math.max(0, activeStep),
-        end: Math.min(steps.length - 1, activeStep + 2),
-      });
+      newStart = Math.max(0, activeStep);
+      newEnd = Math.min(steps.length - 1, activeStep + 2);
     } else if (activeStep > visibleRange.end) {
-      setVisibleRange({
-        start: Math.max(0, activeStep - 2),
-        end: Math.min(steps.length - 1, activeStep),
-      });
+      newStart = Math.max(0, activeStep - 2);
+      newEnd = Math.min(steps.length - 1, activeStep);
     }
+
+    setVisibleRange({ start: newStart, end: newEnd });
   }, [activeStep, steps.length]);
 
   const showPrevious = () => {
@@ -192,10 +203,9 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
           />
         </div>
 
-        {/* Step counter indicator */}
         <div className="flex justify-between items-center mb-3 text-sm text-gray-400">
           <span>
-            Step {activeStep + 1} of {steps.length}
+            Step {activeStep + 1} of {totalSteps}
           </span>
           <span>
             Showing {visibleRange.start + 1}-{visibleRange.end + 1} of{" "}
@@ -203,9 +213,7 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
           </span>
         </div>
 
-        {/* Horizontal slider with navigation buttons */}
         <div className="flex items-center">
-          {/* Previous button */}
           {steps.length > 3 && (
             <button
               onClick={showPrevious}
@@ -220,13 +228,10 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
             </button>
           )}
 
-          {/* Horizontal stepper */}
           <div className="flex-grow overflow-hidden relative">
             <div className="flex justify-between items-start relative">
-              {/* Background connector lines - match the design in image */}
               <div className="absolute top-6 left-[16.5%] right-[16.5%] h-[2px] bg-gray-700/70 z-0"></div>
 
-              {/* First connector */}
               <div className="absolute top-6 left-[16.5%] w-[33.3%] h-[2px] z-1">
                 <motion.div
                   className="h-full bg-gradient-to-r from-indigo-500 to-violet-500"
@@ -238,7 +243,6 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
                 />
               </div>
 
-              {/* Second connector */}
               <div className="absolute top-6 left-[50%] w-[33.3%] h-[2px] z-1">
                 <motion.div
                   className="h-full bg-gradient-to-r from-violet-500 to-emerald-500"
@@ -265,7 +269,6 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
                     animate="animate"
                     variants={stepItemVariants}
                   >
-                    {/* Step circle */}
                     <motion.div
                       className="w-12 h-12 flex items-center justify-center rounded-full border border-gray-700/60 mb-3"
                       variants={circleVariants}
@@ -274,33 +277,30 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
                         isCompleted
                           ? "completed"
                           : isActive
-                          ? "active"
-                          : "pending"
+                            ? "active"
+                            : "pending"
                       }
                       transition={{ duration: 0.4 }}
                     >
                       {getStepIcon(step.name, isCompleted, isActive)}
                     </motion.div>
 
-                    {/* Step name */}
                     <h4
                       className={`font-medium text-base text-center ${
                         isCompleted
                           ? "text-violet-400"
                           : isActive
-                          ? "text-indigo-300"
-                          : "text-gray-400"
+                            ? "text-indigo-300"
+                            : "text-gray-400"
                       }`}
                     >
                       {step.name}
                     </h4>
 
-                    {/* Show step description below each step */}
                     <p className="text-sm text-center mt-2 mb-2 text-gray-400">
                       {step.label}
                     </p>
 
-                    {/* Only show status tooltip when active/completed */}
                     {(isActive || isCompleted) && (
                       <motion.div
                         className={`absolute bottom-full left-0 right-0 mb-2 p-2 rounded-md shadow-lg z-20 ${
@@ -333,7 +333,6 @@ const BackupProgressTracker: React.FC<BackupProgressTrackerProps> = ({
             </div>
           </div>
 
-          {/* Next button */}
           {steps.length > 3 && (
             <button
               onClick={showNext}

@@ -23,7 +23,6 @@ const Notifications = () => {
 
   return (
     <div className="dropdown dropdown-end">
-      {/* badge */}
       <label
         tabIndex={0}
         className="relative flex items-center justify-center p-[1.1rem] h-7 w-7 min-h-0 bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-lg cursor-pointer"
@@ -46,13 +45,12 @@ const Notifications = () => {
           )}
         </div>
       </label>
-      {/* dropdown */}
+
       <div
         tabIndex={0}
         className="mt-4 dropdown-content w-72 bg-gray-900 backdrop-blur-xl shadow-xl border border-white/10 text-gray-100 rounded-2xl overflow-hidden"
       >
         <div className="p-4">
-          {/* title, notification count */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-lg">Notifications</h3>
             {notificationsCount !== 0 && (
@@ -61,29 +59,28 @@ const Notifications = () => {
               </span>
             )}
           </div>
-          {/* notifications */}
+
           <div className="space-y-2 max-h-[350px] overflow-auto pr-1 ">
             {allNotifications?.map((notification) => (
               <div
                 key={notification.id + Math.random()}
                 className="flex relative overflow-hidden items-start gap-3 p-3 rounded-xl hover:bg-white/5 border border-white/5"
               >
-                {/* icon */}
                 <div className="bg-gradient-to-r from-sky-500/20 to-violet-500/20 p-2 rounded-lg">
                   {getNotificationStyles(notification.title).icon}
                 </div>
-                {/* shiny-effect */}
+
                 <div
                   className={`absolute -top-[40px] rotate-45 -right-[20px] w-[50px] h-[200px] blur-lg ${
                     getNotificationStyles(notification.title).shinyClassName
                   }`}
                 />
-                {/* message, relative date */}
+
                 <div>
                   <p className="font-medium text-[14px]">
                     {notification.message}
                   </p>
-                  {/* relative date */}
+
                   <p className="text-xs text-gray-400">
                     <ReactTimeAgo
                       date={new Date(notification.created_at)}
@@ -94,7 +91,7 @@ const Notifications = () => {
               </div>
             ))}
           </div>
-          {/* mark-as-read button / empty-notifications indicator */}
+
           {notificationsCount !== 0 ? (
             <div className="mt-4">
               <button

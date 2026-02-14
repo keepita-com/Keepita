@@ -25,16 +25,15 @@ interface WiFiDetailsModalProps {
   onClose: () => void;
   wifiNetwork: WiFiNetwork | null;
   isLoading?: boolean;
+  theme?: "Samsung" | "Xiaomi" | "Apple";
 }
 
-/**
- * WiFi network details modal component
- */
 const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
   isOpen,
   onClose,
   wifiNetwork,
   isLoading = false,
+  theme = "Samsung",
 }) => {
   const [copiedField, setCopiedField] = React.useState<string | null>(null);
 
@@ -48,10 +47,34 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
 
   if (!isOpen) return null;
 
+  const detailsTheme = {
+    Samsung: {
+      networkIconClassNames: "w-5 h-5 text-blue-600",
+      networkIconWrapperClassNames:
+        "w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center",
+      shieldIconClassNames: "w-4 h-4 text-green-600",
+      lockIconClassNames: "w-4 h-4 text-red-600",
+    },
+    Xiaomi: {
+      networkIconClassNames: "w-6 h-6 text-orange-600",
+      networkIconWrapperClassNames:
+        "w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center",
+      shieldIconClassNames: "w-4 h-4 text-orange-600",
+      lockIconClassNames: "w-4 h-4 text-orange-600",
+    },
+    Apple: {
+      networkIconClassNames: "w-5 h-5 text-blue-600",
+      networkIconWrapperClassNames:
+        "w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center",
+      shieldIconClassNames: "w-4 h-4 text-green-600",
+      lockIconClassNames: "w-4 h-4 text-red-600",
+    },
+  };
+  const currentTheme = detailsTheme[theme];
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 overflow-y-auto">
-        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -60,7 +83,6 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
           onClick={onClose}
         />
 
-        {/* Modal */}
         <div className="flex min-h-full items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -69,11 +91,10 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
             className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                  <Wifi className="w-5 h-5 text-blue-600" />
+                <div className={currentTheme.networkIconWrapperClassNames}>
+                  <Wifi className={currentTheme.networkIconClassNames} />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">
@@ -90,20 +111,18 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
               </button>
             </div>
 
-            {/* Content */}
             <div className="p-6">
               {isLoading ? (
                 <div className="space-y-4">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <div key={index} className="animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                      <div className="h-6 bg-gray-300 rounded w-3/4"></div>
                     </div>
                   ))}
                 </div>
               ) : wifiNetwork ? (
                 <div className="space-y-6">
-                  {/* Basic Info */}
                   <div className="bg-gray-50 rounded-xl p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-medium text-gray-900 flex items-center gap-2">
@@ -147,7 +166,9 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
                           Security Type
                         </label>
                         <div className="mt-1 flex items-center gap-2">
-                          <Shield className="w-4 h-4 text-green-600" />
+                          <Shield
+                            className={currentTheme.shieldIconClassNames}
+                          />
                           <p className="text-gray-900">
                             {wifiNetwork.security_display}
                           </p>
@@ -174,8 +195,8 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
                               wifiNetwork.connection_status === "Connected"
                                 ? "text-blue-800 bg-blue-100"
                                 : wifiNetwork.connection_status === "Saved"
-                                ? "text-green-800 bg-green-100"
-                                : "text-gray-800 bg-gray-100"
+                                  ? "text-green-800 bg-green-100"
+                                  : "text-gray-800 bg-gray-100",
                             )}
                           >
                             {wifiNetwork.connection_status}
@@ -185,17 +206,31 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Security Information */}
-                  {(wifiNetwork.password || wifiNetwork.security_strength) && (
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-red-600" />
-                        Security Information
-                      </h3>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+                      <Lock className={currentTheme.lockIconClassNames} />
+                      Security Information
+                    </h3>
 
-                      <div className="space-y-4">
-                        {wifiNetwork.password &&
-                          wifiNetwork.security_type !== "NONE" && (
+                    <div className="space-y-4">
+                      {wifiNetwork.security_type === "NONE" ? (
+                        <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-100 rounded-lg">
+                          <div className="p-2 bg-orange-100 rounded-full flex-shrink-0">
+                            <Shield className="w-4 h-4 text-orange-600" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-orange-900">
+                              No Security
+                            </h4>
+                            <p className="text-sm text-orange-700 mt-1">
+                              This Wi-Fi network doesn't have any security
+                              protection.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {wifiNetwork.password && (
                             <div>
                               <label className="text-sm font-medium text-gray-700">
                                 Password
@@ -208,7 +243,7 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
                                   onClick={() =>
                                     handleCopyToClipboard(
                                       wifiNetwork.password,
-                                      "password"
+                                      "password",
                                     )
                                   }
                                   className="p-1 hover:bg-gray-200 rounded transition-colors"
@@ -223,50 +258,50 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
                             </div>
                           )}
 
-                        {wifiNetwork.security_strength && (
-                          <div>
-                            <label className="text-sm font-medium text-gray-700">
-                              Security Strength
-                            </label>
-                            <div className="mt-1 flex items-center gap-3">
-                              <span
-                                className={cn(
-                                  "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium",
-                                  getSecurityStrengthColor(
-                                    wifiNetwork.security_strength.color
-                                  )
-                                )}
-                              >
-                                {wifiNetwork.security_strength.level}
-                              </span>
-                              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                <div
+                          {wifiNetwork.security_strength && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-700">
+                                Security Strength
+                              </label>
+                              <div className="mt-1 flex items-center gap-3">
+                                <span
                                   className={cn(
-                                    "h-2 rounded-full transition-all duration-300",
-                                    wifiNetwork.security_strength.color ===
-                                      "green"
-                                      ? "bg-green-500"
-                                      : wifiNetwork.security_strength.color ===
-                                        "orange"
-                                      ? "bg-orange-500"
-                                      : "bg-red-500"
+                                    "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium",
+                                    getSecurityStrengthColor(
+                                      wifiNetwork.security_strength.color,
+                                    ),
                                   )}
-                                  style={{
-                                    width: `${wifiNetwork.security_strength.score}%`,
-                                  }}
-                                />
+                                >
+                                  {wifiNetwork.security_strength.level}
+                                </span>
+                                <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className={cn(
+                                      "h-2 rounded-full transition-all duration-300",
+                                      wifiNetwork.security_strength.color ===
+                                        "green"
+                                        ? "bg-green-500"
+                                        : wifiNetwork.security_strength
+                                              .color === "orange"
+                                          ? "bg-orange-500"
+                                          : "bg-red-500",
+                                    )}
+                                    style={{
+                                      width: `${wifiNetwork.security_strength.score}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-sm text-gray-600 font-medium">
+                                  {wifiNetwork.security_strength.score}/100
+                                </span>
                               </div>
-                              <span className="text-sm text-gray-600 font-medium">
-                                {wifiNetwork.security_strength.score}/100
-                              </span>
                             </div>
-                          </div>
-                        )}
-                      </div>
+                          )}
+                        </>
+                      )}
                     </div>
-                  )}
+                  </div>
 
-                  {/* Connection Details */}
                   <div className="bg-gray-50 rounded-xl p-4">
                     <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                       <Clock className="w-4 h-4 text-purple-600" />
@@ -324,7 +359,6 @@ const WiFiDetailsModal: React.FC<WiFiDetailsModalProps> = ({
               )}
             </div>
 
-            {/* Footer */}
             <div className="flex justify-end p-6 border-t border-gray-100">
               <button
                 onClick={onClose}

@@ -2,14 +2,14 @@ import { getBackupMedia } from "@/features/backup/api/backup.api";
 import { downloadMedias } from "@/features/backup/utils/backup.utils";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Download, X } from "lucide-react";
-import React, { useEffect } from "react";
+import { AlertTriangle, Download, X, Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useDocumentTitle } from "../../../../../shared/hooks/useDocumentTitle";
-import SamsungSearchAndFilterHeader from "../../../../../shared/components/SamsungSearchAndFilterHeader";
 import SamsungSectionLayout from "../../../../../shared/components/SamsungSectionLayout";
 import FileGrid from "../components/FileGrid";
+import FileGridSkeleton from "../components/FileGridSkeleton";
 import FilePreview from "../components/FilePreview";
 import Pagination from "../components/Pagination";
 import {
@@ -22,14 +22,28 @@ import {
   useMyFilesSelection,
 } from "../hooks/myFiles.hooks";
 import { useMyFilesStore } from "../store/myFiles.store";
+import MobileSearchAndFilterHeader from "@/shared/components/MobileSearchAndFilterHeader";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
+import XiaomiSectionLayout from "@/shared/components/XiaomiSectionLayout";
+
+import { useBackupDetails } from "../../../hooks/backup.hooks";
+import BackupNotFound from "@/features/backup/components/BackupNotFound";
 
 const MyFilesPage: React.FC = () => {
   const navigate = useNavigate();
   const { backupId } = useParams<{ backupId: string }>();
-  useDocumentTitle("My Files | xplorta");
+  useDocumentTitle("My Files | Keepita");
   const numericBackupId = backupId ? parseInt(backupId, 10) : 0;
+  const { theme } = useBackupTheme();
 
-  // Get server state from React Query (proper pattern)
+  const {
+    backup,
+    isLoading: isBackupLoading,
+    error: backupError,
+  } = useBackupDetails(backupId);
+
+  const [isBulkDownloading, setIsBulkDownloading] = useState(false);
+
   const {
     files,
     totalResults,
@@ -41,7 +55,6 @@ const MyFilesPage: React.FC = () => {
     error,
   } = useMyFiles(numericBackupId);
 
-  // Get client state from Zustand
   const {
     searchQuery,
     selectedCategory,
@@ -51,7 +64,6 @@ const MyFilesPage: React.FC = () => {
     reset,
   } = useMyFilesStore();
 
-  // Get actions
   const {
     handleSearch,
     handleCategoryFilter,
@@ -59,11 +71,9 @@ const MyFilesPage: React.FC = () => {
     handleClearFilters,
   } = useMyFilesActions();
 
-  // Get selection state and actions
   const { clearSelection } = useMyFilesSelection();
 
   useEffect(() => {
-    // Clean up state when component unmounts
     return () => {
       reset();
     };
@@ -73,7 +83,6 @@ const MyFilesPage: React.FC = () => {
     navigate(`/backups/${backupId}`);
   };
 
-  // Transform sort options for Samsung component
   const sortOptions = MY_FILES_SORT_OPTIONS.map((option) => ({
     value: option.value,
     label: option.label,
@@ -83,22 +92,20 @@ const MyFilesPage: React.FC = () => {
       : ("asc" as const),
   }));
 
-  // Current sort config for Samsung component
   const currentSortConfig = {
     field:
       sortConfig.field === "date"
         ? "created_date"
         : sortConfig.field === "name"
-        ? "file_name"
-        : sortConfig.field === "size"
-        ? "file_size"
-        : sortConfig.field === "type"
-        ? "file_extension"
-        : "created_date",
+          ? "file_name"
+          : sortConfig.field === "size"
+            ? "file_size"
+            : sortConfig.field === "type"
+              ? "file_extension"
+              : "created_date",
     direction: sortConfig.order,
   };
 
-  // Handle sort change from Samsung component
   const handleSamsungSortChange = (config: {
     field: string;
     direction: "asc" | "desc";
@@ -115,51 +122,76 @@ const MyFilesPage: React.FC = () => {
   };
 
   const handleBulkDownload = async () => {
-    const getRequestSignature = selectedFiles.map(async (fileId) => {
-      const { download_url } = await getBackupMedia(fileId);
+    if (isBulkDownloading) return;
 
-      const fileNameWithBackupName = download_url
-        .split("/files/")[1]
-        .split("?")[0];
-      const fileName =
-        fileNameWithBackupName.split("_")[
-          fileNameWithBackupName.split("_").length - 1
-        ];
+    setIsBulkDownloading(true);
+    try {
+      const getRequestSignature = selectedFiles.map(async (fileId) => {
+        const { download_url } = await getBackupMedia(fileId);
 
-      try {
-        return await axios
-          .get<Blob>(download_url, { responseType: "blob" })
-          .then((res) => ({
-            blob: res.data,
-            fileName,
-          }));
-      } catch {
-        toast.error("Files are corrupted or an unknown error accured!");
+        const fileNameWithBackupName = download_url
+          .split("/files/")[1]
+          .split("?")[0];
+        const fileName =
+          fileNameWithBackupName.split("_")[
+            fileNameWithBackupName.split("_").length - 1
+          ];
 
-        return;
-      }
-    });
+        try {
+          return await axios
+            .get<Blob>(download_url, { responseType: "blob" })
+            .then((res) => ({
+              blob: res.data,
+              fileName,
+            }));
+        } catch {
+          toast.error("Files are corrupted or an unknown error accured!");
 
-    const blobFiles = await Promise.all(getRequestSignature);
+          return;
+        }
+      });
 
-    const parsedBlobs = blobFiles
-      .filter((file) => file?.blob && file?.fileName)
-      .map((file) => ({
-        blob: file?.blob as Blob,
-        name: file?.fileName as string,
-      }));
+      const blobFiles = await Promise.all(getRequestSignature);
 
-    downloadMedias(parsedBlobs);
+      const parsedBlobs = blobFiles
+        .filter((file) => file?.blob && file?.fileName)
+        .map((file) => ({
+          blob: file?.blob as Blob,
+          name: file?.fileName as string,
+        }));
+
+      await downloadMedias(parsedBlobs);
+    } catch (error) {
+      console.error("Bulk download failed", error);
+    } finally {
+      setIsBulkDownloading(false);
+    }
   };
 
-  // Check if filters are active
   const hasActiveFilters = Boolean(
     searchQuery ||
-      selectedCategory ||
-      Object.keys(filters).some((key) => filters[key as keyof typeof filters])
+    selectedCategory ||
+    Object.keys(filters).some((key) => filters[key as keyof typeof filters]),
   );
 
-  // Custom filter elements for category selection
+  const filesTheme = {
+    Samsung: {
+      layout: SamsungSectionLayout,
+      theme: "Samsung" as "Samsung" | "Xiaomi",
+      searchPlaceholder: "Search files...",
+      containerClassNames: "bg-white min-h-screen",
+      filterOptionBorderRadius: "rounded-full",
+    },
+    Xiaomi: {
+      layout: XiaomiSectionLayout,
+      theme: "Xiaomi" as "Samsung" | "Xiaomi",
+      searchPlaceholder: "Search files",
+      containerClassNames: "bg-gray-50 min-h-screen",
+      filterOptionBorderRadius: "rounded-lg",
+    },
+  };
+  const currentTheme = filesTheme[theme as "Samsung" | "Xiaomi"];
+
   const customFilterElements = (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
@@ -176,7 +208,9 @@ const MyFilesPage: React.FC = () => {
                 handleCategoryFilter(isActive ? null : category.key)
               }
               className={`
-                flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all
+                flex items-center gap-2 px-3 py-2 ${
+                  currentTheme.filterOptionBorderRadius
+                } text-sm font-medium transition-all
                 ${
                   isActive
                     ? "bg-blue-600 text-white"
@@ -193,34 +227,18 @@ const MyFilesPage: React.FC = () => {
     </div>
   );
 
-  if (!backupId || isNaN(numericBackupId)) {
-    return (
-      <SamsungSectionLayout
-        title="My Files"
-        subtitle="Invalid backup ID"
-        onBack={handleBack}
-        isLoading={false}
-      >
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Invalid Backup ID
-            </h2>
-            <p className="text-gray-600">Please provide a valid backup ID.</p>
-          </div>
-        </div>
-      </SamsungSectionLayout>
-    );
+  if (!backupId || backupError || (!isBackupLoading && !backup)) {
+    return <BackupNotFound />;
   }
 
   if (isError) {
     return (
-      <SamsungSectionLayout
+      <currentTheme.layout
         title="My Files"
         subtitle="Error loading files"
         onBack={handleBack}
         isLoading={false}
+        bgColor="bg-gray-50"
       >
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
@@ -233,23 +251,23 @@ const MyFilesPage: React.FC = () => {
             </p>
           </div>
         </div>
-      </SamsungSectionLayout>
+      </currentTheme.layout>
     );
   }
 
   return (
-    <SamsungSectionLayout
+    <currentTheme.layout
       title="My Files"
       subtitle={`${totalResults} files`}
       onBack={handleBack}
-      isLoading={isLoading}
+      isLoading={false}
+      bgColor="bg-gray-50"
     >
-      <div className="bg-white min-h-screen">
-        {/* Samsung Search and Filter Header */}
-        <SamsungSearchAndFilterHeader
+      <div className={currentTheme.containerClassNames}>
+        <MobileSearchAndFilterHeader
           searchQuery={searchQuery}
           onSearchChange={handleSearch}
-          searchPlaceholder="Search files..."
+          searchPlaceholder={currentTheme.searchPlaceholder}
           customFilterElements={customFilterElements}
           onClearFilters={handleClearFilters}
           hasActiveFilters={hasActiveFilters}
@@ -258,14 +276,30 @@ const MyFilesPage: React.FC = () => {
           sortOptions={sortOptions}
           resultsCount={totalResults}
           resultsLabel="files"
+          theme={currentTheme.theme}
+          classOverrides={
+            theme === "Xiaomi"
+              ? {
+                  containerClass:
+                    "bg-gray-50 rounded-2xl w-full mx-auto pt-2 pb-2 mb-2  ",
+                  inputClass:
+                    "w-full pl-13 pr-10 py-3 border text-stone-900 font-semibold border-gray-200 rounded-xl text-sm sm:text-md bg-gray-100  focus:border-gray-200 focus:outline-none transition-all duration-200",
+                  sortButtonClass:
+                    "flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium bg-gray-100 text-stone-700 hover:bg-gray-200 border border-gray-200 ",
+                  filterContainerClass: "px-4",
+                }
+              : {}
+          }
         />
 
-        {/* File Grid */}
         <div className="px-4 pb-4">
-          <FileGrid files={files} />
+          {isLoading ? (
+            <FileGridSkeleton count={12} />
+          ) : (
+            <FileGrid files={files} theme={currentTheme.theme} />
+          )}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="px-4 pb-4">
             <Pagination
@@ -277,7 +311,6 @@ const MyFilesPage: React.FC = () => {
           </div>
         )}
 
-        {/* Selection Actions */}
         <AnimatePresence>
           {selectedFiles.length > 0 && (
             <motion.div
@@ -296,9 +329,14 @@ const MyFilesPage: React.FC = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleBulkDownload}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors"
+                    disabled={isBulkDownloading}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    <Download className="w-4 h-4" />
+                    {isBulkDownloading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
                     Download
                   </motion.button>
                   <motion.button
@@ -315,10 +353,9 @@ const MyFilesPage: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* File Preview Modal */}
-        <FilePreview />
+        <FilePreview theme={currentTheme.theme} />
       </div>
-    </SamsungSectionLayout>
+    </currentTheme.layout>
   );
 };
 

@@ -10,10 +10,6 @@ import type {
   MessageThreadsResponse,
 } from "../types/message.types";
 
-// ================================
-// INFINITE SCROLL HOOK
-// ================================
-
 interface UseInfiniteScrollOptions {
   hasNextPage?: boolean;
   fetchNextPage: () => void;
@@ -48,7 +44,7 @@ export const useInfiniteScroll = ({
       {
         rootMargin,
         threshold,
-      }
+      },
     );
 
     observer.observe(currentRef);
@@ -63,17 +59,9 @@ export const useInfiniteScroll = ({
   return { loadMoreRef };
 };
 
-// ================================
-// MESSAGE HOOKS - PROPER STATE SEPARATION
-// React Query: Server state (data, loading, error)
-// Zustand: Client state (filters, selections, UI preferences)
-// ================================
-
-// Hook for managing message threads with infinite scroll
 export const useMessageThreads = (backupId: number) => {
   const { chatListFilters } = useMessageStore();
 
-  // Build query parameters using utility from message utils
   const buildParams = useCallback(() => {
     return {
       page_size: 20,
@@ -82,10 +70,9 @@ export const useMessageThreads = (backupId: number) => {
     };
   }, [chatListFilters]);
 
-  // Create query key that changes when filters change
   const queryKey = useMemo(
     () => ["messageThreads", backupId, buildParams()],
-    [backupId, buildParams]
+    [backupId, buildParams],
   );
 
   const {
@@ -105,28 +92,24 @@ export const useMessageThreads = (backupId: number) => {
     },
     enabled: !!backupId,
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60 * 2,
   });
 
-  // Flatten all pages into a single array
   const threads = useMemo(() => {
     if (!data?.pages) return [];
     return data.pages.flatMap((page) => page.results || []);
   }, [data?.pages]);
 
-  // Get total count from first page
   const totalCount = useMemo(() => {
     return data?.pages?.[0]?.total_results || 0;
   }, [data?.pages]);
 
-  // Load more function
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Refresh function
   const refresh = useCallback(() => {
     refetch();
   }, [refetch]);
@@ -143,14 +126,12 @@ export const useMessageThreads = (backupId: number) => {
   };
 };
 
-// Hook for managing messages in a specific thread
 export const useThreadMessages = (
   backupId: number,
-  threadId: number | null
+  threadId: number | null,
 ) => {
   const { chatMessageFilters } = useMessageStore();
 
-  // Build query parameters using utility from message utils
   const buildParams = useCallback(() => {
     return {
       ...chatMessageFilters,
@@ -158,13 +139,11 @@ export const useThreadMessages = (
     };
   }, [chatMessageFilters]);
 
-  // Create query key that changes when filters change
   const queryKey = useMemo(
     () => ["threadMessages", backupId, threadId, buildParams()],
-    [backupId, threadId, buildParams]
+    [backupId, threadId, buildParams],
   );
 
-  // Get thread with messages using React Query
   const {
     data: threadWithMessages,
     error,
@@ -177,10 +156,9 @@ export const useThreadMessages = (
       return getMessageThread(backupId, threadId, buildParams());
     },
     enabled: !!backupId && !!threadId,
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60 * 2,
   });
 
-  // Extract data from response
   const messages = useMemo(() => {
     return threadWithMessages?.messages || [];
   }, [threadWithMessages?.messages]);
@@ -198,11 +176,6 @@ export const useThreadMessages = (
   };
 };
 
-// ================================
-// CLIENT STATE HOOKS
-// ================================
-
-// Hook for managing client-side filters and UI state
 export const useMessageFilters = () => {
   const {
     chatListFilters,
@@ -218,69 +191,64 @@ export const useMessageFilters = () => {
     (newFilters: Partial<ChatListFilters>) => {
       setChatListFilters(newFilters);
     },
-    [setChatListFilters]
+    [setChatListFilters],
   );
 
   const updateChatMessageFilters = useCallback(
     (newFilters: Partial<ChatMessageFilters>) => {
       setChatMessageFilters(newFilters);
     },
-    [setChatMessageFilters]
+    [setChatMessageFilters],
   );
 
   const updateFilters = useCallback(
     (newFilters: Partial<MessageFilters>) => {
       setFilters(newFilters);
     },
-    [setFilters]
+    [setFilters],
   );
 
   const clearFilters = useCallback(() => {
     clearAllFilters();
   }, [clearAllFilters]);
 
-  // Convenience methods
   const setSearch = useCallback(
     (search: string) => {
       setChatListFilters({ search });
     },
-    [setChatListFilters]
+    [setChatListFilters],
   );
 
   const setUnreadOnly = useCallback(
     (unreadOnly: boolean) => {
       setChatListFilters({ has_unread: unreadOnly });
     },
-    [setChatListFilters]
+    [setChatListFilters],
   );
 
   const setSorting = useCallback(
     (ordering: string) => {
       setChatListFilters({ ordering });
     },
-    [setChatListFilters]
+    [setChatListFilters],
   );
 
   return {
-    // Filter states
     chatListFilters,
     chatMessageFilters,
     filters,
 
-    // Filter actions
     updateChatListFilters,
     updateChatMessageFilters,
     updateFilters,
     clearFilters,
 
-    // Convenience methods
     setSearch,
     setUnreadOnly,
     setSorting,
   };
 };
 
-// Hook for managing UI state (selections, view modes, etc.)
 export const useMessageUI = () => {
   const {
     selectedThreadId,
@@ -304,21 +272,21 @@ export const useMessageUI = () => {
       setSelectedThreadId(threadId);
       setConversationOpen(!!threadId);
     },
-    [setSelectedThreadId, setConversationOpen]
+    [setSelectedThreadId, setConversationOpen],
   );
 
   const selectMessages = useCallback(
     (messageIds: number[]) => {
       setSelectedMessageIds(messageIds);
     },
-    [setSelectedMessageIds]
+    [setSelectedMessageIds],
   );
 
   const toggleMessage = useCallback(
     (messageId: number) => {
       toggleMessageSelection(messageId);
     },
-    [toggleMessageSelection]
+    [toggleMessageSelection],
   );
 
   const clearSelections = useCallback(() => {
@@ -331,31 +299,26 @@ export const useMessageUI = () => {
   }, [setSelectedThreadId, setConversationOpen]);
 
   return {
-    // Selection state
     selectedThreadId,
     selectedMessageIds,
 
-    // UI state
     viewMode,
     sortBy,
     groupBy,
     isConversationOpen,
 
-    // Selection actions
     selectThread,
     selectMessages,
     toggleMessage,
     clearSelections,
     closeConversation,
 
-    // UI actions
     setViewMode,
     setSortBy,
     setGroupBy,
   };
 };
 
-// Hook for grouping messages by date in conversation view
 export const useMessageGroups = (messages: Message[]) => {
   return useMemo(() => {
     const groups: { [date: string]: Message[] } = {};
@@ -372,7 +335,7 @@ export const useMessageGroups = (messages: Message[]) => {
       .map(([date, msgs]) => ({
         date,
         messages: msgs.sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         ),
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());

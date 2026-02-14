@@ -161,14 +161,14 @@ const RegisterForm: React.FC = () => {
               {...register("password1", {
                 required: "Password is required",
                 minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
+                  value: 8,
+                  message: "Password must be at least 8 characters",
                 },
               })}
               className={`w-full py-2.5 pl-10 pr-10 bg-gray-800/50 border ${
                 errors.password1 ? "border-rose-500/50" : "border-gray-600/50"
               } rounded-lg text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30`}
-              placeholder="••••••••"
+              placeholder="Enter your password"
             />
             <div
               className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-gray-400 cursor-pointer"
@@ -205,7 +205,7 @@ const RegisterForm: React.FC = () => {
               className={`w-full py-2.5 pl-10 pr-10 bg-gray-800/50 border ${
                 errors.password2 ? "border-rose-500/50" : "border-gray-600/50"
               } rounded-lg text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30`}
-              placeholder="••••••••"
+              placeholder="Re-Enter your password"
             />
             <div
               className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-gray-400 cursor-pointer"

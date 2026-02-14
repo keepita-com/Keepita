@@ -1,7 +1,3 @@
-/**
- * @param url - The full URL string
- * @returns A cleaned, more readable version of the URL
- */
 export const formatUrl = (url: string): string => {
   try {
     const urlObj = new URL(url);
@@ -15,10 +11,6 @@ export const formatUrl = (url: string): string => {
   }
 };
 
-/**
- * @param dateString - An ISO 8601 date string
- * @returns A human-readable relative time string
- */
 export const formatRelativeTime = (dateString: string): string => {
   if (!dateString) return "Unknown date";
   const date = new Date(dateString);
@@ -49,10 +41,6 @@ export const formatRelativeTime = (dateString: string): string => {
   }
 };
 
-/**
- * @param bytes - Size in bytes
- * @returns A human-readable file size string (e.g., "1.2 MB")
- */
 export const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 B";
   const k = 1024;
@@ -61,10 +49,6 @@ export const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 };
 
-/**
- * @param url - The URL of the website
- * @returns A URL to the Google favicon service
- */
 export const getFaviconUrl = (url: string): string => {
   try {
     const domain = new URL(url).hostname;
@@ -74,10 +58,6 @@ export const getFaviconUrl = (url: string): string => {
   }
 };
 
-/**
- * @param tab - The browser tab type
- * @returns Sort options for the specific tab
- */
 export const getSortOptionsForTab = (tab: string) => {
   const options = [
     {
@@ -232,10 +212,6 @@ export const getSortOptionsForTab = (tab: string) => {
   }
 };
 
-/**
- * @param tab - The browser tab type
- * @returns Search placeholder text
- */
 export const getSearchPlaceholderForTab = (tab: string): string => {
   switch (tab) {
     case "Bookmarks":

@@ -15,6 +15,7 @@ interface GenericBrowserListProps<T> {
   };
   loadingText: string;
   endText: string;
+  theme?: "Samsung" | "Xiaomi" | "Apple";
 }
 
 function GenericBrowserList<T extends { id: number | string }>({
@@ -27,11 +28,27 @@ function GenericBrowserList<T extends { id: number | string }>({
   emptyState,
   loadingText,
   endText,
+  theme = "Samsung",
 }: GenericBrowserListProps<T>) {
   const observer = useRef<IntersectionObserver | null>(null);
   const lastItemRef = useRef<HTMLDivElement>(null);
 
-  // Infinite scroll observer using IntersectionObserver
+  const listThemes = {
+    Samsung: {
+      containerClassNames: "bg-white",
+      listClassNames: "space-y-1 p-4",
+    },
+    Xiaomi: {
+      containerClassNames: "bg-red-50",
+      listClassNames: "space-y-2 p-3",
+    },
+    Apple: {
+      containerClassNames: "bg-white",
+      listClassNames: "space-y-1 p-4",
+    },
+  };
+  const currentTheme = listThemes[theme];
+
   useEffect(() => {
     if (!hasNextPage || !fetchNextPage) return;
 
@@ -45,7 +62,7 @@ function GenericBrowserList<T extends { id: number | string }>({
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (lastItemRef.current) {
@@ -59,7 +76,6 @@ function GenericBrowserList<T extends { id: number | string }>({
     };
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  // Empty state
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -77,8 +93,8 @@ function GenericBrowserList<T extends { id: number | string }>({
   }
 
   return (
-    <div className="bg-white">
-      <div className="space-y-1 p-4">
+    <div className={currentTheme.containerClassNames}>
+      <div className={currentTheme.listClassNames}>
         {items.map((item, index) => (
           <motion.div
             key={item.id}
@@ -91,7 +107,6 @@ function GenericBrowserList<T extends { id: number | string }>({
         ))}
       </div>
 
-      {/* Infinite scroll trigger */}
       {hasNextPage && (
         <div
           ref={lastItemRef}
@@ -119,7 +134,6 @@ function GenericBrowserList<T extends { id: number | string }>({
         </div>
       )}
 
-      {/* End of list indicator */}
       {!hasNextPage && items.length > 0 && (
         <div className="flex items-center justify-center py-8">
           <span className="text-sm text-gray-400">{endText}</span>

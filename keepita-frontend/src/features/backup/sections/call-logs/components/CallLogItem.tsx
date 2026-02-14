@@ -1,154 +1,213 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Phone,
   PhoneMissed,
   PhoneIncoming,
   PhoneOutgoing,
   User,
+  MoveDownLeft,
+  MoveUpRight,
+  ArrowUp,
+  Clock,
+  Calendar,
+  Info,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { CallLog } from "../types/callLogs.types";
-import {
-  formatPhoneNumber,
-  formatCallDate,
-  formatDuration,
-} from "../utils/callLogs.utils";
-import { motion } from "framer-motion";
+import { formatPhoneNumber } from "../utils/callLogs.utils";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
 
 interface CallLogItemProps {
   log: CallLog;
   onSelect: (log: CallLog) => void;
+  index?: number;
+  callLogsLength?: number;
 }
 
-const getCallTypeIcon = (callType: string) => {
-  switch (callType) {
-    case "INCOMING":
-      return PhoneIncoming;
-    case "OUTGOING":
-      return PhoneOutgoing;
-    case "MISSED":
-      return PhoneMissed;
-    default:
-      return Phone;
-  }
-};
+const CallLogItem: React.FC<CallLogItemProps> = ({
+  log,
+  onSelect,
+  index = 0,
+  callLogsLength = 1,
+}) => {
+  const { theme } = useBackupTheme();
+  const isApple = theme === "Apple";
+  const [isExpanded, setIsExpanded] = useState(false);
 
-const getCallTypeColor = (callType: string): string => {
-  switch (callType) {
-    case "INCOMING":
-      return "text-green-600";
-    case "OUTGOING":
-      return "text-blue-600";
-    case "MISSED":
-      return "text-red-600";
-    default:
-      return "text-gray-600";
-  }
-};
-
-const getCallTypeBadgeColor = (callType: string): string => {
-  switch (callType) {
-    case "INCOMING":
-      return "bg-green-100 text-green-700";
-    case "OUTGOING":
-      return "bg-blue-100 text-blue-700";
-    case "MISSED":
-      return "bg-red-100 text-red-700";
-    default:
-      return "bg-gray-100 text-gray-700";
-  }
-};
-
-const CallLogItem: React.FC<CallLogItemProps> = ({ log, onSelect }) => {
-  if (!log) {
-    console.warn("CallLogItem: log is null or undefined");
-    return null;
-  }
-
-  const IconComponent = getCallTypeIcon(log.type);
-  const iconColor = getCallTypeColor(log.type);
-  const badgeColor = getCallTypeBadgeColor(log.type);
+  if (!log) return null;
 
   const displayName = log.contact_name || log.name || "Unknown";
-  const displayNumber = formatPhoneNumber(log.number);
-  const formattedDate = formatCallDate(log.date);
-  const formattedDuration =
-    log.duration > 0
-      ? log.duration_display || formatDuration(log.duration)
-      : null;
+  const displayNumber = formatPhoneNumber(log.number || "");
+
+  const dateDisplay = log.call_date_formatted || log.date || "—";
+  const durationDisplay = log.duration_display || null;
+
+  const callType = log.type || "UNKNOWN";
+
+  const getIconAndColor = () => {
+    switch (callType) {
+      case "INCOMING":
+        return { Icon: PhoneIncoming, color: "text-green-600" };
+      case "OUTGOING":
+        return { Icon: PhoneOutgoing, color: "text-blue-600" };
+      case "MISSED":
+        return { Icon: PhoneMissed, color: "text-red-600" };
+      default:
+        return { Icon: Phone, color: "text-gray-500" };
+    }
+  };
+
+  const { Icon: CallIcon, color: iconColor } = getIconAndColor();
+
+  if (isApple) {
+    const isSelected = isExpanded;
+
+    return (
+      <div className={`${isSelected ? "bg-[#F5F5F5]" : "bg-white"} `}>
+        <motion.button
+          layout
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={`w-full px-5 py-3.5 flex items-center justify-between text-left 
+           active:bg-gray-100 transition-colors duration-150 
+          ${index !== callLogsLength - 1 ? "border-b border-gray-200" : ""}`}
+        >
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <CallIcon className={`w-5 h-5 ${iconColor}`} />
+
+            <div className="flex-1 min-w-0">
+              <p className="text-[17px] font-semibold text-gray-900 leading-tight truncate">
+                {displayName}
+              </p>
+
+              <p className="text-[13px] text-gray-500 mt-0.5">
+                {displayNumber}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button className="p-1">
+              <Info className="w-6 h-6 text-blue-600" />
+            </button>
+          </div>
+        </motion.button>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="border-t border-gray-200 bg-gray-50/40"
+            >
+              <div className="px-5 py-4">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="flex flex-col items-center p-3 bg-white rounded-xl border border-gray-200">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <p className="text-[13px] text-gray-700 mt-1">
+                      {dateDisplay}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col items-center p-3 bg-white rounded-xl border border-gray-200">
+                    <Phone className="w-5 h-5 text-blue-600" />
+                    <p className="text-[13px] text-gray-700 mt-1">
+                      {displayNumber}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col items-center p-3 bg-white rounded-xl border border-gray-200">
+                    <Clock className="w-5 h-5 text-blue-600" />
+                    <p className="text-[13px] text-gray-700 mt-1">
+                      {durationDisplay || "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  if (theme === "Xiaomi") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        onClick={() => onSelect(log)}
+        className={`relative bg-gray-100 rounded-3xl ${
+          index === 0
+            ? "rounded-3xl rounded-b-md"
+            : Number(index) + 1 === callLogsLength
+              ? "rounded-b-3xl rounded-t-md"
+              : "rounded-md"
+        } px-4 py-3.5 mb-1 mt-2 transition-all duration-200 cursor-pointer`}
+      >
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 rounded-full bg-red-200/50 flex items-center justify-center">
+            <CallIcon className={`w-6 h-6 ${iconColor}`} />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <h3 className="text-[16px] font-semibold text-stone-700 truncate">
+                {displayName}
+              </h3>
+              {log.contact_name && <User className="w-4 h-4 text-stone-700" />}
+            </div>
+
+            <p className="text-sm text-stone-700 font-mono">{displayNumber}</p>
+
+            <div className="flex items-center gap-2 mt-1">
+              {callType === "INCOMING" && (
+                <MoveDownLeft className="size-3 text-stone-700" />
+              )}
+              {callType === "OUTGOING" && (
+                <MoveUpRight className="size-3 text-stone-700" />
+              )}
+              {callType === "MISSED" && (
+                <ArrowUp className="size-3 text-stone-700" />
+              )}
+              <p className="text-xs text-stone-700">
+                {dateDisplay} {durationDisplay && `(${durationDisplay})`}
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
       onClick={() => onSelect(log)}
-      className="relative bg-white rounded-2xl p-5 mb-3 border-2 border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all duration-200 cursor-pointer"
+      className="bg-white rounded-2xl p-5 mb-3 border-2 border-gray-100 hover:border-gray-200 transition-all cursor-pointer"
     >
-      {/* Main Content - Balanced Layout */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-        {/* Left Side - Call Info */}
-        <div className="flex items-start space-x-4 flex-1 mb-3 sm:mb-0">
-          {/* Call Type Icon */}
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center">
-              <IconComponent className={`w-6 h-6 ${iconColor}`} />
-            </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center">
+            <CallIcon className={`w-6 h-6 ${iconColor}`} />
           </div>
-
-          {/* Call Details */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 mb-2">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {displayName}
-              </h3>
-              {log.contact_name && <User className="w-4 h-4 text-gray-400" />}
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-sm text-gray-600 font-mono">{displayNumber}</p>
-
-              <div className="flex items-center space-x-2">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${badgeColor}`}
-                >
-                  {log.call_type_display || log.type}
-                </span>
-                {formattedDuration && (
-                  <span className="text-xs text-gray-500">
-                    • Duration: {formattedDuration}
-                  </span>
-                )}
-              </div>
-            </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">{displayName}</h3>
+            <p className="text-sm text-gray-600">{displayNumber}</p>
           </div>
         </div>
-
-        {/* Right Side - Date & Time Info */}
-        <div className="flex flex-row sm:flex-col items-start sm:items-end justify-between sm:justify-start space-x-4 sm:space-x-0 sm:space-y-2 sm:ml-4">
-          {/* Call Date/Time */}
-          <div className="text-left sm:text-right">
-            <p className="text-xs text-gray-500">Call time</p>
-            <p className="text-sm font-medium text-gray-700">{formattedDate}</p>
-          </div>
-
-          {/* Contact Status Indicator */}
-          <div className="flex items-center">
-            <span
-              className={`
-                px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap
-                ${
-                  log.contact_name
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-600"
-                }
-              `}
-            >
-              {log.contact_name ? "Known" : "Unknown"}
-            </span>
-          </div>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">{dateDisplay}</p>
+          {durationDisplay && (
+            <p className="text-xs text-gray-500 mt-1">({durationDisplay})</p>
+          )}
         </div>
       </div>
     </motion.div>
   );
 };
+
 export default CallLogItem;

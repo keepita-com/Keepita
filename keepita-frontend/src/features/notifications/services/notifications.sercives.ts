@@ -45,13 +45,30 @@ export const useMarkAllAsRead = () => {
   return useMutation<useMarkAsReadResponse>({
     mutationFn: markAllAsRead,
     onMutate: () => {
-      queryClient.setQueryData<InfiniteData<useNotificationsResponse>>(
-        ["user", "notifications"],
-        { pageParams: [1], pages: [] }
-      );
+      const prevData = queryClient.getQueryData<
+        InfiniteData<useNotificationsResponse>
+      >(["user", "notifications"]);
+
+      if (!prevData) return;
+
+      const updatedPages = prevData.pages.map((page) => ({
+        ...page,
+        results: page.results.map((notification) => ({
+          ...notification,
+          is_seen: true,
+        })),
+      }));
+
+      queryClient.setQueryData(["user", "notifications"], {
+        ...prevData,
+        pages: updatedPages,
+      });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["user", "notifications"] });
+    },
+    onError: () => {
+      console.log("error");
     },
   });
 };

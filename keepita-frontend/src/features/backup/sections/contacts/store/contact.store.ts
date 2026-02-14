@@ -6,17 +6,12 @@ import type {
   ContactSortConfig,
 } from "../types/contact.types";
 
-/**
- * Contact store interface - Only client-side state
- */
 interface ContactStore {
-  // Client-side state only
   selectedContact: Contact | null;
   searchQuery: string;
   filters: ContactFilters;
   sortConfig: ContactSortConfig;
 
-  // Actions - Only client-side actions
   selectContact: (contact: Contact | null) => void;
   setSearchQuery: (query: string) => void;
   setFilters: (filters: ContactFilters) => void;
@@ -25,9 +20,6 @@ interface ContactStore {
   reset: () => void;
 }
 
-/**
- * Initial state - Only client-side state
- */
 const initialState = {
   selectedContact: null,
   searchQuery: "",
@@ -38,19 +30,14 @@ const initialState = {
   },
 };
 
-/**
- * Contact store implementation - Only client-side state management
- */
 export const useContactStore = create<ContactStore>()(
   devtools(
     (set) => ({
       ...initialState,
 
-      // Contact selection (client-side only)
       selectContact: (selectedContact) =>
         set({ selectedContact }, false, "selectContact"),
 
-      // Search and filters (client-side only)
       setSearchQuery: (searchQuery) =>
         set({ searchQuery }, false, "setSearchQuery"),
 
@@ -66,13 +53,13 @@ export const useContactStore = create<ContactStore>()(
             searchQuery: "",
           },
           false,
-          "clearFilters"
+          "clearFilters",
         ),
 
       reset: () => set(initialState, false, "reset"),
     }),
     {
       name: "contact-store",
-    }
-  )
+    },
+  ),
 );

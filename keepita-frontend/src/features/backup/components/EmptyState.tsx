@@ -33,7 +33,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
 
   const defaultDescriptions = {
     "no-backups":
-      "Create your first backup to ensure your data is safe and easily recoverable when needed.",
+      "Create your first backup to ensure your data is safe.",
     "no-results": "We couldn't find any backups matching your search query.",
     "filter-no-match": "Try adjusting your filters to see more results.",
     "api-key": "Create your first client to start using API keys.",

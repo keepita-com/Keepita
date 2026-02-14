@@ -14,7 +14,6 @@ const BrowserSkeleton: React.FC<BrowserSkeletonProps> = ({
   if (type === "Overview") {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-        {/* Stat Cards Skeleton */}
         {Array.from({ length: 5 }).map((_, index) => (
           <motion.div
             key={index}
@@ -33,7 +32,6 @@ const BrowserSkeleton: React.FC<BrowserSkeletonProps> = ({
           </motion.div>
         ))}
 
-        {/* Chart Skeleton */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -44,7 +42,6 @@ const BrowserSkeleton: React.FC<BrowserSkeletonProps> = ({
           <div className="h-64 bg-gray-200 rounded animate-pulse" />
         </motion.div>
 
-        {/* List Skeleton */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,7 +65,6 @@ const BrowserSkeleton: React.FC<BrowserSkeletonProps> = ({
     );
   }
 
-  // List skeleton for other tabs
   return (
     <div className="space-y-1 p-4">
       {Array.from({ length: count }).map((_, index) => (
@@ -80,22 +76,17 @@ const BrowserSkeleton: React.FC<BrowserSkeletonProps> = ({
           className="bg-gray-50 rounded-2xl p-4"
         >
           <div className="flex items-start space-x-3">
-            {/* Icon/Favicon Skeleton */}
             <div className="flex-shrink-0 mt-1">
               <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse" />
             </div>
 
-            {/* Content Skeleton */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  {/* Title */}
                   <div className="h-4 bg-gray-200 rounded animate-pulse mb-2 w-3/4" />
 
-                  {/* Subtitle/URL */}
                   <div className="h-3 bg-gray-200 rounded animate-pulse mb-2 w-1/2" />
 
-                  {/* Metadata */}
                   <div className="flex items-center space-x-4">
                     <div className="h-3 bg-gray-200 rounded animate-pulse w-20" />
                     <div className="h-3 bg-gray-200 rounded animate-pulse w-16" />
@@ -104,7 +95,6 @@ const BrowserSkeleton: React.FC<BrowserSkeletonProps> = ({
                     )}
                   </div>
 
-                  {/* Progress bar for downloads */}
                   {type === "Downloads" && Math.random() > 0.7 && (
                     <div className="mt-2">
                       <div className="h-2 bg-gray-200 rounded animate-pulse w-full" />
@@ -112,7 +102,6 @@ const BrowserSkeleton: React.FC<BrowserSkeletonProps> = ({
                   )}
                 </div>
 
-                {/* Action buttons skeleton */}
                 <div className="flex items-center space-x-2 ml-3">
                   <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
                   {type === "Searches" && (

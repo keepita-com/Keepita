@@ -30,7 +30,6 @@ const BackupStats: React.FC<BackupStatsProps> = ({ stats }) => {
       animate="show"
       className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8"
     >
-      {/* total backups */}
       <motion.div
         variants={item}
         whileHover={{
@@ -64,7 +63,7 @@ const BackupStats: React.FC<BackupStatsProps> = ({ stats }) => {
           </motion.p>
         </div>
       </motion.div>
-      {/* total backups size */}
+
       <motion.div
         variants={item}
         whileHover={{
@@ -98,7 +97,7 @@ const BackupStats: React.FC<BackupStatsProps> = ({ stats }) => {
           </motion.p>
         </div>
       </motion.div>
-      {/* completed backups */}
+
       <motion.div
         variants={item}
         whileHover={{
@@ -132,7 +131,7 @@ const BackupStats: React.FC<BackupStatsProps> = ({ stats }) => {
           </motion.p>
         </div>
       </motion.div>
-      {/* failed backups */}
+
       <motion.div
         variants={item}
         whileHover={{

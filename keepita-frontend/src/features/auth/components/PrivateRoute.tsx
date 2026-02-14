@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/auth.hooks";
+import { PageLoader } from "../../../shared/components";
 
 interface PrivateRouteProps {
   redirectTo?: string;
@@ -14,11 +15,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-10 w-10 border-4 border-indigo-500 rounded-full border-t-transparent"></div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!isAuthenticated) {

@@ -7,9 +7,6 @@ import type {
 } from "../types/wifi.types";
 import { buildQueryParams } from "../../../../../shared/utils";
 
-/**
- * Format date for display
- */
 export const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
@@ -20,9 +17,6 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
-/**
- * Format frequency for display
- */
 export const formatFrequency = (frequency: number | null): string => {
   if (!frequency) return "Unknown";
 
@@ -37,11 +31,8 @@ export const formatFrequency = (frequency: number | null): string => {
   return `${frequency}MHz`;
 };
 
-/**
- * Get security strength level and color
- */
 export const getSecurityStrength = (
-  securityType: SecurityType
+  securityType: SecurityType,
 ): {
   level: string;
   color: string;
@@ -63,9 +54,6 @@ export const getSecurityStrength = (
   }
 };
 
-/**
- * Get security icon name based on type
- */
 export const getSecurityIcon = (securityType: SecurityType): string => {
   switch (securityType) {
     case "NONE":
@@ -80,9 +68,6 @@ export const getSecurityIcon = (securityType: SecurityType): string => {
   }
 };
 
-/**
- * Get connection status color classes
- */
 export const getConnectionStatusColor = (status: ConnectionStatus): string => {
   switch (status) {
     case "Connected":
@@ -98,9 +83,6 @@ export const getConnectionStatusColor = (status: ConnectionStatus): string => {
   }
 };
 
-/**
- * Get security strength color classes
- */
 export const getSecurityStrengthColor = (color: string): string => {
   switch (color.toLowerCase()) {
     case "green":
@@ -114,9 +96,6 @@ export const getSecurityStrengthColor = (color: string): string => {
   }
 };
 
-/**
- * Get frequency band from frequency value
- */
 export const getFrequencyBand = (frequency: number | null): FrequencyBand => {
   if (!frequency) return "Unknown";
 
@@ -131,29 +110,22 @@ export const getFrequencyBand = (frequency: number | null): FrequencyBand => {
   return "Unknown";
 };
 
-/**
- * Validate SSID format
- */
 export const isValidSSID = (ssid: string): boolean => {
   if (!ssid || typeof ssid !== "string") return false;
-  // SSID should be 1-32 characters
+
   return ssid.length >= 1 && ssid.length <= 32;
 };
 
-/**
- * Validate password format for security type
- */
 export const isValidPassword = (
   password: string,
-  securityType: SecurityType
+  securityType: SecurityType,
 ): boolean => {
   if (securityType === "NONE") {
-    return true; // No password needed
+    return true;
   }
 
   if (!password || typeof password !== "string") return false;
 
-  // WPA/WPA2 passwords should be 8-63 characters
   if (securityType.includes("WPA")) {
     return password.length >= 8 && password.length <= 63;
   }
@@ -161,40 +133,25 @@ export const isValidPassword = (
   return password.length > 0;
 };
 
-/**
- * Check if network is secure
- */
 export const isSecureNetwork = (wifiNetwork: WiFiNetwork): boolean => {
   return wifiNetwork.security_type !== "NONE";
 };
 
-/**
- * Check if network is hidden
- */
 export const isHiddenNetwork = (wifiNetwork: WiFiNetwork): boolean => {
   return wifiNetwork.hidden;
 };
 
-/**
- * Check if network is saved
- */
 export const isSavedNetwork = (wifiNetwork: WiFiNetwork): boolean => {
   return wifiNetwork.is_saved;
 };
 
-/**
- * Check if network is currently connected
- */
 export const isConnectedNetwork = (wifiNetwork: WiFiNetwork): boolean => {
   return wifiNetwork.connection_status === "Connected";
 };
 
-/**
- * Check if network was recently connected (within last 7 days)
- */
 export const isRecentlyConnected = (
   wifiNetwork: WiFiNetwork,
-  daysThreshold: number = 7
+  daysThreshold: number = 7,
 ): boolean => {
   if (!wifiNetwork.last_connected) return false;
 
@@ -205,9 +162,6 @@ export const isRecentlyConnected = (
   return lastConnected >= threshold;
 };
 
-/**
- * Copy text to clipboard
- */
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
     await navigator.clipboard.writeText(text);
@@ -218,11 +172,8 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   }
 };
 
-/**
- * Group WiFi networks by security type
- */
 export const groupBySecurityType = (
-  networks: WiFiNetwork[]
+  networks: WiFiNetwork[],
 ): Record<SecurityType, WiFiNetwork[]> => {
   const groups = {} as Record<SecurityType, WiFiNetwork[]>;
 
@@ -236,11 +187,8 @@ export const groupBySecurityType = (
   return groups;
 };
 
-/**
- * Group WiFi networks by connection status
- */
 export const groupByConnectionStatus = (
-  networks: WiFiNetwork[]
+  networks: WiFiNetwork[],
 ): Record<ConnectionStatus, WiFiNetwork[]> => {
   const groups = {} as Record<ConnectionStatus, WiFiNetwork[]>;
 
@@ -254,11 +202,8 @@ export const groupByConnectionStatus = (
   return groups;
 };
 
-/**
- * Group WiFi networks by frequency band
- */
 export const groupByFrequencyBand = (
-  networks: WiFiNetwork[]
+  networks: WiFiNetwork[],
 ): Record<FrequencyBand, WiFiNetwork[]> => {
   const groups = {} as Record<FrequencyBand, WiFiNetwork[]>;
 
@@ -273,23 +218,17 @@ export const groupByFrequencyBand = (
   return groups;
 };
 
-/**
- * Sort networks by signal strength (if available) or security strength
- */
 export const sortByStrength = (networks: WiFiNetwork[]): WiFiNetwork[] => {
   return [...networks].sort((a, b) => {
     const strengthA = getSecurityStrength(a.security_type).score;
     const strengthB = getSecurityStrength(b.security_type).score;
-    return strengthB - strengthA; // Descending order
+    return strengthB - strengthA;
   });
 };
 
-/**
- * Filter networks by search query
- */
 export const filterBySearch = (
   networks: WiFiNetwork[],
-  query: string
+  query: string,
 ): WiFiNetwork[] => {
   if (!query || !query.trim()) return networks;
 
@@ -299,13 +238,10 @@ export const filterBySearch = (
     (network) =>
       network.ssid.toLowerCase().includes(searchTerm) ||
       network.security_type.toLowerCase().includes(searchTerm) ||
-      network.security_display.toLowerCase().includes(searchTerm)
+      network.security_display.toLowerCase().includes(searchTerm),
   );
 };
 
-/**
- * Get comprehensive WiFi network info
- */
 export const getWiFiNetworkInfo = (network: WiFiNetwork) => ({
   ssid: network.ssid,
   isSecure: isSecureNetwork(network),
@@ -322,9 +258,6 @@ export const getWiFiNetworkInfo = (network: WiFiNetwork) => ({
     : null,
 });
 
-/**
- * Get WiFi networks statistics
- */
 export const getWiFiStats = (networks: WiFiNetwork[]) => ({
   total: networks.length,
   secure: networks.filter(isSecureNetwork).length,
@@ -337,9 +270,6 @@ export const getWiFiStats = (networks: WiFiNetwork[]) => ({
   byFrequencyBand: groupByFrequencyBand(networks),
 });
 
-/**
- * Build query parameters for WiFi API call
- */
 export const buildWifiQueryParams = (params: Partial<WiFiQueryParams>) => {
   return buildQueryParams(params);
 };

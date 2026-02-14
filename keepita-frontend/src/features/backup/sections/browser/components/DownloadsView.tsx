@@ -10,6 +10,7 @@ interface DownloadsViewProps {
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   isFetchingNextPage?: boolean;
+  theme?: "Samsung" | "Xiaomi" | "Apple";
 }
 
 const DownloadsView: React.FC<DownloadsViewProps> = ({
@@ -18,7 +19,23 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({
   hasNextPage,
   fetchNextPage,
   isFetchingNextPage,
+  theme = "Samsung",
 }) => {
+  const downloadsTheme = {
+    Samsung: {
+      theme: "Samsung" as "Samsung" | "Xiaomi" | "Apple",
+      emptyIconClassNames: "w-16 h-16 text-gray-300 mb-4",
+    },
+    Xiaomi: {
+      theme: "Xiaomi" as "Samsung" | "Xiaomi" | "Apple",
+      emptyIconClassNames: "w-16 h-16 text-gray-300 mb-4",
+    },
+    Apple: {
+      theme: "Apple" as "Samsung" | "Xiaomi" | "Apple",
+      emptyIconClassNames: "w-16 h-16 text-gray-400 mb-4",
+    },
+  };
+  const currentTheme = downloadsTheme[theme];
   return (
     <GenericBrowserList
       items={downloads}
@@ -31,15 +48,17 @@ const DownloadsView: React.FC<DownloadsViewProps> = ({
           key={downloadItem.id}
           downloadItem={downloadItem}
           searchQuery={query}
+          theme={currentTheme.theme}
         />
       )}
       emptyState={{
-        icon: <Download className="w-16 h-16 text-gray-300 mb-4" />,
+        icon: <Download className={currentTheme.emptyIconClassNames} />,
         title: "No Downloads Found",
         description: "This backup doesn't contain any downloads.",
       }}
       loadingText="Loading more downloads..."
       endText="No more downloads to load"
+      theme={currentTheme.theme}
     />
   );
 };

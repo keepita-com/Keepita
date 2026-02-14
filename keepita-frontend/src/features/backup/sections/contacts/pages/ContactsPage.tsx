@@ -8,24 +8,65 @@ import {
   ContactListSkeleton,
   ContactsEmptyState,
 } from "../components";
-import { useContactManager, useInfiniteScroll } from "../hooks//contacts.hooks";
+import { useContactManager, useInfiniteScroll } from "../hooks/contacts.hooks";
 import type { Contact } from "../types/contact.types";
 import { getDisplayName } from "../utils/contact.utils";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
+
+import { useBackupDetails } from "../../../hooks/backup.hooks";
+import BackupNotFound from "@/features/backup/components/BackupNotFound";
+
+type Theme = "Samsung" | "Xiaomi" | "Apple";
+
+interface ThemeClasses {
+  listWrapper: string;
+  letterHeader: string;
+  letterTitle?: string;
+  favoriteWrapper: string;
+  showEndOfList: boolean;
+}
+
+const themeClasses: Record<Theme, ThemeClasses> = {
+  Samsung: {
+    listWrapper: "bg-white",
+    letterHeader:
+      "sticky top-0 z-10 bg-white/95 border-gray-100 backdrop-blur-sm px-4 border-b",
+    letterTitle: "text-lg text-blue-600 font-semibold",
+    favoriteWrapper: "bg-white",
+    showEndOfList: true,
+  },
+  Xiaomi: {
+    listWrapper: "bg-white",
+    letterHeader:
+      "sticky top-0 z-10 bg-red-100 border-transparent backdrop-blur-sm px-4 border-b",
+    letterTitle: "text-md text-stone-600 pl-6 font-semibold",
+    favoriteWrapper: "bg-red-100 ",
+    showEndOfList: false,
+  },
+  Apple: {
+    listWrapper: "bg-white",
+    letterHeader: "sticky top-0 z-10 bg-white px-4",
+    favoriteWrapper: "bg-white",
+    showEndOfList: true,
+  },
+};
 
 const ContactsPage: React.FC = () => {
   const { backupId } = useParams<{ backupId: string }>();
   const navigate = useNavigate();
+  const { theme } = useBackupTheme();
   const [selectedLetter, setSelectedLetter] = useState<string>("");
+  const [hasLoadedInitially, setHasLoadedInitially] = React.useState(false);
 
-  if (!backupId) {
-    navigate("/backups");
-    return null;
-  }
-  useDocumentTitle(`Contacts - Backup ${backupId} | xplorta`);
+  useDocumentTitle(`Contacts - Backup ${backupId} | Keepita`);
 
-  const contactManager = useContactManager(backupId);
+  const currentTheme = themeClasses[theme as Theme] ?? themeClasses.Samsung;
+
+  const { backup, isLoading: isBackupLoading, error: backupError } =
+    useBackupDetails(backupId);
+
+  const contactManager = useContactManager(backupId!);
   const {
-    // Server state from React Query
     filteredContacts,
     groupedContacts,
     stats,
@@ -34,51 +75,45 @@ const ContactsPage: React.FC = () => {
     fetchNextPage,
     isFetchingNextPage,
 
-    // Client state from Zustand
     searchQuery,
     filters,
     sortConfig,
 
-    // Client actions from Zustand
     setSearchQuery,
     setFilters,
     setSortConfig,
   } = contactManager;
 
-  // Track if we have ever loaded data to distinguish initial loading from search/filter operations
-  const [hasLoadedInitially, setHasLoadedInitially] = React.useState(false);
-
-  // Mark as initially loaded once we have data
   React.useEffect(() => {
     if (filteredContacts.length > 0 && !hasLoadedInitially) {
       setHasLoadedInitially(true);
     }
   }, [filteredContacts.length, hasLoadedInitially]);
 
-  // Determine if this is initial loading (show full page loader) or search/filter operation (show skeleton)
   const isInitialLoading = isLoading && !hasLoadedInitially;
   const isSearchFilterLoading = isLoading && hasLoadedInitially;
 
-  // Set up infinite scroll with improved performance
   const { loadMoreRef } = useInfiniteScroll(
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage
   );
 
+  if (!backupId || backupError || (!isBackupLoading && !backup)) {
+    return <BackupNotFound />;
+  }
+
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   const scrollToLetter = (letter: string) => {
     setSelectedLetter(letter);
 
-    if ((groupedContacts as any)._isFavoriteSort) {
-      // For favorite sorting, find the first contact starting with this letter
+    if ((groupedContacts as { _isFavoriteSort?: boolean })._isFavoriteSort) {
       const contactIndex = filteredContacts.findIndex((contact) => {
         const displayName = getDisplayName(contact);
         return displayName.charAt(0).toUpperCase() === letter;
       });
 
       if (contactIndex >= 0) {
-        // For list view in favorite mode, look for contact by index
         const contactElement = document.querySelector(
           `[data-contact-index="${contactIndex}"]`
         );
@@ -87,7 +122,6 @@ const ContactsPage: React.FC = () => {
         }
       }
     } else {
-      // For name sorting, scroll to the letter group
       const element = document.getElementById(`letter-${letter}`);
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -96,15 +130,10 @@ const ContactsPage: React.FC = () => {
   };
 
   const handleContactSelect = (contact: Contact) => {
-    // Add contact selection logic here - could open modal or navigate
     console.log("Selected contact:", contact);
-    // TODO: Implement contact detail modal or navigation
   };
+
   const renderContent = () => {
-    // Show skeleton loading during:
-    // 1. Initial loading with no data
-    // 2. Search/filter/sort operations (when refetching)
-    // 3. When isFetchingNextPage and we have no current data
     const shouldShowSkeleton =
       (isLoading && filteredContacts.length === 0) ||
       (isFetchingNextPage && filteredContacts.length === 0) ||
@@ -117,22 +146,20 @@ const ContactsPage: React.FC = () => {
     }
 
     if (!filteredContacts || filteredContacts.length === 0) {
-      // Use separate empty state component
       return (
         <ContactsEmptyState
           hasSearchQuery={!!searchQuery}
           searchQuery={searchQuery}
           onClearSearch={() => setSearchQuery("")}
+          isRender={theme !== "Xiaomi"}
         />
       );
     }
 
-    // Samsung List View - only view mode
     return (
-      <div className="pr-12">
-        {/* Handle favorite sorting differently - show as simple list */}
-        {(groupedContacts as any)._isFavoriteSort ? (
-          <div className="bg-white">
+      <div>
+        {(groupedContacts as { _isFavoriteSort?: boolean })._isFavoriteSort ? (
+          <div className={currentTheme.favoriteWrapper}>
             <ContactsList
               contacts={filteredContacts}
               searchQuery={searchQuery}
@@ -141,11 +168,9 @@ const ContactsPage: React.FC = () => {
             />
           </div>
         ) : (
-          /* Regular alphabetical grouping for name sorting */
           Object.entries(groupedContacts)
-            .filter(([key]) => !key.startsWith("_")) // Filter out internal properties
+            .filter(([key]) => !key.startsWith("_"))
             .sort(([letterA], [letterB]) => {
-              // Sort letters alphabetically for name sorting
               const comparison = letterA.localeCompare(letterB);
               return sortConfig.direction === "desc" ? -comparison : comparison;
             })
@@ -156,26 +181,28 @@ const ContactsPage: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 }}
-                className="bg-white"
+                className={currentTheme.listWrapper}
               >
-                {/* Letter Header - Samsung Style */}
-                <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm px-4 py-2 border-b border-gray-100">
-                  <h3 className="text-lg font-semibold text-blue-600">
+                <div className={currentTheme.letterHeader}>
+                  <h3
+                    className={
+                      currentTheme.letterTitle ||
+                      "text-lg text-blue-600 font-semibold"
+                    }
+                  >
                     {letter}
                   </h3>
                 </div>
-                {/* Contacts List */}
                 <ContactsList
                   contacts={letterContacts as Contact[]}
                   searchQuery={searchQuery}
                   onContactSelect={handleContactSelect}
-                  baseIndex={0} // Will be updated with cumulative index
+                  baseIndex={0}
                 />
               </motion.div>
             ))
         )}
 
-        {/* Infinite Scroll Trigger at the end */}
         {hasNextPage && (
           <div
             ref={loadMoreRef}
@@ -206,17 +233,20 @@ const ContactsPage: React.FC = () => {
             )}
           </div>
         )}
-        {/* End of list indicator */}
-        {!hasNextPage && filteredContacts.length > 0 && (
-          <div className="flex items-center justify-center py-8">
-            <span className="text-sm text-gray-400">
-              No more contacts to load
-            </span>
-          </div>
-        )}
+
+        {!hasNextPage &&
+          filteredContacts.length > 0 &&
+          currentTheme.showEndOfList && (
+            <div className="flex items-center justify-center py-8">
+              <span className="text-sm text-gray-400">
+                No more contacts to load
+              </span>
+            </div>
+          )}
       </div>
     );
   };
+
   return (
     <ContactsLayout
       title="Contacts"
@@ -231,42 +261,48 @@ const ContactsPage: React.FC = () => {
       isLoading={isInitialLoading}
       resultsCount={filteredContacts.length}
     >
-      {/* Alphabet Index Sidebar - Samsung Style - Vertically centered */}
-      <div className="fixed right-3 top-1/2 transform -translate-y-1/2 z-20">
-        <div className="bg-white/90 backdrop-blur-sm rounded-full py-1 px-1 shadow-lg border border-gray-200">
-          {alphabet.map((letter) => {
-            // For favorite sorting, check if any contact starting with this letter exists
-            // For name sorting, check the grouped contacts
-            const hasContacts = (groupedContacts as any)._isFavoriteSort
-              ? filteredContacts.some((contact) => {
+      {theme === "Samsung" && (
+        <div className="fixed right-3 top-1/2 transform -translate-y-1/2 z-20">
+          <div className="bg-white/90 backdrop-blur-sm rounded-full py-1 px-1 shadow-lg border border-gray-200">
+            {alphabet.map((letter) => {
+              const hasContacts = (
+                groupedContacts as { _isFavoriteSort?: boolean }
+              )._isFavoriteSort
+                ? filteredContacts.some((contact) => {
                   const displayName = getDisplayName(contact);
                   return displayName.charAt(0).toUpperCase() === letter;
                 })
-              : (groupedContacts as any)[letter]?.length > 0;
+                : Array.isArray(
+                  (groupedContacts as Record<string, unknown>)[letter]
+                ) &&
+                (
+                  (groupedContacts as Record<string, unknown>)[
+                  letter
+                  ] as unknown[]
+                ).length > 0;
 
-            return (
-              <motion.button
-                key={letter}
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => scrollToLetter(letter)}
-                disabled={!hasContacts}
-                className={`block w-6 h-6 text-xs font-medium rounded-full transition-all duration-200 ${
-                  selectedLetter === letter
+              return (
+                <motion.button
+                  key={letter}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => scrollToLetter(letter)}
+                  disabled={!hasContacts}
+                  className={`block w-6 h-6 text-xs font-medium rounded-full transition-all duration-200 ${selectedLetter === letter
                     ? "bg-blue-600 text-white font-bold"
                     : hasContacts
-                    ? "text-gray-600 hover:bg-gray-100"
-                    : "text-gray-300 cursor-not-allowed"
-                }`}
-              >
-                {letter}
-              </motion.button>
-            );
-          })}
+                      ? "text-gray-600 hover:bg-gray-100"
+                      : "text-gray-300 cursor-not-allowed"
+                    }`}
+                >
+                  {letter}
+                </motion.button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Main Content */}
       {renderContent()}
     </ContactsLayout>
   );

@@ -6,15 +6,17 @@ interface ContactsEmptyStateProps {
   hasSearchQuery?: boolean;
   searchQuery?: string;
   onClearSearch?: () => void;
+  isRender?: boolean;
 }
 
 const ContactsEmptyState: React.FC<ContactsEmptyStateProps> = ({
   hasSearchQuery = false,
   searchQuery = "",
   onClearSearch,
+  isRender,
 }) => {
+  if (!isRender) return null;
   if (hasSearchQuery) {
-    // Empty state for search/filter with no results
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -45,7 +47,6 @@ const ContactsEmptyState: React.FC<ContactsEmptyStateProps> = ({
     );
   }
 
-  // Empty state for no contacts at all
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

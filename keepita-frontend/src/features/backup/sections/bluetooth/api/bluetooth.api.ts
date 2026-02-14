@@ -12,12 +12,9 @@ const BLUETOOTH_API_ENDPOINTS = {
     `${RESOURCE}/backups/${backupId}/bluetooth/devices/`,
 } as const;
 
-/**
- * Get bluetooth devices for a specific backup with optional filtering and pagination
- */
 export const getBluetoothDevices = async (
   backupId: number | string | undefined,
-  params: Partial<GetBluetoothDevicesParams> = {}
+  params: Partial<GetBluetoothDevicesParams> = {},
 ): Promise<BluetoothDevicesResponse> => {
   if (!backupId) {
     throw new Error("Backup ID is required");
@@ -38,7 +35,7 @@ export const getBluetoothDevices = async (
       endpoint,
       {
         params: queryParams,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -47,12 +44,9 @@ export const getBluetoothDevices = async (
   }
 };
 
-/**
- * Export bluetooth devices data (for consistency with other APIs)
- */
 export const exportBluetoothDevices = async (
   backupId: number | string | undefined,
-  params: Partial<GetBluetoothDevicesParams> = {}
+  params: Partial<GetBluetoothDevicesParams> = {},
 ): Promise<Blob> => {
   if (!backupId) {
     throw new Error("Backup ID is required");
@@ -79,7 +73,6 @@ export const exportBluetoothDevices = async (
   }
 };
 
-// Legacy support - maintain backward compatibility for now
 export const bluetoothApi = {
   getDevices: getBluetoothDevices,
 } as const;

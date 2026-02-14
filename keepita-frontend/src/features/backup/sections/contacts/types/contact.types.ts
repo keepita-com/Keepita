@@ -1,4 +1,3 @@
-// Contact domain types following SOLID principles
 import type { ApiResponseList } from "../../../../../core/types/apiResponse";
 
 export interface Contact {
@@ -9,13 +8,11 @@ export interface Contact {
   phone_number: string;
   date_of_birth: string | null;
   is_favorite: boolean;
-  has_image?: boolean; // Backend field for filtering
+  has_image?: boolean;
 }
 
-// API response structure
 export interface ContactsResponse extends ApiResponseList<Contact[]> {}
 
-// API request parameters
 export interface GetContactsParams {
   page?: number;
   page_size?: number;
@@ -25,20 +22,18 @@ export interface GetContactsParams {
   has_image?: boolean;
 }
 
-// Contact filtering options
 export interface ContactFilters {
   search?: string;
   is_favorite?: boolean;
   has_image?: boolean;
+  [key: string]: boolean | string | undefined;
 }
 
-// Contact sorting configuration
 export interface ContactSortConfig {
   field: "name" | "is_favorite";
   direction: "asc" | "desc";
 }
 
-// Contact sort options based on backend ordering_fields
 export interface ContactSortOption {
   value: string;
   label: string;
@@ -46,12 +41,10 @@ export interface ContactSortOption {
   direction: "asc" | "desc";
 }
 
-// Contact list grouping
 export interface GroupedContacts {
   [letter: string]: Contact[];
 }
 
-// Contact actions
 export interface ContactActions {
   onCall?: (contact: Contact) => void;
   onMessage?: (contact: Contact) => void;
@@ -60,14 +53,12 @@ export interface ContactActions {
   onToggleFavorite?: (contact: Contact) => void;
 }
 
-// Contact list props
 export interface ContactListProps {
   contacts: Contact[];
   actions?: ContactActions;
   isLoading?: boolean;
 }
 
-// Contact search and filter props
 export interface ContactSearchProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
@@ -75,7 +66,6 @@ export interface ContactSearchProps {
   onFiltersChange?: (filters: ContactFilters) => void;
 }
 
-// Contact stats
 export interface ContactStats {
   total: number;
   favorites: number;

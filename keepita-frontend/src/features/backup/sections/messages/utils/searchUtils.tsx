@@ -1,7 +1,6 @@
-// Search highlighting utility for messages feature
 export const highlightSearchTerms = (
   text: string,
-  searchQuery: string
+  searchQuery: string,
 ): React.ReactElement | string => {
   if (!searchQuery || !text) {
     return text;
@@ -24,7 +23,7 @@ export const highlightSearchTerms = (
           </mark>
         ) : (
           part
-        )
+        ),
       )}
     </>
   );

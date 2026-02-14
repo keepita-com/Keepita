@@ -6,23 +6,15 @@ import type {
   ChatMessageFilters,
 } from "../types/message.types";
 
-// ================================
-// QUERY PARAMETER UTILITIES
-// ================================
-
-/**
- * Build query parameters for message threads list
- */
 export const buildThreadsQueryParams = (
   page: number = 1,
-  filters: ChatListFilters = {}
+  filters: ChatListFilters = {},
 ): URLSearchParams => {
   const params = new URLSearchParams({
     page: page.toString(),
     page_size: "20",
   });
 
-  // Add all available filters
   if (filters.search) params.append("search", filters.search);
   if (filters.contact) params.append("contact", filters.contact);
   if (filters.address) params.append("address", filters.address);
@@ -32,7 +24,7 @@ export const buildThreadsQueryParams = (
   if (filters.is_favorite_contact !== undefined) {
     params.append(
       "is_favorite_contact",
-      filters.is_favorite_contact.toString()
+      filters.is_favorite_contact.toString(),
     );
   }
   if (filters.created_after)
@@ -60,15 +52,11 @@ export const buildThreadsQueryParams = (
   return params;
 };
 
-/**
- * Build query parameters for thread messages
- */
 export const buildThreadMessagesQueryParams = (
-  filters: ChatMessageFilters = {}
+  filters: ChatMessageFilters = {},
 ): URLSearchParams => {
   const params = new URLSearchParams();
 
-  // Add message filters
   if (filters.body) params.append("body", filters.body);
   if (filters.body_exact) params.append("body_exact", filters.body_exact);
   if (filters.body_empty !== undefined) {
@@ -102,13 +90,6 @@ export const buildThreadMessagesQueryParams = (
   return params;
 };
 
-// ================================
-// DATE AND TIME UTILITIES
-// ================================
-
-/**
- * Format message timestamp for display
- */
 export const formatMessageTime = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -129,9 +110,6 @@ export const formatMessageTime = (dateString: string): string => {
   }
 };
 
-/**
- * Format message date for conversation view
- */
 export const formatConversationDate = (dateString: string): string => {
   const messageDate = new Date(dateString);
   const today = new Date();
@@ -152,37 +130,20 @@ export const formatConversationDate = (dateString: string): string => {
   }
 };
 
-// ================================
-// TEXT UTILITIES
-// ================================
-
-/**
- * Truncate message text for preview
- */
 export const truncateMessage = (
   message: string,
-  maxLength: number = 60
+  maxLength: number = 60,
 ): string => {
   if (message.length <= maxLength) return message;
   return message.substring(0, maxLength).trim() + "...";
 };
 
-// ================================
-// CONTACT UTILITIES
-// ================================
-
-/**
- * Get contact display name
- */
 export const getContactDisplayName = (thread: MessageThread): string => {
   if (thread.contact?.display_name) return thread.contact.display_name;
   if (thread.contact?.name) return thread.contact.name;
   return thread.address;
 };
 
-/**
- * Get contact initials for avatar
- */
 export const getContactInitials = (name: string): string => {
   const words = name.split(" ").filter((word) => word.length > 0);
   if (words.length >= 2) {
@@ -193,44 +154,28 @@ export const getContactInitials = (name: string): string => {
   return "NA";
 };
 
-/**
- * Check if address is a phone number
- */
 export const isPhoneNumber = (address: string): boolean => {
   return /^\+?\d[\d\s\-\(\)]+$/.test(address);
 };
 
-/**
- * Format phone number for display
- */
 export const formatPhoneNumber = (phone: string): string => {
-  // Remove all non-digit characters
   const cleaned = phone.replace(/\D/g, "");
 
-  // Format as (XXX) XXX-XXXX for US numbers
   if (cleaned.length === 10) {
     return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(
-      6
+      6,
     )}`;
   } else if (cleaned.length === 11 && cleaned[0] === "1") {
     return `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(
-      7
+      7,
     )}`;
   }
 
-  // Return original if formatting doesn't apply
   return phone;
 };
 
-// ================================
-// MESSAGE GROUPING UTILITIES
-// ================================
-
-/**
- * Group messages by date for conversation view
- */
 export const groupMessagesByDate = (
-  messages: Message[]
+  messages: Message[],
 ): ConversationGroup[] => {
   const groups: { [date: string]: Message[] } = {};
 
@@ -246,26 +191,16 @@ export const groupMessagesByDate = (
     .map(([date, msgs]) => ({
       date,
       messages: msgs.sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       ),
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };
 
-// ================================
-// CALCULATION UTILITIES
-// ================================
-
-/**
- * Calculate total unread count for threads
- */
 export const getTotalUnreadCount = (threads: MessageThread[]): number => {
   return threads.reduce((total, thread) => total + thread.unread_count, 0);
 };
 
-/**
- * Calculate conversation statistics
- */
 export const getConversationStats = (messages: Message[]) => {
   const sentMessages = messages.filter((msg) => msg.status === 2);
   const receivedMessages = messages.filter((msg) => msg.status === 1);
@@ -283,16 +218,9 @@ export const getConversationStats = (messages: Message[]) => {
   };
 };
 
-// ================================
-// FILTERING AND SORTING UTILITIES
-// ================================
-
-/**
- * Filter threads based on search query
- */
 export const filterThreads = (
   threads: MessageThread[],
-  query: string
+  query: string,
 ): MessageThread[] => {
   if (!query.trim()) return threads;
 
@@ -310,12 +238,9 @@ export const filterThreads = (
   });
 };
 
-/**
- * Sort threads by various criteria
- */
 export const sortThreads = (
   threads: MessageThread[],
-  sortBy: "date" | "name" | "unread"
+  sortBy: "date" | "name" | "unread",
 ): MessageThread[] => {
   const sorted = [...threads];
 
@@ -324,11 +249,11 @@ export const sortThreads = (
       return sorted.sort(
         (a, b) =>
           new Date(b.last_message_date).getTime() -
-          new Date(a.last_message_date).getTime()
+          new Date(a.last_message_date).getTime(),
       );
     case "name":
       return sorted.sort((a, b) =>
-        getContactDisplayName(a).localeCompare(getContactDisplayName(b))
+        getContactDisplayName(a).localeCompare(getContactDisplayName(b)),
       );
     case "unread":
       return sorted.sort((a, b) => b.unread_count - a.unread_count);
@@ -337,29 +262,18 @@ export const sortThreads = (
   }
 };
 
-/**
- * Search messages content
- */
 export const searchMessages = (
   messages: Message[],
-  query: string
+  query: string,
 ): Message[] => {
   if (!query.trim()) return messages;
 
   const searchTerm = query.toLowerCase();
-  return messages.filter(
-    (message) => message.body.toLowerCase().includes(searchTerm)
-    // Note: address not available in Message type, only searching body
+  return messages.filter((message) =>
+    message.body.toLowerCase().includes(searchTerm),
   );
 };
 
-// ================================
-// MESSAGE TYPE UTILITIES
-// ================================
-
-/**
- * Get message type indicator
- */
 export const getMessageTypeLabel = (type: number): string => {
   switch (type) {
     case 1:
@@ -371,13 +285,6 @@ export const getMessageTypeLabel = (type: number): string => {
   }
 };
 
-// ================================
-// EXPORT UTILITIES
-// ================================
-
-/**
- * Export messages to JSON format
- */
 export const exportToJSON = (threads: MessageThread[], messages: Message[]) => {
   return JSON.stringify(
     {
@@ -388,13 +295,10 @@ export const exportToJSON = (threads: MessageThread[], messages: Message[]) => {
       messages,
     },
     null,
-    2
+    2,
   );
 };
 
-/**
- * Convert messages to CSV format
- */
 export const exportToCSV = (messages: Message[]): string => {
   const headers = [
     "ID",
@@ -408,9 +312,9 @@ export const exportToCSV = (messages: Message[]): string => {
   ];
   const rows = messages.map((msg) => [
     msg.id,
-    "N/A", // thread_id not available in Message type
-    "N/A", // address not available in Message type
-    `"${msg.body.replace(/"/g, '""')}"`, // Escape quotes for CSV
+    "N/A",
+    "N/A",
+    `"${msg.body.replace(/"/g, '""')}"`,
     msg.date,
     getMessageTypeLabel(msg.status),
     msg.seen ? "Yes" : "No",
@@ -420,13 +324,6 @@ export const exportToCSV = (messages: Message[]): string => {
   return [headers, ...rows].map((row) => row.join(",")).join("\n");
 };
 
-// ================================
-// CONTACT EXTRACTION UTILITIES
-// ================================
-
-/**
- * Get unique contacts from threads
- */
 export const getUniqueContacts = (threads: MessageThread[]) => {
   const contacts = new Map();
 
@@ -446,13 +343,6 @@ export const getUniqueContacts = (threads: MessageThread[]) => {
   return Array.from(contacts.values());
 };
 
-// ================================
-// LEGACY COMPATIBILITY (Object-based exports)
-// ================================
-
-/**
- * @deprecated Use individual functions instead
- */
 export const messageUtils = {
   formatMessageTime,
   formatConversationDate,
@@ -471,4 +361,22 @@ export const messageUtils = {
   exportToCSV,
   searchMessages,
   getUniqueContacts,
+};
+
+export const getInitials = (name: string): string => {
+  if (!name || typeof name !== "string") {
+    return "?";
+  }
+
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    return "?";
+  }
+
+  return trimmedName
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 };
