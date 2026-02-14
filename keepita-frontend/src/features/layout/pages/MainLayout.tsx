@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Outlet, Link } from "react-router-dom";
+import { MessageSquarePlus } from "lucide-react";
 import { useNavigation } from "../hooks/useNavigation";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { ANIMATION_PRESETS, Z_INDEX } from "../constants";
@@ -13,11 +14,14 @@ import Sidebar from "../components/Sidebar";
 import { useAuthStore } from "../../../features/auth/store";
 import AnimatedBackground from "../../../shared/components/AnimatedBackground";
 import { useLoadingStore } from "../../../store/loadingStore";
+import FeedbackModal from "../../home/components/FeedbackModal";
 
 const MainLayout: React.FC = () => {
   const { navItems, isDrawerOpen, toggleDrawer, closeDrawer } = useNavigation();
   const { isPageLoading } = useLoadingStore();
   const user = useAuthStore((state) => state.user);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+
   const firstName = user?.first_name || "";
   const lastName = user?.last_name || "";
   const fullName = `${firstName} ${lastName}`.trim() || "John Doe";
@@ -39,7 +43,6 @@ const MainLayout: React.FC = () => {
           aria-label="Toggle navigation menu"
         />
         <div className="drawer-content relative z-10 flex flex-col">
-          {" "}
           <AnimatePresence>
             {!isPageLoading && (
               <motion.div
@@ -63,8 +66,8 @@ const MainLayout: React.FC = () => {
                     />
                     <Logo />
                     <NavBar navItems={navItems} />
-                    {/* login/signup / profile */}
-                    <div className="flex-none gap-3 flex items-center">
+
+                    <div className="flex-none gap-2 sm:gap-3 flex items-center">
                       {!user && (
                         <div className="hidden lg:flex items-center gap-2">
                           <Link
@@ -83,8 +86,16 @@ const MainLayout: React.FC = () => {
                       )}
                       {user && (
                         <>
-                          {" "}
-                          <Notifications />{" "}
+                          <button
+                            onClick={() => setIsFeedbackOpen(true)}
+                            className="relative flex items-center justify-center h-9 w-9 bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-lg cursor-pointer text-gray-300 hover:text-white hover:scale-105 active:scale-95"
+                            title="Send Feedback"
+                          >
+                            <MessageSquarePlus size={18} strokeWidth={1.5} />
+                          </button>
+
+                          <Notifications />
+
                           <UserProfile
                             userName={fullName}
                             email={email}
@@ -119,6 +130,11 @@ const MainLayout: React.FC = () => {
           <Sidebar navItems={navItems} onDrawerClose={closeDrawer} />
         </div>
       </div>
+
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+      />
     </ThemeProvider>
   );
 };

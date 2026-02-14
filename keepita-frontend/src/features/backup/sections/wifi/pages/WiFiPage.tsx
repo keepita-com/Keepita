@@ -5,16 +5,22 @@ import { useWiFiNetworks, useWiFiNetworkDetails } from "../hooks/wifi.hooks";
 import { useWiFiStore } from "../store/wifi.store";
 import { useDocumentTitle } from "../../../../../shared/hooks/useDocumentTitle";
 import type { WiFiNetwork } from "../types/wifi.types";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
 
-/**
- * WiFi networks page component
- * Now uses React Query for server state and Zustand only for client state
- */
+import { useBackupDetails } from "../../../hooks/backup.hooks";
+import BackupNotFound from "@/features/backup/components/BackupNotFound";
+
 const WiFiPage: React.FC = () => {
   const { backupId } = useParams<{ backupId: string }>();
   const navigate = useNavigate();
+  const { theme } = useBackupTheme();
 
-  // Client-side state from Zustand
+  const {
+    backup,
+    isLoading: isBackupLoading,
+    error: backupError,
+  } = useBackupDetails(backupId);
+
   const {
     filters,
     searchQuery,
@@ -26,7 +32,6 @@ const WiFiPage: React.FC = () => {
     reset,
   } = useWiFiStore();
 
-  // Server state from React Query
   const {
     wifiNetworks,
     stats,
@@ -37,7 +42,6 @@ const WiFiPage: React.FC = () => {
     loadMore,
   } = useWiFiNetworks(backupId!);
 
-  // WiFi details modal (combines React Query + Zustand)
   const {
     currentWiFiNetwork,
     isLoadingDetails,
@@ -46,17 +50,14 @@ const WiFiPage: React.FC = () => {
     closeModal,
   } = useWiFiNetworkDetails(backupId!);
 
-  // Set document title
-  useDocumentTitle("WiFi | xplorta");
+  useDocumentTitle("WiFi | Keepita");
 
-  // Reset client state when component unmounts or backupId changes
   useEffect(() => {
     return () => {
       reset();
     };
   }, [backupId, reset]);
 
-  // Handlers
   const handleBack = useCallback(() => {
     navigate(`/backups/${backupId}`);
   }, [navigate, backupId]);
@@ -65,21 +66,21 @@ const WiFiPage: React.FC = () => {
     (query: string) => {
       setSearchQuery(query);
     },
-    [setSearchQuery]
+    [setSearchQuery],
   );
 
   const handleFilterChange = useCallback(
     (newFilters: typeof filters) => {
       setFilters(newFilters);
     },
-    [setFilters]
+    [setFilters],
   );
 
   const handleSortChange = useCallback(
     (config: typeof sortConfig) => {
       setSortConfig(config);
     },
-    [setSortConfig]
+    [setSortConfig],
   );
 
   const handleClearFilters = useCallback(() => {
@@ -90,22 +91,11 @@ const WiFiPage: React.FC = () => {
     (wifiNetwork: WiFiNetwork) => {
       fetchWiFiNetworkDetails(wifiNetwork.id.toString());
     },
-    [fetchWiFiNetworkDetails]
+    [fetchWiFiNetworkDetails],
   );
 
-  if (!backupId) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Invalid Backup ID
-          </h2>
-          <p className="text-gray-600">
-            Please select a valid backup to view WiFi networks.
-          </p>
-        </div>
-      </div>
-    );
+  if (!backupId || backupError || (!isBackupLoading && !backup)) {
+    return <BackupNotFound />;
   }
 
   return (
@@ -121,6 +111,7 @@ const WiFiPage: React.FC = () => {
       sortConfig={sortConfig}
       onSortChange={handleSortChange}
       totalWiFiNetworks={stats.total}
+      theme={theme as "Samsung" | "Xiaomi" | "Apple"}
     >
       <WiFiList
         wifiNetworks={wifiNetworks}
@@ -130,6 +121,7 @@ const WiFiPage: React.FC = () => {
         isLoadingMore={isLoadingMore}
         onLoadMore={loadMore}
         onWiFiClick={handleWiFiClick}
+        theme={theme as "Samsung" | "Xiaomi" | "Apple"}
       />
       {isDetailsModalOpen && (
         <WiFiDetailsModal
@@ -137,6 +129,7 @@ const WiFiPage: React.FC = () => {
           onClose={closeModal}
           wifiNetwork={currentWiFiNetwork}
           isLoading={isLoadingDetails}
+          theme={theme as "Samsung" | "Xiaomi" | "Apple"}
         />
       )}
     </WiFiLayout>

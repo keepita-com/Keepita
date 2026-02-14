@@ -3,10 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useDocumentTitle } from "../../../../../shared/hooks/useDocumentTitle";
 import { useBrowserManager } from "../hooks/browser.hooks";
-import {
-  SamsungSectionLayout,
-  SamsungSearchAndFilterHeader,
-} from "../../../../../shared/components";
+import { SamsungSectionLayout } from "../../../../../shared/components";
 import { BrowserOverview, BrowserErrorBoundary } from "../components";
 import BookmarksView from "../components/BookmarksView";
 import HistoryView from "../components/HistoryView";
@@ -15,19 +12,29 @@ import SearchesView from "../components/SearchesView";
 import TabsView from "../components/TabsView";
 import BrowserSkeleton from "../components/BrowserSkeleton";
 import { BROWSER_TABS } from "../constants/browser.constants";
-import {
-  getSortOptionsForTab,
-  getSearchPlaceholderForTab,
-} from "../utils/browser.utils";
+import { getSortOptionsForTab } from "../utils/browser.utils";
 import type { BrowserTabType, BrowserFilters } from "../types/browser.types";
+import MobileSearchAndFilterHeader from "@/shared/components/MobileSearchAndFilterHeader";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
+import XiaomiSectionLayout from "@/shared/components/XiaomiSectionLayout";
+import AppleSectionLayout from "@/shared/components/AppleSectionLayout";
+import { useBackupDetails } from "../../../hooks/backup.hooks";
+import BackupNotFound from "@/features/backup/components/BackupNotFound";
 
 const BrowserPage: React.FC = () => {
   const { backupId } = useParams<{ backupId: string }>();
   const navigate = useNavigate();
-  useDocumentTitle("Browser | xplorta");
+  useDocumentTitle("Browser | Keepita");
+  const { theme } = useBackupTheme();
 
-  if (!backupId) {
-    return <div>Invalid Backup ID</div>;
+  const {
+    backup,
+    isLoading: isBackupLoading,
+    error: backupError,
+  } = useBackupDetails(backupId);
+
+  if (!backupId || backupError || (!isBackupLoading && !backup)) {
+    return <BackupNotFound />;
   }
 
   const {
@@ -56,14 +63,14 @@ const BrowserPage: React.FC = () => {
     (tab: BrowserTabType) => {
       setActiveTab(tab);
     },
-    [setActiveTab]
+    [setActiveTab],
   );
 
   const handleFiltersChange = useCallback(
     (filters: Partial<BrowserFilters>) => {
       setFilters(filters);
     },
-    [setFilters]
+    [setFilters],
   );
 
   const handleSortChange = useCallback(
@@ -73,17 +80,13 @@ const BrowserPage: React.FC = () => {
         direction: config.direction,
       });
     },
-    [setSortConfig]
+    [setSortConfig],
   );
 
-  // Get sort options and placeholder for current tab
   const sortOptions = getSortOptionsForTab(activeTab);
-  const searchPlaceholder = getSearchPlaceholderForTab(activeTab);
 
-  // Get current tab info
   const currentTabInfo = BROWSER_TABS.find((tab) => tab.key === activeTab);
 
-  // Get total count for current tab from overview data
   const getTotalCount = () => {
     if (!overviewData) return data?.length || 0;
 
@@ -132,6 +135,8 @@ const BrowserPage: React.FC = () => {
             overview={overviewData}
             stats={statisticsData}
             isLoading={isLoading || false}
+            theme={theme as "Samsung" | "Xiaomi" | "Apple"}
+            handleTabChange={handleTabChange}
           />
         );
       case "Bookmarks":
@@ -142,6 +147,7 @@ const BrowserPage: React.FC = () => {
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
+            theme={theme as "Samsung" | "Xiaomi" | "Apple"}
           />
         );
       case "History":
@@ -152,6 +158,7 @@ const BrowserPage: React.FC = () => {
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
+            theme={theme as "Samsung" | "Xiaomi" | "Apple"}
           />
         );
       case "Downloads":
@@ -162,6 +169,7 @@ const BrowserPage: React.FC = () => {
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
+            theme={theme as "Samsung" | "Xiaomi" | "Apple"}
           />
         );
       case "Searches":
@@ -172,6 +180,7 @@ const BrowserPage: React.FC = () => {
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
+            theme={theme as "Samsung" | "Xiaomi" | "Apple"}
           />
         );
       case "Tabs":
@@ -182,6 +191,7 @@ const BrowserPage: React.FC = () => {
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
+            theme={theme as "Samsung" | "Xiaomi" | "Apple"}
           />
         );
       default:
@@ -189,19 +199,61 @@ const BrowserPage: React.FC = () => {
     }
   };
 
+  const browserThemes = {
+    Samsung: {
+      theme: "Samsung" as "Samsung" | "Xiaomi" | "Apple",
+      layout: SamsungSectionLayout,
+      filterWrapperClassNames: "bg-white border-b border-gray-100",
+      tabsWrapperClassNames:
+        "bg-white border-b border-gray-100 sticky top-0 z-10",
+      tabItemsClassNames:
+        "flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200",
+      tabItemsColorsActive:
+        "bg-blue-500 text-white shadow-lg shadow-blue-500/25",
+      tabItemsColorInActive: "bg-gray-100 text-gray-700 hover:bg-gray-200",
+      bgColor: "bg-white",
+    },
+    Xiaomi: {
+      theme: "Xiaomi" as "Samsung" | "Xiaomi" | "Apple",
+      layout: XiaomiSectionLayout,
+      filterWrapperClassNames: "bg-red-100 border-b border-red-200",
+      tabsWrapperClassNames:
+        "bg-red-50 border-b border-red-200 sticky top-0 z-50",
+      tabItemsClassNames:
+        "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 border border-red-100",
+      tabItemsColorsActive: "bg-red-200 text-stone-700 border-red-300",
+      tabItemsColorInActive: "bg-red-100  text-stone-700 hover:bg-red-200",
+      bgColor: "bg-red-50",
+    },
+    Apple: {
+      theme: "Apple" as "Samsung" | "Xiaomi" | "Apple",
+      layout: AppleSectionLayout,
+      filterWrapperClassNames: "bg-white ",
+      tabsWrapperClassNames: "bg-white  sticky top-0 z-10",
+      tabItemsClassNames:
+        "flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200",
+      tabItemsColorsActive:
+        "bg-blue-500 text-white shadow-lg shadow-blue-500/25",
+      tabItemsColorInActive: "bg-gray-100 text-gray-700 hover:bg-gray-200",
+      bgColor: "bg-white",
+    },
+  };
+
+  const currentTheme = browserThemes[theme as "Samsung" | "Xiaomi" | "Apple"];
+
   return (
     <BrowserErrorBoundary>
-      <SamsungSectionLayout
+      <currentTheme.layout
         title="Browser"
         subtitle={`${
           currentTabInfo?.label || activeTab
         } - ${getTotalCount().toLocaleString()} items`}
         onBack={handleBack}
         isLoading={isLoading}
+        bgColor={currentTheme.bgColor}
       >
         <div className="flex flex-col h-full">
-          {/* Tab Navigation */}
-          <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
+          <div className={currentTheme.tabsWrapperClassNames}>
             <div className="flex overflow-x-auto scrollbar-hide px-4 py-3">
               <div className="flex space-x-2 min-w-max">
                 {BROWSER_TABS.map((tab, index) => {
@@ -217,10 +269,10 @@ const BrowserPage: React.FC = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleTabChange(tab.key)}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                      className={`${currentTheme.tabItemsClassNames} ${
                         isActive
-                          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          ? currentTheme.tabItemsColorsActive
+                          : currentTheme.tabItemsColorInActive
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -232,25 +284,24 @@ const BrowserPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Search and Sort Header (only for non-Overview tabs) */}
           {activeTab !== "Overview" && (
-            <div className="bg-white border-b border-gray-100">
-              <SamsungSearchAndFilterHeader
+            <div className={currentTheme.filterWrapperClassNames}>
+              <MobileSearchAndFilterHeader
                 searchQuery={currentFilters.search || ""}
                 onSearchChange={(query) =>
                   handleFiltersChange({ search: query })
                 }
-                searchPlaceholder={searchPlaceholder}
+                searchPlaceholder="Search browser data..."
                 sortConfig={currentSortConfig}
                 onSortChange={handleSortChange}
                 sortOptions={sortOptions}
                 resultsCount={getTotalCount()}
                 resultsLabel={activeTab.toLowerCase()}
+                theme={currentTheme.theme}
               />
             </div>
           )}
 
-          {/* Content */}
           <div className="flex-1 overflow-hidden">
             <motion.div
               key={activeTab}
@@ -264,7 +315,7 @@ const BrowserPage: React.FC = () => {
             </motion.div>
           </div>
         </div>
-      </SamsungSectionLayout>
+      </currentTheme.layout>
     </BrowserErrorBoundary>
   );
 };

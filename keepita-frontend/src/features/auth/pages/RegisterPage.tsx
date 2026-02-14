@@ -5,12 +5,11 @@ import { useDocumentTitle } from "../../../shared/hooks/useDocumentTitle";
 import AnimatedBackground from "../../../shared/components/AnimatedBackground";
 
 const RegisterPage: React.FC = () => {
-  useDocumentTitle("Register | xplorta");
+  useDocumentTitle("Register | Keepita");
 
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-br from-gray-900 via-gray-900 to-gray-900 relative overflow-hidden">
-            <AnimatedBackground />
-      
+      <AnimatedBackground />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -25,7 +24,7 @@ const RegisterPage: React.FC = () => {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
-            xplorta
+            Keepita
           </h1>
           <p className="text-gray-400 mt-2">Create your account</p>
         </motion.div>

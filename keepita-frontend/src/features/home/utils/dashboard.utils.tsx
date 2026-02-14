@@ -13,15 +13,12 @@ import {
   PhoneCall,
   Users,
   Archive,
-  // Orbit,
-  // icons,
+  Orbit,
 } from "lucide-react";
 import type {
   DashboardOverviewResponse,
   DashboardOverviewResponseStats,
 } from "../types/home.types";
-// import { title } from "process";
-// import path from "path";
 
 export const containerVariants = {
   hidden: { opacity: 0 },
@@ -49,7 +46,7 @@ export const itemVariants = {
 export const getIconComponent = (
   iconName: string,
   size: number = 20,
-  className: string = ""
+  className: string = "",
 ) => {
   const icons: Record<string, React.ReactNode> = {
     MessagesSquare: (
@@ -86,33 +83,8 @@ const FREQUENT_CONTACTS_LIST_DEFAULT_STYLES = {
 };
 
 export const getFrequentContactsStyles = (
-  contacts?: DashboardOverviewResponse["frequently_called_contacts"]
+  contacts?: DashboardOverviewResponse["frequently_called_contacts"],
 ) => {
-  // if (!contacts || contacts.length === 0) {
-  //   const fakeContacts = [
-  //     "Hannah Cole",
-  //     "Victoria Gardner",
-  //     "Sophia Mathis",
-  //     "Verna Owen",
-  //   ];
-
-  //   const fakeModels = [
-  //     "BW66MZYR4025582151008256",
-  //     "UQ90SYUK0000000001132719989850112",
-  //     "ON56ERW27719014346260480",
-  //     "UU20OSNN0001840482967617536",
-  //   ];
-
-  //   return Array.from({ length: 4 })
-  //     .fill(0)
-  //     .map((_, index) => ({
-  //       ...FREQUENT_CONTACTS_LIST_DEFAULT_STYLES,
-  //       title: fakeContacts[index],
-  //       callCount: 0,
-  //       phoneModel: fakeModels[index],
-  //     }));
-  // }
-
   return contacts?.map((c) => ({
     ...FREQUENT_CONTACTS_LIST_DEFAULT_STYLES,
     title: c.name,
@@ -131,24 +103,7 @@ export const getQuickActionsData = () => [
     borderColor: "bg-sky-500/20",
     delay: 0.3,
   },
-  {
-    icon: <Settings size={16} className="text-violet-300" />,
-    title: "Settings",
-    path: "/settings",
-    bgColor: "rgba(167, 139, 250, 0.08)",
-    hoverColor: "rgba(139, 92, 246, 0.2)",
-    borderColor: "bg-violet-500/20",
-    delay: 0.4,
-  },
-  {
-    icon: <Bell size={16} className="text-amber-200" />,
-    title: "Notifications",
-    path: "/notifications",
-    bgColor: "rgba(253, 224, 71, 0.08)",
-    hoverColor: "rgba(251, 191, 36, 0.2)",
-    borderColor: "bg-amber-500/20",
-    delay: 0.5,
-  },
+
   {
     icon: <Archive size={16} className="text-teal-300" />,
     title: "Backups",
@@ -156,6 +111,15 @@ export const getQuickActionsData = () => [
     bgColor: "rgba(45, 212, 191, 0.08)",
     hoverColor: "rgba(20, 184, 166, 0.2)",
     borderColor: "bg-teal-500/20",
+    delay: 0.5,
+  },
+  {
+    icon: <Orbit size={16} className="text-rose-300" />,
+    title: "Plans",
+    path: "/plans",
+    bgColor: "rgba(251, 113, 133, 0.08)",
+    hoverColor: "rgba(244, 114, 182, 0.2)",
+    borderColor: "bg-rose-500/20",
     delay: 0.6,
   },
 ];
@@ -192,7 +156,7 @@ const STATS_STACK_DEFAULT_STYLES = [
 ];
 
 export const getDashboardStatsInfo = (
-  stats?: DashboardOverviewResponseStats
+  stats?: DashboardOverviewResponseStats,
 ) => {
   if (!stats) return STATS_STACK_DEFAULT_STYLES;
 

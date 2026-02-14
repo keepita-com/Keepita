@@ -1,7 +1,3 @@
-/**
- * BrowserErrorBoundary.tsx
- * Error boundary component for browser section
- */
 import React from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle, RefreshCw } from "lucide-react";

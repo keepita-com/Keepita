@@ -1,7 +1,8 @@
 import React, { type ReactNode, useCallback, memo } from "react";
 import { motion } from "framer-motion";
 import SamsungSectionLayout from "../../../../../shared/components/SamsungSectionLayout";
-import SamsungSearchAndFilterHeader from "../../../../../shared/components/SamsungSearchAndFilterHeader";
+import AppleSectionLayout from "../../../../../shared/components/AppleSectionLayout";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
 import {
   type BluetoothFilters,
   type BluetoothDeviceType,
@@ -11,6 +12,7 @@ import {
   BLUETOOTH_DEVICE_TYPE_FILTERS,
   BLUETOOTH_BOND_STATE_FILTERS,
 } from "../constants/bluetooth.constants";
+import MobileSearchAndFilterHeader from "@/shared/components/MobileSearchAndFilterHeader";
 
 interface BluetoothLayoutProps {
   children: ReactNode;
@@ -19,7 +21,7 @@ interface BluetoothLayoutProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onBack: () => void;
-  // Filter and sort props
+
   filters: BluetoothFilters;
   onFilterChange: (filters: BluetoothFilters) => void;
   onClearFilters: () => void;
@@ -45,7 +47,8 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
     onSortChange,
     totalDevices = 0,
   }) => {
-    // Helper function to handle device type filtering
+    const { theme } = useBackupTheme();
+
     const handleDeviceTypeFilter = useCallback(
       (type: BluetoothDeviceType) => {
         const isCurrentlySelected = filters.device_type === type;
@@ -55,15 +58,14 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
         };
         onFilterChange(newFilters);
       },
-      [filters, onFilterChange]
+      [filters, onFilterChange],
     );
 
-    // Helper function to check if a device type is selected
     const isDeviceTypeSelected = useCallback(
       (type: BluetoothDeviceType): boolean => {
         return filters.device_type === type;
       },
-      [filters.device_type]
+      [filters.device_type],
     );
 
     const handleBondStateFilter = useCallback(
@@ -74,22 +76,21 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
         };
         onFilterChange(newFilters);
       },
-      [filters, onFilterChange]
+      [filters, onFilterChange],
     );
 
     const hasActiveFilters = Boolean(
       filters.device_class ||
-        filters.device_type ||
-        filters.bond_state !== undefined ||
-        filters.date_from ||
-        filters.date_to ||
-        filters.name ||
-        filters.address ||
-        filters.appearance ||
-        filters.link_type
+      filters.device_type ||
+      filters.bond_state !== undefined ||
+      filters.date_from ||
+      filters.date_to ||
+      filters.name ||
+      filters.address ||
+      filters.appearance ||
+      filters.link_type,
     );
 
-    // Convert sort options for the header component
     const sortOptions = BLUETOOTH_SORT_OPTIONS.map((option) => ({
       value: option.value,
       label: option.label,
@@ -97,7 +98,6 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
       direction: option.direction,
     }));
 
-    // Current sort configuration
     const sortConfig = {
       field: sortBy,
       direction: sortOrder as "asc" | "desc",
@@ -107,13 +107,11 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
       (config: { field: string; direction: "asc" | "desc" }) => {
         onSortChange(config.field, config.direction);
       },
-      [onSortChange]
+      [onSortChange],
     );
 
-    // Custom filter elements
     const customFilterElements = (
       <>
-        {/* Device Type Categories */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700">Device Types</h4>
           <div className="flex flex-wrap gap-2">
@@ -130,8 +128,8 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
                   onClick={() => handleDeviceTypeFilter(category.key)}
                   className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
                     isSelected
-                      ? "bg-blue-500 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-[#007AFF] text-white "
+                      : "bg-white text-[#2F7CF5]"
                   }`}
                 >
                   <span className="text-base">{category.icon}</span>
@@ -144,7 +142,6 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
           </div>
         </div>
 
-        {/* Connection Status Filters */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700">
             Connection Status
@@ -160,8 +157,8 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
                   onClick={() => handleBondStateFilter(bondStatus.value)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     isSelected
-                      ? "bg-blue-500 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-[#007AFF] text-white "
+                      : "bg-white text-[#2F7CF5]"
                   }`}
                 >
                   <div className={`w-2 h-2 rounded-full ${bondStatus.color}`} />
@@ -174,9 +171,12 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
       </>
     );
 
+    const LayoutComponent =
+      theme === "Apple" ? AppleSectionLayout : SamsungSectionLayout;
+
     return (
-      <SamsungSectionLayout title={title} subtitle={subtitle} onBack={onBack}>
-        <SamsungSearchAndFilterHeader
+      <LayoutComponent title={title} subtitle={subtitle} onBack={onBack}>
+        <MobileSearchAndFilterHeader
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
           searchPlaceholder="Search devices..."
@@ -188,11 +188,15 @@ const BluetoothLayout: React.FC<BluetoothLayoutProps> = memo(
           sortOptions={sortOptions}
           resultsCount={totalDevices}
           resultsLabel="devices"
+          theme={theme as "Samsung" | "Xiaomi" | "Apple"}
+          classOverrides={{
+            containerClass: "mx-5",
+          }}
         />
         {children}
-      </SamsungSectionLayout>
+      </LayoutComponent>
     );
-  }
+  },
 );
 
 export default BluetoothLayout;

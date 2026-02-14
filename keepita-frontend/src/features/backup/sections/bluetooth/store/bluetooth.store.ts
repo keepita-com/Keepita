@@ -6,11 +6,7 @@ import type {
   BluetoothSortConfig,
 } from "../types/bluetooth.types";
 
-/**
- * Bluetooth store state interface - Only client-side state
- */
 interface BluetoothStoreState {
-  // Client-side UI state only
   selectedDevice: BluetoothDevice | null;
   selectedDevices: number[];
   searchQuery: string;
@@ -19,33 +15,23 @@ interface BluetoothStoreState {
   sortConfig: BluetoothSortConfig;
 }
 
-/**
- * Bluetooth store actions interface - Only client-side actions
- */
 interface BluetoothStoreActions {
-  // Device selection (client-side only)
   selectDevice: (device: BluetoothDevice | null) => void;
   selectMultipleDevices: (deviceIds: number[]) => void;
   toggleDeviceSelection: (deviceId: number) => void;
   clearSelection: () => void;
   selectAllDevices: (deviceIds: number[]) => void;
 
-  // Search and filters (client-side only)
   setSearchQuery: (query: string) => void;
   setFilters: (filters: Partial<BluetoothFilters>) => void;
   resetFilters: () => void;
 
-  // View settings (client-side only)
   setViewMode: (mode: BluetoothViewMode) => void;
   setSortConfig: (config: BluetoothSortConfig) => void;
 
-  // Utility actions
   reset: () => void;
 }
 
-/**
- * Initial state - Only client-side state
- */
 const initialState: BluetoothStoreState = {
   selectedDevice: null,
   selectedDevices: [],
@@ -57,15 +43,11 @@ const initialState: BluetoothStoreState = {
   },
 };
 
-/**
- * Bluetooth store implementation - Only client-side state management
- */
 export const useBluetoothStore = create<
   BluetoothStoreState & BluetoothStoreActions
 >((set) => ({
   ...initialState,
 
-  // Device selection (client-side only)
   selectDevice: (selectedDevice: BluetoothDevice | null) => {
     set({ selectedDevice });
   },
@@ -90,7 +72,6 @@ export const useBluetoothStore = create<
     set({ selectedDevices: deviceIds });
   },
 
-  // Search and filters (client-side only)
   setSearchQuery: (searchQuery: string) => {
     set({ searchQuery });
   },
@@ -108,7 +89,6 @@ export const useBluetoothStore = create<
     });
   },
 
-  // View settings (client-side only)
   setViewMode: (viewMode: BluetoothViewMode) => {
     set({ viewMode });
   },
@@ -117,19 +97,15 @@ export const useBluetoothStore = create<
     set({ sortConfig });
   },
 
-  // Utility actions
   reset: () => {
     set(initialState);
   },
 }));
 
-/**
- * Selectors for computed client-side state
- */
 export const bluetoothSelectors = {
   getSelectedDevicesFromList: (
     selectedDeviceIds: number[],
-    allDevices: BluetoothDevice[]
+    allDevices: BluetoothDevice[],
   ) => {
     return allDevices.filter((device) => selectedDeviceIds.includes(device.id));
   },

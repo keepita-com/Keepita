@@ -69,7 +69,6 @@ const Pagination: React.FC<PaginationProps> = ({
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col gap-3 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm mt-4"
     >
-      {/* Results Info */}
       <div className="flex justify-center">
         <span className="text-gray-600 text-sm">
           Showing {Math.min((currentPage - 1) * 20 + 1, totalResults)}-
@@ -77,9 +76,7 @@ const Pagination: React.FC<PaginationProps> = ({
         </span>
       </div>
 
-      {/* Desktop Pagination */}
       <div className="hidden md:flex justify-center items-center gap-2">
-        {/* Previous Button */}
         <motion.button
           whileHover={hasPrevious ? { scale: 1.05 } : {}}
           whileTap={hasPrevious ? { scale: 0.95 } : {}}
@@ -96,7 +93,6 @@ const Pagination: React.FC<PaginationProps> = ({
           Previous
         </motion.button>
 
-        {/* Page Numbers */}
         <div className="flex items-center gap-1">
           <AnimatePresence mode="wait">
             {visiblePages.map((page, index) => (
@@ -131,7 +127,6 @@ const Pagination: React.FC<PaginationProps> = ({
           </AnimatePresence>
         </div>
 
-        {/* Next Button */}
         <motion.button
           whileHover={hasNext ? { scale: 1.05 } : {}}
           whileTap={hasNext ? { scale: 0.95 } : {}}
@@ -149,7 +144,6 @@ const Pagination: React.FC<PaginationProps> = ({
         </motion.button>
       </div>
 
-      {/* Mobile Pagination */}
       <div className="flex md:hidden justify-center items-center gap-3">
         <motion.button
           whileHover={hasPrevious ? { scale: 1.05 } : {}}

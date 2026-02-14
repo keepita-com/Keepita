@@ -1,22 +1,22 @@
-// Samsung One UI 6 Color System
-// Based on official Samsung One UI 6 design guidelines
+
+
 
 export const samsungColors = {
-  // Primary Brand Colors
+  
   primary: {
     50: "#e8f4ff",
     100: "#c3e3ff",
     200: "#9bd1ff",
     300: "#6dbeff",
     400: "#42abff",
-    500: "#1c96ff", // Samsung Blue
+    500: "#1c96ff", 
     600: "#1a87e6",
     700: "#1876cc",
     800: "#1565b3",
     900: "#124d8a",
   },
 
-  // Background Colors
+  
   background: {
     primary: "#ffffff",
     secondary: "#f8f9fa",
@@ -25,7 +25,7 @@ export const samsungColors = {
     overlay: "rgba(0, 0, 0, 0.4)",
   },
 
-  // Surface Colors
+  
   surface: {
     primary: "#ffffff",
     secondary: "#f8f9fa",
@@ -34,7 +34,7 @@ export const samsungColors = {
     container: "#f1f3f4",
   },
 
-  // Text Colors
+  
   text: {
     primary: "#1f1f1f",
     secondary: "#5f6368",
@@ -44,7 +44,7 @@ export const samsungColors = {
     accent: "#1c96ff",
   },
 
-  // Icon Colors
+  
   icon: {
     primary: "#5f6368",
     secondary: "#80868b",
@@ -53,7 +53,7 @@ export const samsungColors = {
     inverse: "#ffffff",
   },
 
-  // Border Colors
+  
   border: {
     light: "#e8eaed",
     medium: "#dadce0",
@@ -61,7 +61,7 @@ export const samsungColors = {
     accent: "#1c96ff",
   },
 
-  // Status Colors
+  
   status: {
     success: "#34a853",
     warning: "#fbbc05",
@@ -69,7 +69,7 @@ export const samsungColors = {
     info: "#1c96ff",
   },
 
-  // Samsung Specific Colors
+  
   samsung: {
     blue: "#1c96ff",
     lightBlue: "#e8f4ff",
@@ -85,7 +85,7 @@ export const samsungColors = {
     gray900: "#1f1f1f",
   },
 
-  // Contact Specific Colors
+  
   contact: {
     avatarBg: [
       "#ff6b6b",
@@ -104,7 +104,7 @@ export const samsungColors = {
     offlineStatus: "#9aa0a6",
   },
 
-  // Interaction States
+  
   interaction: {
     hover: "rgba(28, 150, 255, 0.08)",
     pressed: "rgba(28, 150, 255, 0.12)",
@@ -113,7 +113,7 @@ export const samsungColors = {
     disabled: "rgba(0, 0, 0, 0.12)",
   },
 
-  // Dark Mode Support (for future use)
+  
   dark: {
     background: {
       primary: "#121212",
@@ -135,7 +135,7 @@ export const samsungColors = {
   },
 } as const;
 
-// Helper functions for color usage
+
 export const getSamsungColors = () => samsungColors;
 
 export const getContactAvatarColor = (index: number): string => {
@@ -156,9 +156,9 @@ export const getSamsungBackgroundColor = (
   return samsungColors.background[variant];
 };
 
-// Tailwind CSS classes mapping for Samsung colors
+
 export const samsungTailwindClasses = {
-  // Background classes
+  
   bg: {
     primary: "bg-white",
     secondary: "bg-gray-50",
@@ -167,7 +167,7 @@ export const samsungTailwindClasses = {
     surface: "bg-white",
   },
 
-  // Text classes
+  
   text: {
     primary: "text-gray-900",
     secondary: "text-gray-600",
@@ -176,20 +176,20 @@ export const samsungTailwindClasses = {
     inverse: "text-white",
   },
 
-  // Border classes
+  
   border: {
     light: "border-gray-200",
     medium: "border-gray-300",
     accent: "border-blue-500",
   },
 
-  // Hover states
+  
   hover: {
     bg: "hover:bg-gray-50",
     text: "hover:text-blue-600",
   },
 
-  // Active states
+  
   active: {
     bg: "active:bg-gray-100",
     text: "active:text-blue-700",

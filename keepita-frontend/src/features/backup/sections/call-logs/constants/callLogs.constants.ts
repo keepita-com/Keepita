@@ -1,26 +1,22 @@
-// Call logs constants following Samsung One UI design guidelines
-
 import { PhoneMissed, User, PhoneIncoming, PhoneOutgoing } from "lucide-react";
 
-// Samsung One UI Colors for Call Logs
 export const CALL_LOGS_COLORS = {
-  // Call type colors following Samsung One UI palette
   INCOMING: {
-    primary: "#1976D2", // Samsung Blue
+    primary: "#1976D2",
     background: "#E3F2FD",
     hover: "#1565C0",
   },
   OUTGOING: {
-    primary: "#388E3C", // Samsung Green
+    primary: "#388E3C",
     background: "#E8F5E8",
     hover: "#2E7D32",
   },
   MISSED: {
-    primary: "#D32F2F", // Samsung Red
+    primary: "#D32F2F",
     background: "#FFEBEE",
     hover: "#C62828",
   },
-  // UI Colors
+
   TEXT: {
     primary: "#1C1C1E",
     secondary: "#8E8E93",
@@ -35,7 +31,6 @@ export const CALL_LOGS_COLORS = {
   SHADOW: "rgba(0, 0, 0, 0.1)",
 } as const;
 
-// Samsung One UI Typography Scale
 export const CALL_LOGS_TYPOGRAPHY = {
   HEADING: {
     fontSize: "28px",
@@ -69,7 +64,6 @@ export const CALL_LOGS_TYPOGRAPHY = {
   },
 } as const;
 
-// Samsung One UI Spacing System
 export const CALL_LOGS_SPACING = {
   XS: "4px",
   SM: "8px",
@@ -80,7 +74,6 @@ export const CALL_LOGS_SPACING = {
   XXXL: "32px",
 } as const;
 
-// Samsung One UI Border Radius
 export const CALL_LOGS_BORDER_RADIUS = {
   SM: "8px",
   MD: "12px",
@@ -89,14 +82,12 @@ export const CALL_LOGS_BORDER_RADIUS = {
   ROUND: "50%",
 } as const;
 
-// Call type display mappings
 export const CALL_TYPE_LABELS = {
   INCOMING: "Incoming",
   OUTGOING: "Outgoing",
   MISSED: "Missed",
 } as const;
 
-// Call type icons (Samsung One UI style)
 export const CALL_TYPE_ICONS = {
   INCOMING: "call_received",
   OUTGOING: "call_made",
@@ -120,7 +111,6 @@ export const CALL_LOG_TYPE_FILTERS = [
   { value: "MISSED", label: "Missed", icon: PhoneMissed },
 ] as const;
 
-// Animation durations following Samsung One UI
 export const CALL_LOGS_ANIMATIONS = {
   FAST: "150ms",
   NORMAL: "250ms",
@@ -129,7 +119,6 @@ export const CALL_LOGS_ANIMATIONS = {
   EASE_OUT: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
 } as const;
 
-// Samsung One UI Component Heights
 export const CALL_LOGS_HEIGHTS = {
   ITEM: "72px",
   ITEM_COMPACT: "56px",
@@ -139,28 +128,24 @@ export const CALL_LOGS_HEIGHTS = {
   BUTTON_SMALL: "36px",
 } as const;
 
-// Pagination constants
 export const CALL_LOGS_PAGINATION = {
   DEFAULT_PAGE_SIZE: 50,
   PAGE_SIZE_OPTIONS: [25, 50, 100, 200],
-  INFINITE_SCROLL_THRESHOLD: 100, // pixels from bottom
+  INFINITE_SCROLL_THRESHOLD: 100,
 } as const;
 
-// Export formats
 export const CALL_LOGS_EXPORT_FORMATS = [
   { value: "csv", label: "CSV File", extension: ".csv" },
   { value: "json", label: "JSON File", extension: ".json" },
   { value: "pdf", label: "PDF Report", extension: ".pdf" },
 ] as const;
 
-// Samsung One UI Elevation Shadows
 export const CALL_LOGS_SHADOWS = {
   CARD: "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
   ELEVATED: "0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)",
   MODAL: "0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)",
 } as const;
 
-// Call logs feature flags
 export const CALL_LOGS_FEATURES = {
   INFINITE_SCROLL: true,
   EXPORT_FUNCTIONALITY: true,

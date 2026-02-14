@@ -5,7 +5,7 @@ import CallLogList from "../components/CallLogList";
 import CallLogScrollToTop from "../components/CallLogScrollToTop";
 import CallLogSkeletonList from "../components/CallLogSkeletonList";
 import SamsungSectionLayout from "../../../../../shared/components/SamsungSectionLayout";
-import SamsungSearchAndFilterHeader from "../../../../../shared/components/SamsungSearchAndFilterHeader";
+import XiaomiSectionLayout from "@/shared/components/XiaomiSectionLayout";
 import { useCallLogsQuery } from "../hooks/callLogs.hooks";
 import {
   CALL_LOG_BOOLEAN_FILTERS,
@@ -13,6 +13,12 @@ import {
   CALL_LOG_TYPE_FILTERS,
 } from "../constants/callLogs.constants";
 import type { CallType } from "../types/callLogs.types";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
+import MobileSearchAndFilterHeader from "@/shared/components/MobileSearchAndFilterHeader";
+import { AppleSectionLayout } from "@/shared/components";
+
+import { useBackupDetails } from "../../../hooks/backup.hooks";
+import BackupNotFound from "@/features/backup/components/BackupNotFound";
 
 interface CallLogsFilters {
   call_type?: CallType;
@@ -25,12 +31,54 @@ interface CallLogsFilters {
   search?: string;
 }
 
+type Theme = "Samsung" | "Xiaomi" | "Apple";
+
+const themeConfig = {
+  Samsung: {
+    Layout: SamsungSectionLayout,
+    wrapper: "p-6 bg-white",
+    headerProps: { searchPlaceholder: "Search call logs...", theme: "Samsung" },
+    extra: <CallLogScrollToTop />,
+  },
+  Xiaomi: {
+    Layout: XiaomiSectionLayout,
+    wrapper: "bg-red-100 px-4",
+    headerProps: {
+      searchPlaceholder: "Search call logs",
+      theme: "Xiaomi",
+      searchInputBackgroundColor: "bg-gray-100",
+    },
+    extra: null,
+  },
+  Apple: {
+    Layout: AppleSectionLayout,
+    wrapper: "px-4 py-2 bg-white",
+    headerProps: {
+      searchPlaceholder: "Search call logs... ",
+      theme: "Apple",
+      searchInputBackgroundColor: "bg-blue-200 shadow-none rounded-2xl",
+    },
+    extra: null,
+  },
+};
+
 const CallLogsPage: React.FC = () => {
+  const { theme } = useBackupTheme();
+  const currentTheme = themeConfig[theme as Theme] ?? themeConfig.Samsung;
+
   const { backupId } = useParams();
   const navigate = useNavigate();
-  useDocumentTitle("Call Logs | xplorta");
+  useDocumentTitle("Call Logs | Keepita");
 
-  console.log("CallLogsPage: backupId from params", backupId);
+  const {
+    backup,
+    isLoading: isBackupLoading,
+    error: backupError,
+  } = useBackupDetails(backupId);
+
+  if (!backupId || backupError || (!isBackupLoading && !backup)) {
+    return <BackupNotFound />;
+  }
 
   const {
     callLogs,
@@ -45,17 +93,6 @@ const CallLogsPage: React.FC = () => {
     isFetchingNextPage,
   } = useCallLogsQuery(backupId);
 
-  console.log("CallLogsPage: Hook state", {
-    callLogsCount: callLogs.length,
-    totalResults,
-    isLoading,
-    isFetching,
-    error: error?.message,
-    hasNextPage,
-    showingSkeleton: (isLoading || isFetching) && callLogs.length === 0,
-  });
-
-  // Convert query params to filters format for the layout
   const filters = useMemo(
     (): CallLogsFilters => ({
       call_type: queryParams.call_type as CallType,
@@ -67,30 +104,21 @@ const CallLogsPage: React.FC = () => {
       duration_max: queryParams.duration_max,
       search: queryParams.search,
     }),
-    [queryParams]
+    [queryParams],
   );
 
   const handleSearchChange = useCallback(
     (search: string) => {
       updateQueryParams({ search });
     },
-    [updateQueryParams]
+    [updateQueryParams],
   );
 
   const handleFilterChange = useCallback(
     (newFilters: CallLogsFilters) => {
-      updateQueryParams({
-        call_type: newFilters.call_type,
-        has_contact: newFilters.has_contact,
-        missed_calls: newFilters.missed_calls,
-        date_from: newFilters.date_from,
-        date_to: newFilters.date_to,
-        duration_min: newFilters.duration_min,
-        duration_max: newFilters.duration_max,
-        search: newFilters.search,
-      });
+      updateQueryParams(newFilters);
     },
-    [updateQueryParams]
+    [updateQueryParams],
   );
 
   const handleClearFilters = useCallback(() => {
@@ -111,10 +139,9 @@ const CallLogsPage: React.FC = () => {
       const ordering = sortOrder === "desc" ? `-${sortBy}` : sortBy;
       updateQueryParams({ ordering });
     },
-    [updateQueryParams]
+    [updateQueryParams],
   );
 
-  // Parse current sort from ordering parameter
   const { sortBy, sortOrder } = useMemo(() => {
     const ordering = queryParams.ordering || "date";
     if (ordering.startsWith("-")) {
@@ -123,37 +150,56 @@ const CallLogsPage: React.FC = () => {
     return { sortBy: ordering, sortOrder: "asc" as const };
   }, [queryParams.ordering]);
 
-  // Prepare sort options using constants
   const sortOptions = CALL_LOG_SORT_OPTIONS.map((option) => {
-    // Parse the sort value to extract field and direction
     const isDesc = option.value.startsWith("-");
     const field = isDesc ? option.value.slice(1) : option.value;
-    const direction = isDesc ? "desc" : "asc";
-
     return {
       value: option.value,
       label: option.label,
       field,
-      direction: direction as "asc" | "desc",
+      direction: (isDesc ? "desc" : "asc") as "asc" | "desc",
     };
   });
 
   const hasActiveFilters = Boolean(
     filters.missed_calls ||
-      filters.has_contact ||
-      filters.call_type ||
-      filters.date_from ||
-      filters.date_to ||
-      filters.duration_min ||
-      filters.duration_max
+    filters.has_contact ||
+    filters.call_type ||
+    filters.date_from ||
+    filters.date_to ||
+    filters.duration_min ||
+    filters.duration_max,
   );
 
-  // Create custom filter elements with both call type and boolean filters
+  const getFilterButtonClasses = (isActive: boolean) => {
+    if (theme === "Samsung") {
+      return `rounded-full ${
+        isActive
+          ? "bg-blue-600 text-white"
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      }`;
+    }
+
+    if (theme === "Apple") {
+      return `rounded-2xl ${
+        isActive
+          ? "bg-[#007AFF] text-white"
+          : "bg-white text-[#007AFF] shadow-none hover:bg-gray-50/20"
+      }`;
+    }
+
+    return `rounded-lg  ${
+      isActive
+        ? "bg-red-300/50 text-stone-700"
+        : "bg-red-200/50 text-stone-700 hover:bg-red-300/30"
+    }`;
+  };
+
   const customFilterElements = (
-    <div className="space-y-4">
-      {/* Call Type Filters */}
+    <div className={`space-y-4 ${theme === "Xiaomi" && "px-4"}`}>
       <div>
         <h4 className="text-sm font-medium text-gray-800 mb-2">Call Type</h4>
+
         <div className="flex flex-wrap gap-2">
           {CALL_LOG_TYPE_FILTERS.map((filter) => {
             const IconComponent = filter.icon;
@@ -162,33 +208,32 @@ const CallLogsPage: React.FC = () => {
             return (
               <button
                 key={filter.value}
-                onClick={() => {
+                onClick={() =>
                   handleFilterChange({
                     ...filters,
                     call_type: isActive
                       ? undefined
                       : (filter.value as CallType),
-                  });
-                }}
-                className={`
-                  flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all
-                  ${
-                    isActive
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }
-                `}
+                  })
+                }
+                className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all ${getFilterButtonClasses(
+                  isActive,
+                )}`}
               >
                 <IconComponent
                   className={`w-4 h-4 ${
                     filter.value === "INCOMING"
                       ? "text-green-600"
                       : filter.value === "OUTGOING"
-                      ? "text-blue-600"
-                      : filter.value === "MISSED"
-                      ? "text-red-600"
+                        ? "text-blue-600"
+                        : filter.value === "MISSED"
+                          ? "text-red-600"
+                          : ""
+                  } ${
+                    isActive && (theme === "Samsung" || theme === "Apple")
+                      ? "text-white"
                       : ""
-                  } ${isActive ? "text-white" : ""}`}
+                  }`}
                 />
                 <span>{filter.label}</span>
               </button>
@@ -197,7 +242,6 @@ const CallLogsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Boolean Filters */}
       <div>
         <h4 className="text-sm font-medium text-gray-800 mb-2">
           Other Filters
@@ -211,24 +255,21 @@ const CallLogsPage: React.FC = () => {
             return (
               <button
                 key={filter.key}
-                onClick={() => {
+                onClick={() =>
                   handleFilterChange({
                     ...filters,
                     [filter.key]: isActive ? undefined : true,
-                  });
-                }}
-                className={`
-                  flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all
-                  ${
-                    isActive
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }
-                `}
+                  })
+                }
+                className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all ${getFilterButtonClasses(
+                  isActive,
+                )}`}
               >
                 <IconComponent
                   className={`w-4 h-4 text-green-600 ${
-                    isActive ? "text-white" : ""
+                    isActive && (theme === "Samsung" || theme === "Apple")
+                      ? "text-white"
+                      : ""
                   }`}
                 />
                 <span>{filter.label}</span>
@@ -240,16 +281,17 @@ const CallLogsPage: React.FC = () => {
     </div>
   );
 
+  const Layout = currentTheme.Layout;
+
   return (
-    <SamsungSectionLayout
+    <Layout
       title="Call logs"
       subtitle={`${totalResults} ${totalResults === 1 ? "call" : "calls"}`}
       onBack={() => navigate(`/backups/${backupId}`)}
     >
-      <SamsungSearchAndFilterHeader
+      <MobileSearchAndFilterHeader
         searchQuery={queryParams.search || ""}
         onSearchChange={handleSearchChange}
-        searchPlaceholder="Search call logs..."
         customFilterElements={customFilterElements}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
@@ -260,11 +302,11 @@ const CallLogsPage: React.FC = () => {
         sortOptions={sortOptions}
         resultsCount={totalResults}
         resultsLabel="calls"
+        {...currentTheme.headerProps}
+        theme={theme as Theme}
       />
 
-      {/* Main Content */}
-      <div className="p-6 bg-white">
-        {/* Show skeleton when initially loading and no data */}
+      <div className={currentTheme.wrapper}>
         {(isLoading || isFetching) && callLogs.length === 0 ? (
           <div>
             <p className="text-sm text-gray-500 mb-4">Loading call logs...</p>
@@ -282,8 +324,8 @@ const CallLogsPage: React.FC = () => {
         )}
       </div>
 
-      <CallLogScrollToTop />
-    </SamsungSectionLayout>
+      {currentTheme.extra}
+    </Layout>
   );
 };
 

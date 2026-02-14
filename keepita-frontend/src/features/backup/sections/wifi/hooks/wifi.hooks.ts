@@ -10,14 +10,9 @@ import type { WiFiQueryParams, WiFiNetwork } from "../types/wifi.types";
 
 const WIFI_QUERY_KEY = "wifi";
 
-/**
- * Hook for fetching WiFi networks with infinite scroll
- * React Query is the single source of truth for server state
- */
 export const useWiFiNetworks = (backupId: string) => {
   const { filters, searchQuery, sortConfig } = useWiFiStore();
 
-  // Build query parameters from client-side state
   const buildQueryParams = useCallback((): Omit<WiFiQueryParams, "page"> => {
     return {
       page_size: 20,
@@ -32,7 +27,6 @@ export const useWiFiNetworks = (backupId: string) => {
 
   const baseQueryParams = buildQueryParams();
 
-  // Create query key that includes all parameters
   const queryKey = [WIFI_QUERY_KEY, backupId, baseQueryParams];
 
   const query = useInfiniteQuery({
@@ -43,31 +37,29 @@ export const useWiFiNetworks = (backupId: string) => {
         page: pageParam,
       }),
     enabled: !!backupId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     getNextPageParam: (lastPage) =>
       lastPage.has_next ? lastPage.current_page + 1 : undefined,
     initialPageParam: 1,
     refetchOnWindowFocus: false,
   });
 
-  // Flatten all WiFi networks from React Query data
   const allWiFiNetworks = useMemo(() => {
     if (!query.data?.pages) return [];
     return query.data.pages.flatMap((page) => page.results);
   }, [query.data]);
 
-  // Calculate stats from React Query data
   const stats = useMemo(() => {
     const totalFromBackend = query.data?.pages[0]?.total_results || 0;
     const secureNetworks = allWiFiNetworks.filter(
-      (network) => network.security_type !== "NONE"
+      (network) => network.security_type !== "NONE",
     ).length;
     const savedNetworks = allWiFiNetworks.filter(
-      (network) => network.is_saved
+      (network) => network.is_saved,
     ).length;
     const connectedNetworks = allWiFiNetworks.filter(
-      (network) => network.connection_status === "Connected"
+      (network) => network.connection_status === "Connected",
     ).length;
 
     return {
@@ -89,7 +81,6 @@ export const useWiFiNetworks = (backupId: string) => {
   }, [query]);
 
   return {
-    // Server state from React Query
     wifiNetworks: allWiFiNetworks,
     stats,
     isLoading: query.isLoading,
@@ -97,30 +88,22 @@ export const useWiFiNetworks = (backupId: string) => {
     hasMore: query.hasNextPage,
     error: query.error ? (query.error as Error).message : null,
 
-    // Actions
     loadMore,
     refresh,
     refetch: query.refetch,
   };
 };
 
-/**
- * Hook for fetching a single WiFi network
- * React Query manages the server state
- */
 export const useWiFiNetwork = (backupId: string, wifiId: string) => {
   return useQuery({
     queryKey: [WIFI_QUERY_KEY, backupId, wifiId],
     queryFn: () => getWiFiNetwork(backupId, wifiId),
     enabled: !!backupId && !!wifiId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 };
 
-/**
- * Hook for WiFi actions and cache management
- */
 export const useWiFiActions = () => {
   const queryClient = useQueryClient();
 
@@ -130,7 +113,7 @@ export const useWiFiActions = () => {
         queryKey: [WIFI_QUERY_KEY, backupId],
       });
     },
-    [queryClient]
+    [queryClient],
   );
 
   return {
@@ -138,10 +121,6 @@ export const useWiFiActions = () => {
   };
 };
 
-/**
- * Hook for WiFi network details modal
- * Combines React Query for server state with Zustand for UI state
- */
 export const useWiFiNetworkDetails = (backupId: string) => {
   const {
     selectedWiFiNetwork,
@@ -151,18 +130,16 @@ export const useWiFiNetworkDetails = (backupId: string) => {
     closeDetailsModal,
   } = useWiFiStore();
 
-  // Query for fetching network details
   const detailsQuery = useQuery({
     queryKey: [WIFI_QUERY_KEY, backupId, selectedWiFiNetwork?.id],
     queryFn: () => getWiFiNetwork(backupId, selectedWiFiNetwork!.id.toString()),
     enabled: !!backupId && !!selectedWiFiNetwork?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
   const fetchWiFiNetworkDetails = useCallback(
     (wifiId: string) => {
-      // Find the network from current data or set a minimal network object
       const networkStub: WiFiNetwork = {
         id: parseInt(wifiId),
         ssid: "Loading...",
@@ -185,7 +162,7 @@ export const useWiFiNetworkDetails = (backupId: string) => {
       setSelectedWiFiNetwork(networkStub);
       openDetailsModal();
     },
-    [setSelectedWiFiNetwork, openDetailsModal]
+    [setSelectedWiFiNetwork, openDetailsModal],
   );
 
   const handleCloseModal = useCallback(() => {
@@ -193,15 +170,12 @@ export const useWiFiNetworkDetails = (backupId: string) => {
   }, [closeDetailsModal]);
 
   return {
-    // Server state from React Query
     currentWiFiNetwork: detailsQuery.data || selectedWiFiNetwork,
     isLoadingDetails: detailsQuery.isLoading,
     error: detailsQuery.error ? (detailsQuery.error as Error).message : null,
 
-    // Client state from Zustand
     isDetailsModalOpen,
 
-    // Actions
     fetchWiFiNetworkDetails,
     closeModal: handleCloseModal,
     refetch: detailsQuery.refetch,

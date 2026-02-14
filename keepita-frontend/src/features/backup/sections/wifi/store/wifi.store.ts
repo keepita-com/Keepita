@@ -6,20 +6,14 @@ import type {
   WiFiSortConfig,
 } from "../types/wifi.types";
 
-/**
- * WiFi store interface - Only client-side state
- */
 interface WiFiStore {
-  // Client-side UI state only
   selectedWiFiNetwork: WiFiNetwork | null;
   isDetailsModalOpen: boolean;
 
-  // Filters and Search (client-side)
   filters: WiFiFilters;
   searchQuery: string;
   sortConfig: WiFiSortConfig;
 
-  // Actions for client-side state only
   setSelectedWiFiNetwork: (wifiNetwork: WiFiNetwork | null) => void;
   openDetailsModal: () => void;
   closeDetailsModal: () => void;
@@ -30,9 +24,6 @@ interface WiFiStore {
   reset: () => void;
 }
 
-/**
- * Initial state - Only client-side state
- */
 const initialState = {
   selectedWiFiNetwork: null,
   isDetailsModalOpen: false,
@@ -41,9 +32,6 @@ const initialState = {
   sortConfig: { field: "created_at" as const, direction: "desc" as const },
 };
 
-/**
- * WiFi store implementation - Only client-side state management
- */
 export const useWiFiStore = create<WiFiStore>()(
   devtools(
     (set) => ({
@@ -62,7 +50,7 @@ export const useWiFiStore = create<WiFiStore>()(
             selectedWiFiNetwork: null,
           },
           false,
-          "closeDetailsModal"
+          "closeDetailsModal",
         ),
 
       setFilters: (filters) => set({ filters }, false, "setFilters"),
@@ -80,13 +68,13 @@ export const useWiFiStore = create<WiFiStore>()(
             searchQuery: "",
           },
           false,
-          "clearFilters"
+          "clearFilters",
         ),
 
       reset: () => set(initialState, false, "reset"),
     }),
     {
       name: "wifi-store",
-    }
-  )
+    },
+  ),
 );

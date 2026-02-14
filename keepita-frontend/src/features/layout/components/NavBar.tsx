@@ -34,7 +34,7 @@ const NavBar: React.FC<NavBarProps> = ({ navItems }) => {
                 </span>
                 {isActive(item.path) && (
                   <motion.div
-                    className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-sky-500 to-violet-500"
+                    className="absolute bottom-0 left-0 h-0.5 bg-sky-500"
                     layoutId="navbar-indicator"
                     initial={{ width: 0 }}
                     animate={{ width: "100%" }}

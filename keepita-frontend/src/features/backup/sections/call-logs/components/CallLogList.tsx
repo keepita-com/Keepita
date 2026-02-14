@@ -4,6 +4,7 @@ import { AlertTriangle, Phone } from "lucide-react";
 import CallLogItem from "./CallLogItem";
 import type { CallLog } from "../types/callLogs.types";
 import CallLogSkeletonList from "./CallLogSkeletonList";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
 
 interface CallLogListProps {
   callLogs: CallLog[];
@@ -23,22 +24,20 @@ const CallLogList: React.FC<CallLogListProps> = ({
   error = null,
 }) => {
   const observer = useRef<IntersectionObserver>(null);
+  const { theme } = useBackupTheme();
 
   const lastCallLogRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (isFetchingNextPage) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
+        if (entries[0].isIntersecting && hasNextPage) fetchNextPage();
       });
       if (node) observer.current.observe(node);
     },
-    [isFetchingNextPage, hasNextPage, fetchNextPage]
+    [isFetchingNextPage, hasNextPage, fetchNextPage],
   );
 
-  // Error State
   if (error) {
     return (
       <motion.div
@@ -59,8 +58,8 @@ const CallLogList: React.FC<CallLogListProps> = ({
     );
   }
 
-  // Empty State
-  if (!callLogs || callLogs.length === 0) {
+  if (!callLogs?.length) {
+    const iconColor = theme === "Samsung" ? "text-gray-400" : "text-stone-700";
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -68,7 +67,7 @@ const CallLogList: React.FC<CallLogListProps> = ({
         className="text-center py-12"
       >
         <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-          <Phone className="text-gray-400" size={32} />
+          <Phone className={iconColor} size={32} />
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           No call logs found
@@ -81,13 +80,18 @@ const CallLogList: React.FC<CallLogListProps> = ({
     );
   }
 
-  // Simple list without grouping
+  const wrapperClass =
+    theme === "Xiaomi"
+      ? "space-y-2 bg-red-100"
+      : theme === "Apple"
+        ? "space-y-2 bg-white"
+        : "space-y-2";
+
   return (
-    <div className="space-y-2">
+    <div className={wrapperClass}>
       <AnimatePresence>
         {callLogs.map((callLog, index) => {
-          // Safety check for each call log item
-          if (!callLog || !callLog.id) {
+          if (!callLog?.id) {
             console.warn("Invalid call log item:", callLog);
             return null;
           }
@@ -97,20 +101,23 @@ const CallLogList: React.FC<CallLogListProps> = ({
             <motion.div
               key={callLog.id}
               ref={isLast ? lastCallLogRef : undefined}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.02 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.15 }}
             >
-              <CallLogItem log={callLog} onSelect={onCallLogSelect} />
+              <CallLogItem
+                log={callLog}
+                callLogsLength={callLogs.length}
+                index={index}
+                onSelect={onCallLogSelect}
+              />
             </motion.div>
           );
         })}
       </AnimatePresence>
 
-      {/* Loading indicator for infinite scroll */}
       {isFetchingNextPage && <CallLogSkeletonList count={5} />}
 
-      {/* End of list indicator */}
       {!hasNextPage && callLogs.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}

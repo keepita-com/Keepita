@@ -60,9 +60,7 @@ const UploadsPhoneModels: React.FC<UploadsPhoneModelsProps> = ({
     >
       <div className="absolute -top-16 -right-16 w-32 h-32 bg-sky-500/10 rounded-full blur-xl"></div>
       <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-sky-500/10 rounded-full blur-xl"></div>{" "}
-      {/* static labels */}
       <div className="flex justify-between items-center mb-6 relative z-10">
-        {/* title */}
         <motion.h2
           className="text-xl font-bold bg-gradient-to-r from-white to-sky-200 bg-clip-text text-transparent"
           initial={{ opacity: 0 }}
@@ -72,7 +70,7 @@ const UploadsPhoneModels: React.FC<UploadsPhoneModelsProps> = ({
         >
           Phone Models
         </motion.h2>
-        {/* time period */}
+
         <motion.div
           className="badge bg-gradient-to-r from-sky-500 to-sky-600 text-white border-none shadow-md shadow-sky-900/20"
           initial={{ opacity: 0, scale: 0.8 }}
@@ -84,7 +82,6 @@ const UploadsPhoneModels: React.FC<UploadsPhoneModelsProps> = ({
           This Week
         </motion.div>
       </div>
-      {/* chart */}
       <motion.div
         className="h-60 relative z-10"
         variants={chartVariants}

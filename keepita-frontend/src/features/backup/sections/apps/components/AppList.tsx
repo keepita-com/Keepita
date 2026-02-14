@@ -16,7 +16,8 @@ interface AppListProps {
   isFetchingNextPage?: boolean;
   onAppSelect: (app: App) => void;
   emptyStateMessage?: string;
-  backupId: string | number; // Add backupId for modal
+  backupId: string | number;
+  theme?: "Xiaomi" | "Samsung" | "Apple";
 }
 
 const AppList: React.FC<AppListProps> = ({
@@ -30,16 +31,16 @@ const AppList: React.FC<AppListProps> = ({
   onAppSelect,
   emptyStateMessage = "No apps found",
   backupId,
+  theme,
 }) => {
   const lastAppRef = useRef<HTMLDivElement>(null);
   const [selectedApp, setSelectedApp] = useState<App | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Handle app selection - open modal instead of calling onAppSelect
   const handleAppSelect = (app: App) => {
     setSelectedApp(app);
     setIsModalOpen(true);
-    onAppSelect(app); // Still call the original callback if needed
+    onAppSelect(app);
   };
 
   const handleCloseModal = () => {
@@ -47,7 +48,6 @@ const AppList: React.FC<AppListProps> = ({
     setSelectedApp(null);
   };
 
-  // Intersection Observer callback for infinite scroll
   const lastAppElementRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (isLoading || isFetchingNextPage) return;
@@ -65,19 +65,17 @@ const AppList: React.FC<AppListProps> = ({
         if (node) observer.unobserve(node);
       };
     },
-    [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]
+    [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage],
   );
 
-  // Show skeleton loader during initial load
   if (isInitialLoading) {
     return (
       <div className="p-6 bg-transparent">
-        <AppListSkeleton count={20} />
+        <AppListSkeleton count={20} theme={theme} />
       </div>
     );
   }
 
-  // Show error state
   if (error) {
     return (
       <div className="p-6 bg-transparent">
@@ -103,8 +101,20 @@ const AppList: React.FC<AppListProps> = ({
       </div>
     );
   }
+  const emptyApps = {
+    Samsung: {
+      iconClassNames: "text-blue-400 w-12 h-12",
+    },
+    Xiaomi: {
+      iconClassNames: "text-orange-600 w-12 h-12",
+    },
+    Apple: {
+      iconClassNames: "text-blue-600 w-12 h-12",
+    },
+  };
+  const currentEmptyApps =
+    emptyApps[(theme as keyof typeof emptyApps) || "Samsung"];
 
-  // Show empty state
   if (!isLoading && !isFetchingNextPage && apps.length === 0) {
     return (
       <div className="p-6 bg-transparent">
@@ -115,7 +125,7 @@ const AppList: React.FC<AppListProps> = ({
         >
           <div className="relative">
             <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto ">
-              <Smartphone className="w-12 h-12 text-blue-400" />
+              <Smartphone className={currentEmptyApps.iconClassNames} />
             </div>
             <div className="absolute inset-0 w-24 h-24 mx-auto bg-gradient-to-br from-blue-100/20 to-indigo-100/20 rounded-3xl blur-xl"></div>
           </div>
@@ -130,7 +140,6 @@ const AppList: React.FC<AppListProps> = ({
 
   return (
     <div className="px-4 py-2 bg-transparent">
-      {/* Enhanced Responsive Samsung Grid Layout */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-x-4 gap-y-8 justify-items-center">
         <AnimatePresence>
           {apps.filter(Boolean).map((app, index) => {
@@ -143,20 +152,19 @@ const AppList: React.FC<AppListProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{
-                  delay: index * 0.01, // Faster animation for more apps
+                  delay: index * 0.01,
                   duration: 0.3,
                   ease: "easeOut",
                 }}
                 className="w-full flex justify-center"
               >
-                <AppItem app={app} onSelect={handleAppSelect} />
+                <AppItem app={app} onSelect={handleAppSelect} theme={theme} />
               </motion.div>
             );
           })}
         </AnimatePresence>
       </div>
 
-      {/* Loading indicator for infinite scroll */}
       {isFetchingNextPage && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -170,7 +178,6 @@ const AppList: React.FC<AppListProps> = ({
         </motion.div>
       )}
 
-      {/* End of list indicator */}
       {!hasNextPage && apps.length > 0 && !isFetchingNextPage && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -183,12 +190,12 @@ const AppList: React.FC<AppListProps> = ({
         </motion.div>
       )}
 
-      {/* App Details Modal */}
       <AppDetailsModal
         app={selectedApp}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         backupId={backupId}
+        theme={theme}
       />
     </div>
   );

@@ -1,6 +1,5 @@
 import type { ApiResponseList } from "../../../../../core/types/apiResponse";
 
-// WiFi Types for Samsung Backup
 export type SecurityType =
   | "WPA_PSK"
   | "WPA2_PSK"

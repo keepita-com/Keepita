@@ -11,12 +11,9 @@ const CONTACT_API_ENDPOINTS = {
   CONTACTS: (backupId: number) => `${RESOURCE}/backups/${backupId}/contacts/`,
 } as const;
 
-/**
- * Get contacts for a specific backup with optional filtering and pagination
- */
 export const getContacts = async (
   backupId: number | string | undefined,
-  params: Partial<GetContactsParams> = {}
+  params: Partial<GetContactsParams> = {},
 ): Promise<ContactsResponse> => {
   if (!backupId) {
     throw new Error("Backup ID is required");

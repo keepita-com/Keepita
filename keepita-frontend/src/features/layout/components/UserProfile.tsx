@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, UserRoundPen, BellRing } from "lucide-react";
+import { LogOut, UserRoundPen, Orbit, BellRing } from "lucide-react";
 import { useAuthStore } from "../../../features/auth/store";
 
 const navigationItems = [
@@ -11,10 +11,15 @@ const navigationItems = [
     href: "/profile",
   },
   {
+    title: "plans",
+    icon: Orbit,
+    href: "/plans",
+  },
+  {
     title: "notifications",
     icon: BellRing,
     href: "/notifications",
-  }
+  },
 ];
 
 interface UserProfileProps {

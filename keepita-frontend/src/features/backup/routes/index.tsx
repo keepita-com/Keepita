@@ -3,42 +3,50 @@ import { type RouteObject } from "react-router-dom";
 import PrivateRoute from "../../auth/components/PrivateRoute";
 import { PageLoader } from "../../../shared/components";
 
-// Lazy load main backup pages
 const BackupLayout = React.lazy(() => import("../pages/BackupLayout"));
 const BackupSectionsPage = React.lazy(
-  () => import("../pages/BackupSectionsPage")
+  () => import("../pages/BackupSectionsPage"),
 );
 
-// Lazy load backup section pages
 const ContactsPage = React.lazy(
-  () => import("../sections/contacts/pages/ContactsPage")
+  () => import("../sections/contacts/pages/ContactsPage"),
 );
 const CallLogsPage = React.lazy(
-  () => import("../sections/call-logs/pages/CallLogsPage")
+  () => import("../sections/call-logs/pages/CallLogsPage"),
 );
 const MessagesPage = React.lazy(() =>
   import("../sections/messages").then((module) => ({
     default: module.MessagesPage,
-  }))
+  })),
 );
 const MyFilesPage = React.lazy(() =>
   import("../sections/my-files").then((module) => ({
     default: module.MyFilesPage,
-  }))
+  })),
 );
 const BluetoothPage = React.lazy(() =>
   import("../sections/bluetooth").then((module) => ({
     default: module.BluetoothPage,
-  }))
+  })),
 );
 const AppPage = React.lazy(() =>
-  import("../sections/apps").then((module) => ({ default: module.AppPage }))
+  import("../sections/apps").then((module) => ({ default: module.AppPage })),
+);
+const AlarmsPage = React.lazy(() =>
+  import("../sections/alarms").then((module) => ({
+    default: module.AlarmsPage,
+  })),
 );
 const WiFiPage = React.lazy(() =>
-  import("../sections/wifi").then((module) => ({ default: module.WiFiPage }))
+  import("../sections/wifi").then((module) => ({ default: module.WiFiPage })),
+);
+const HomescreenPage = React.lazy(() =>
+  import("../sections/homescreen").then((module) => ({
+    default: module.HomescreenPage,
+  })),
 );
 const BrowserPage = React.lazy(
-  () => import("../sections/browser/pages/BrowserPage")
+  () => import("../sections/browser/pages/BrowserPage"),
 );
 
 export const backupDetailsRoute: RouteObject[] = [
@@ -113,11 +121,31 @@ export const backupDetailsRoute: RouteObject[] = [
     ),
   },
   {
+    path: "/backups/:backupId/alarms",
+    element: (
+      <PrivateRoute>
+        <Suspense fallback={<PageLoader />}>
+          <AlarmsPage />
+        </Suspense>
+      </PrivateRoute>
+    ),
+  },
+  {
     path: "/backups/:backupId/wifi",
     element: (
       <PrivateRoute>
         <Suspense fallback={<PageLoader />}>
           <WiFiPage />
+        </Suspense>
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/backups/:backupId/homescreen",
+    element: (
+      <PrivateRoute>
+        <Suspense fallback={<PageLoader />}>
+          <HomescreenPage />
         </Suspense>
       </PrivateRoute>
     ),

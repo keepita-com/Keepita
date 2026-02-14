@@ -17,8 +17,14 @@ import {
 } from "../components";
 import { useNavigate, useParams } from "react-router-dom";
 import SamsungSectionLayout from "../../../../../shared/components/SamsungSectionLayout";
-import SamsungSearchAndFilterHeader from "../../../../../shared/components/SamsungSearchAndFilterHeader";
+import XiaomiSectionLayout from "@/shared/components/XiaomiSectionLayout";
+import AppleSectionLayout from "@/shared/components/AppleSectionLayout";
 import { MESSAGE_SORT_OPTIONS_FOR_HEADER } from "../constants/message.constants";
+import MobileSearchAndFilterHeader from "@/shared/components/MobileSearchAndFilterHeader";
+import { useBackupTheme } from "@/features/backup/store/backupThemes.store";
+
+import { useBackupDetails } from "../../../hooks/backup.hooks";
+import BackupNotFound from "@/features/backup/components/BackupNotFound";
 
 interface MessageSortConfig {
   field: string;
@@ -27,18 +33,30 @@ interface MessageSortConfig {
 
 export const MessagesPage: React.FC = () => {
   const { backupId } = useParams<{ backupId: string }>();
+  const { theme } = useBackupTheme();
   const navigate = useNavigate();
-  useDocumentTitle("Messages | xplorta");
+  useDocumentTitle("Messages | Keepita");
+
+  const {
+    backup,
+    isLoading: isBackupLoading,
+    error: backupError,
+  } = useBackupDetails(backupId);
+
+  if (!backupId || backupError || (!isBackupLoading && !backup)) {
+    return <BackupNotFound />;
+  }
+
   const [selectedThread, setSelectedThread] = useState<MessageThread | null>(
-    null
+    null,
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<MessageSortConfig>({
-    field: "date",
+    field: "created_at",
     direction: "desc",
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  // Hooks for data management
+
   const {
     threads,
     totalCount,
@@ -47,28 +65,35 @@ export const MessagesPage: React.FC = () => {
     loadingMore: isLoadingMore,
     loadMore,
   } = useMessageThreads(Number(backupId));
+
   const {
     messages,
     currentThread,
     loading: messagesLoading,
   } = useThreadMessages(Number(backupId), selectedThread?.id || null);
+
   const {
     chatListFilters,
     chatMessageFilters,
     updateChatListFilters,
     updateChatMessageFilters,
     clearFilters,
-  } = useMessageFilters(); // Handle thread selection
+  } = useMessageFilters();
+
+  const booleanFilters: Record<string, boolean | undefined> = {
+    is_favorite_contact: chatListFilters.is_favorite_contact,
+    has_messages: chatListFilters.has_messages,
+    has_unread: chatListFilters.has_unread,
+  };
+
   const handleThreadSelect = useCallback((thread: MessageThread) => {
     setSelectedThread(thread);
   }, []);
 
-  // Handle back navigation (for mobile)
   const handleBack = useCallback(() => {
     setSelectedThread(null);
   }, []);
 
-  // Handle search
   const handleSearchChange = useCallback(
     (query: string) => {
       setSearchQuery(query);
@@ -77,22 +102,19 @@ export const MessagesPage: React.FC = () => {
         search: query || undefined,
       });
     },
-    [chatListFilters, updateChatListFilters]
+    [chatListFilters, updateChatListFilters],
   );
 
-  // Handle filters change
   const handleFiltersChange = useCallback(
     (newFilters: ChatListFilters) => {
       updateChatListFilters(newFilters);
     },
-    [updateChatListFilters]
+    [updateChatListFilters],
   );
 
-  // Handle sort change
   const handleSortChange = useCallback(
     (newSortConfig: MessageSortConfig) => {
       setSortConfig(newSortConfig);
-      // Convert to backend ordering format
       const ordering =
         newSortConfig.direction === "desc"
           ? `-${newSortConfig.field}`
@@ -102,10 +124,9 @@ export const MessagesPage: React.FC = () => {
         ordering,
       });
     },
-    [chatListFilters, updateChatListFilters]
+    [chatListFilters, updateChatListFilters],
   );
 
-  // Handle message search
   const handleMessageSearch = useCallback(
     (query: string) => {
       updateChatMessageFilters({
@@ -113,48 +134,72 @@ export const MessagesPage: React.FC = () => {
         search: query || undefined,
       });
     },
-    [chatMessageFilters, updateChatMessageFilters]
+    [chatMessageFilters, updateChatMessageFilters],
   );
 
-  // Handle message filters change
   const handleMessageFiltersChange = useCallback(
     (newFilters: ChatMessageFilters) => {
       updateChatMessageFilters(newFilters);
     },
-    [updateChatMessageFilters]
+    [updateChatMessageFilters],
   );
 
-  // Calculate subtitle with thread count from total_results
   const subtitle = totalCount > 0 ? `${totalCount} conversations` : undefined;
 
-  // Check if there are active filters
   const hasActiveFilters = Object.keys(chatListFilters).some(
     (key) =>
       key !== "ordering" &&
-      chatListFilters[key as keyof ChatListFilters] !== undefined
+      chatListFilters[key as keyof ChatListFilters] !== undefined,
   );
+
+  const themeClasses = {
+    Samsung: {
+      SectionLayout: SamsungSectionLayout,
+      filterTheme: "Samsung" as const,
+      searchInputBackgroundColor: "",
+      messageListTheme: undefined,
+      isClearFilterRender: undefined,
+    },
+    Xiaomi: {
+      SectionLayout: XiaomiSectionLayout,
+      filterTheme: "Xiaomi" as const,
+      searchInputBackgroundColor: "bg-gray-100",
+      messageListTheme: "Xiaomi" as const,
+      isClearFilterRender: true,
+    },
+    Apple: {
+      SectionLayout: AppleSectionLayout,
+      filterTheme: "Apple" as const,
+      searchInputBackgroundColor: "",
+      messageListTheme: "Apple" as const,
+      isClearFilterRender: undefined,
+    },
+  };
+
+  const currentTheme = themeClasses[theme as "Samsung" | "Xiaomi" | "Apple"];
+
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Left Panel - Always visible on desktop, toggleable on mobile */}
       <div
         className={`${
           selectedThread ? "hidden md:flex" : "flex"
         } flex-col w-full md:w-[400px] lg:w-[500px] min-w-0 border-r border-gray-200`}
       >
-        <SamsungSectionLayout
+        <currentTheme.SectionLayout
           title="Messages"
           subtitle={subtitle}
           onBack={() => navigate(`/backups/${backupId}`)}
-          isLoading={threadsLoading}
         >
           <div className="flex flex-col h-full">
             <div className="flex-shrink-0">
-              <SamsungSearchAndFilterHeader
+              <MobileSearchAndFilterHeader
                 searchQuery={searchQuery}
                 onSearchChange={handleSearchChange}
                 searchPlaceholder="Search conversations..."
-                filters={chatListFilters}
-                onFiltersChange={handleFiltersChange}
+                filters={booleanFilters}
+                onFiltersChange={(newFilters) =>
+                  handleFiltersChange({ ...chatListFilters, ...newFilters })
+                }
                 onClearFilters={clearFilters}
                 hasActiveFilters={hasActiveFilters}
                 sortConfig={sortConfig}
@@ -170,11 +215,22 @@ export const MessagesPage: React.FC = () => {
                     onToggle={() =>
                       setShowAdvancedFilters(!showAdvancedFilters)
                     }
+                    theme={currentTheme.filterTheme}
                   />
                 }
+                theme={currentTheme.filterTheme}
+                searchInputBackgroundColor={
+                  currentTheme.searchInputBackgroundColor
+                }
+                isClearFilterRender={currentTheme.isClearFilterRender}
               />
             </div>
-            <div className="flex-1 min-h-0 h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 h-0 overflow-hidden relative">
+              {threadsLoading && (
+                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
               <MessageList
                 threads={threads}
                 loading={threadsLoading}
@@ -189,12 +245,13 @@ export const MessagesPage: React.FC = () => {
                     ? `No conversations found for "${searchQuery}"`
                     : "No message conversations found"
                 }
+                theme={currentTheme.messageListTheme}
               />
             </div>
           </div>
-        </SamsungSectionLayout>
+        </currentTheme.SectionLayout>
       </div>
-      {/* Right Panel - Always visible on desktop */}
+
       <div
         className={`${
           selectedThread ? "flex" : "hidden md:flex"
@@ -211,6 +268,7 @@ export const MessagesPage: React.FC = () => {
             messageFilters={chatMessageFilters}
             messageSearchQuery={chatMessageFilters.search || ""}
             onClearAllFilters={clearFilters}
+            theme={theme as "Samsung" | "Xiaomi" | "Apple"}
           />
         ) : (
           <div className="flex flex-col h-full p-8 bg-gray-50">
@@ -225,7 +283,9 @@ export const MessagesPage: React.FC = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="text-gray-500"
+                  className={`${
+                    theme === "Samsung" ? "text-gray-500" : "text-stone-700"
+                  }`}
                 >
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
@@ -235,7 +295,7 @@ export const MessagesPage: React.FC = () => {
               </h2>
               <p className="text-sm max-w-sm text-gray-600">
                 Choose a conversation from the list to view and manage your
-                messages with Samsung One UI style interface.
+                messages with {theme} UI style interface.
               </p>
             </div>
           </div>

@@ -1,11 +1,5 @@
-// App domain types following SOLID principles
 import type { ApiResponseList } from "../../../../../core/types/apiResponse";
 
-// ============================================================================
-// DOMAIN TYPES
-// ============================================================================
-
-// Unified App interface - single comprehensive interface
 export interface App {
   id: number;
   apk_name: string;
@@ -20,7 +14,6 @@ export interface App {
   created_at: string;
 }
 
-// App Permission interface
 export interface AppPermission {
   id: number;
   permission_name: string;
@@ -36,15 +29,10 @@ export interface AppPermission {
   updated_at: string;
 }
 
-// App statistics
 export interface AppStats {
   total: number;
   recentlyUsed: number;
 }
-
-// ============================================================================
-// TYPE DEFINITIONS
-// ============================================================================
 
 export type AppCategory =
   | "communication"
@@ -85,11 +73,6 @@ export type AppCategory =
 
 export type AppViewMode = "list" | "grid";
 
-// ============================================================================
-// API PARAMETER TYPES
-// ============================================================================
-
-// API request parameters
 export interface GetAppParams {
   page?: number;
   page_size?: number;
@@ -100,13 +83,11 @@ export interface GetAppParams {
   category?: AppCategory;
 }
 
-// App permissions request parameters
 export interface GetAppPermissionsParams {
   page?: number;
   page_size?: number;
 }
 
-// App filtering options
 export interface AppFilters {
   search?: string;
   is_system?: boolean;
@@ -114,10 +95,9 @@ export interface AppFilters {
   category?: AppCategory;
 }
 
-// App sorting configuration
 export interface AppSortConfig {
   field:
-    | "name"
+    | "apk_name"
     | "package_name"
     | "size"
     | "install_time"
@@ -126,14 +106,8 @@ export interface AppSortConfig {
   direction: "asc" | "desc";
 }
 
-// ============================================================================
-// API RESPONSE TYPES
-// ============================================================================
-
-// API response structure - using App instead of AppInfo
 export interface AppsResponse extends ApiResponseList<App[]> {}
 
-// App permissions API response
 export interface AppPermissionsResponse {
   app: App;
   permissions: {

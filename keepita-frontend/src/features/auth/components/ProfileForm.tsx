@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import {
@@ -20,7 +20,6 @@ import ImageUploader from "./ImageUploader";
 import { Link } from "react-router-dom";
 
 interface ProfileFormInputs {
-  username: string;
   first_name: string;
   last_name: string;
   profile_image: File | null;
@@ -28,13 +27,11 @@ interface ProfileFormInputs {
 
 const ProfileForm: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const defaultFirstName = user?.first_name || "";
   const defaultLastName = user?.last_name || "";
 
   const defaultValues = {
-    username: user?.username || "johndoe",
     first_name: defaultFirstName,
     last_name: defaultLastName,
     profile_image: null,
@@ -74,28 +71,34 @@ const ProfileForm: React.FC = () => {
     allowedFileTypes: ["image/jpeg", "image/png", "image/webp"],
   });
 
-  const onSubmit = async (data: ProfileFormInputs) => {
-    try {
-      setIsSubmitting(true);
-
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== null) formData.append(key, value);
+  useEffect(() => {
+    if (user && isSuccess) {
+      reset({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        profile_image: null,
       });
-
-      updateProfile(formData);
-
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Error updating profile:", err);
-    } finally {
-      setIsSubmitting(false);
     }
+  }, [user, isSuccess, reset]);
+
+  const onSubmit = (data: ProfileFormInputs) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null) formData.append(key, value);
+    });
+
+    updateProfile(formData, {
+      onSuccess: () => {
+        setIsEditing(false);
+      },
+      onError: (err) => {
+        console.error("Error updating profile:", err);
+      },
+    });
   };
 
   const cancelEdit = () => {
     reset({
-      username: defaultValues.username,
       first_name: defaultValues.first_name,
       last_name: defaultValues.last_name,
       profile_image: null,
@@ -129,7 +132,7 @@ const ProfileForm: React.FC = () => {
       opacity: 1,
     },
   };
-  const isFormLoading = isSubmitting || isPending || isImageLoading;
+  const isFormLoading = isPending || isImageLoading;
 
   return (
     <motion.div
@@ -231,7 +234,7 @@ const ProfileForm: React.FC = () => {
                 <h2 className="text-xl font-semibold text-white">
                   {firstName} {lastName}
                 </h2>
-                <p className="text-sm text-gray-400">@{watch("username")}</p>
+                <p className="text-sm text-gray-400">@{user?.username}</p>
               </motion.div>
             )}
           </motion.div>
@@ -245,36 +248,20 @@ const ProfileForm: React.FC = () => {
                   Username
                 </label>
                 <div className="relative">
-                  <div
-                    className={`absolute left-3 top-[50%] -translate-y-1/2 pointer-events-none ${
-                      errors.username ? "text-rose-400" : "text-gray-400"
-                    }`}
-                  >
+                  <div className="absolute left-3 top-[50%] -translate-y-1/2 pointer-events-none text-gray-400">
                     <User size={18} />
                   </div>
                   <input
                     type="text"
-                    {...register("username", {
-                      required: "Username is required",
-                      disabled: !isEditing || isFormLoading,
-                    })}
-                    className={`w-full py-2.5 pl-10 pr-4 bg-gray-800/50 border ${
-                      errors.username
-                        ? "border-rose-500/50"
-                        : "border-gray-600/50"
-                    } rounded-lg text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 ${
-                      !isEditing || isFormLoading
-                        ? "opacity-70 cursor-not-allowed"
-                        : ""
-                    }`}
-                    readOnly={!isEditing || isFormLoading}
+                    value={user?.username || ""}
+                    className="w-full py-2.5 pl-10 pr-4 bg-gray-800/20 border border-gray-600/30 rounded-lg text-white opacity-70 cursor-not-allowed"
+                    readOnly={true}
+                    disabled={true}
                   />
                 </div>
-                {errors.username && (
-                  <p className="text-rose-400 text-xs mt-1">
-                    {errors.username.message}
-                  </p>
-                )}
+                <span className="text-xs text-gray-500 mt-1 block">
+                  Username cannot be changed
+                </span>
               </div>
               <div>
                 <label className="block text-gray-300 text-sm font-medium mb-2">
