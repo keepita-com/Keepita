@@ -37,7 +37,6 @@ from .xiaomi.xiaomi_decryption_proxy import XiaomiDecryptionProxy
 from .android.android_app_extractor import AndroidAppExtractor
 from .android.android_file_extractor import AndroidFileExtractor
 from .android.android_message_extractor import AndroidMessageExtractor
-from .android.android_decryption_proxy import AndroidDecryptionProxy
 
 __all__ = [
     'BaseExtractor',
@@ -79,5 +78,4 @@ __all__ = [
     'AndroidAppExtractor',
     'AndroidFileExtractor',
     'AndroidMessageExtractor',
-    'AndroidDecryptionProxy',
 ]
