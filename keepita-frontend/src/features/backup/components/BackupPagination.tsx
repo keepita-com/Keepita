@@ -37,83 +37,65 @@ const BackupPagination: React.FC<BackupPaginationProps> = ({
     },
     tap: { scale: 0.95 },
   };
-  // Check if we're on mobile viewport
+
   const [isMobile, setIsMobile] = React.useState<boolean>(false);
 
-  // Update mobile status on window resize
   React.useEffect(() => {
     const updateWindowSize = () => {
       setIsMobile(window.innerWidth < 640);
     };
 
-    // Set initial value
     updateWindowSize();
 
-    // Add event listener
     window.addEventListener("resize", updateWindowSize);
 
-    // Cleanup
     return () => window.removeEventListener("resize", updateWindowSize);
   }, []);
 
-  // Generate page numbers
   const getPageNumbers = () => {
     const pageNumbers = [];
     const maxVisiblePages = isMobile ? 3 : 5;
 
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if less than maxVisiblePages
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
       }
     } else {
-      // Always include first page
       pageNumbers.push(1);
 
-      // On mobile, just show first, current, and last with ellipses
       if (isMobile) {
-        // Add ellipsis after first page if current page is not 2
         if (currentPage > 2) {
-          pageNumbers.push(-1); // -1 represents ellipsis
+          pageNumbers.push(-1);
         }
 
-        // Add current page if it's not first or last
         if (currentPage !== 1 && currentPage !== totalPages) {
           pageNumbers.push(currentPage);
         }
 
-        // Add ellipsis before last page if current page is not one before last
         if (currentPage < totalPages - 1) {
-          pageNumbers.push(-2); // -2 represents ellipsis
+          pageNumbers.push(-2);
         }
       } else {
-        // Desktop layout
-        // Calculate range around current page
         let startPage = Math.max(2, currentPage - 1);
         const endPage = Math.min(totalPages - 1, startPage + 2);
 
-        // Adjust start if end is too close to totalPages
         if (endPage === totalPages - 1) {
           startPage = Math.max(2, endPage - 2);
         }
 
-        // Add ellipsis after first page if needed
         if (startPage > 2) {
-          pageNumbers.push(-1); // -1 represents ellipsis
+          pageNumbers.push(-1);
         }
 
-        // Add middle pages
         for (let i = startPage; i <= endPage; i++) {
           pageNumbers.push(i);
         }
 
-        // Add ellipsis before last page if needed
         if (endPage < totalPages - 1) {
-          pageNumbers.push(-2); // -2 represents ellipsis
+          pageNumbers.push(-2);
         }
       }
 
-      // Always include last page
       pageNumbers.push(totalPages);
     }
 
@@ -130,7 +112,6 @@ const BackupPagination: React.FC<BackupPaginationProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* First Page Button */}
       <motion.button
         whileHover={buttonAnimation.hover}
         whileTap={buttonAnimation.tap}
@@ -142,7 +123,6 @@ const BackupPagination: React.FC<BackupPaginationProps> = ({
         <ChevronsLeft className="w-4 h-4" />
       </motion.button>
 
-      {/* Previous Button */}
       <motion.button
         whileHover={buttonAnimation.hover}
         whileTap={buttonAnimation.tap}
@@ -154,11 +134,9 @@ const BackupPagination: React.FC<BackupPaginationProps> = ({
         <ChevronLeft className="w-4 h-4" />
       </motion.button>
 
-      {/* Page Numbers */}
       <AnimatePresence mode="wait">
         {pageNumbers.map((pageNumber, index) => {
           if (pageNumber < 0) {
-            // Render ellipsis
             return (
               <motion.span
                 key={`ellipsis-${pageNumber}`}
@@ -210,7 +188,6 @@ const BackupPagination: React.FC<BackupPaginationProps> = ({
         })}
       </AnimatePresence>
 
-      {/* Next Button */}
       <motion.button
         whileHover={buttonAnimation.hover}
         whileTap={buttonAnimation.tap}
@@ -222,7 +199,6 @@ const BackupPagination: React.FC<BackupPaginationProps> = ({
         <ChevronRight className="w-4 h-4" />
       </motion.button>
 
-      {/* Last Page Button */}
       <motion.button
         whileHover={buttonAnimation.hover}
         whileTap={buttonAnimation.tap}

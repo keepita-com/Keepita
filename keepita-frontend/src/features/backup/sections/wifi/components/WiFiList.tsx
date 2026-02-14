@@ -12,12 +12,9 @@ interface WiFiListProps {
   isLoadingMore?: boolean;
   onLoadMore?: () => void;
   onWiFiClick?: (wifiNetwork: WiFiNetwork) => void;
+  theme?: "Samsung" | "Xiaomi" | "Apple";
 }
 
-/**
- * WiFi networks list component with infinite scroll
- * Now receives data as props instead of accessing store directly
- */
 const WiFiList: React.FC<WiFiListProps> = ({
   wifiNetworks,
   isLoading = false,
@@ -26,10 +23,10 @@ const WiFiList: React.FC<WiFiListProps> = ({
   isLoadingMore = false,
   onLoadMore,
   onWiFiClick,
+  theme = "Samsung",
 }) => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  // Intersection observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -38,7 +35,7 @@ const WiFiList: React.FC<WiFiListProps> = ({
           onLoadMore();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentRef = loadMoreRef.current;
@@ -52,6 +49,25 @@ const WiFiList: React.FC<WiFiListProps> = ({
       }
     };
   }, [hasMore, isLoadingMore, onLoadMore]);
+
+  const themes = {
+    Samsung: {
+      emptyNetworksIconClassNames: "w-8 h-8 text-gray-400",
+      emptyNetworkWrapperClassNames:
+        "w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4",
+    },
+    Xiaomi: {
+      emptyNetworksIconClassNames: "w-6 h-6 text-orange-600",
+      emptyNetworkWrapperClassNames:
+        "w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4",
+    },
+    Apple: {
+      emptyNetworksIconClassNames: "w-8 h-8 text-gray-400",
+      emptyNetworkWrapperClassNames:
+        "w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4",
+    },
+  };
+  const currentTheme = themes[theme];
 
   if (isLoading && wifiNetworks.length === 0) {
     return (
@@ -93,9 +109,9 @@ const WiFiList: React.FC<WiFiListProps> = ({
     return (
       <div className="text-center py-12">
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
-          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className={currentTheme.emptyNetworkWrapperClassNames}>
             <svg
-              className="w-8 h-8 text-gray-400"
+              className={currentTheme.emptyNetworksIconClassNames}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -119,6 +135,30 @@ const WiFiList: React.FC<WiFiListProps> = ({
     );
   }
 
+  if (theme === "Apple") {
+    return (
+      <div className="bg-[#E9E9EA] rounded-2xl">
+        <AnimatePresence mode="popLayout">
+          {wifiNetworks.map((wifiNetwork, index) => (
+            <motion.div
+              key={wifiNetwork.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <WiFiItem
+                theme={theme}
+                wifiNetwork={wifiNetwork}
+                onClick={onWiFiClick}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <AnimatePresence mode="popLayout">
@@ -130,12 +170,15 @@ const WiFiList: React.FC<WiFiListProps> = ({
             exit={{ opacity: 0, y: -20 }}
             transition={{ delay: index * 0.05 }}
           >
-            <WiFiItem wifiNetwork={wifiNetwork} onClick={onWiFiClick} />
+            <WiFiItem
+              theme={theme}
+              wifiNetwork={wifiNetwork}
+              onClick={onWiFiClick}
+            />
           </motion.div>
         ))}
       </AnimatePresence>
 
-      {/* Load more trigger */}
       {hasMore && (
         <div ref={loadMoreRef} className="flex justify-center py-4">
           {isLoadingMore && (
@@ -147,7 +190,6 @@ const WiFiList: React.FC<WiFiListProps> = ({
         </div>
       )}
 
-      {/* End message */}
       {!hasMore && wifiNetworks.length > 0 && (
         <div className="text-center py-4 text-gray-500 text-sm">
           You've reached the end of the list

@@ -1,6 +1,5 @@
 import type { ApiResponseList } from "../../../../../core/types/apiResponse";
 
-// Bluetooth domain types following SOLID principles
 export interface BluetoothDevice {
   id: number;
   backup: number;
@@ -16,31 +15,29 @@ export interface BluetoothDevice {
   created_at: string;
 }
 
-// API response structure
-export interface BluetoothDevicesResponse
-  extends ApiResponseList<BluetoothDevice[]> {}
+export interface BluetoothDevicesResponse extends ApiResponseList<
+  BluetoothDevice[]
+> {}
 
-// API request parameters
 export interface GetBluetoothDevicesParams {
   page?: number;
   page_size?: number;
   search?: string;
   ordering?: string;
-  // Basic filters
+
   name?: string;
   address?: string;
   device_class?: number;
   appearance?: number;
   bond_state?: number;
   link_type?: number;
-  // Date filters
+
   last_connected_after?: string;
   last_connected_before?: string;
   created_after?: string;
   created_before?: string;
 }
 
-// Bluetooth device filtering options
 export interface BluetoothFilters {
   search?: string;
   name?: string;
@@ -55,15 +52,12 @@ export interface BluetoothFilters {
   is_paired?: boolean;
 }
 
-// Bluetooth device sorting configuration
 export interface BluetoothSortConfig {
-  ordering?: string; // e.g., "-last_connected", "name", "device_class"
+  ordering?: string;
 }
 
-// Bluetooth device view modes
 export type BluetoothViewMode = "list" | "grid";
 
-// Bluetooth device types based on device_class
 export type BluetoothDeviceType =
   | "audio"
   | "input"
@@ -73,7 +67,6 @@ export type BluetoothDeviceType =
   | "peripheral"
   | "unknown";
 
-// Bond state as union type and constant object
 export type BondState = 0 | 1 | 2;
 export const BondState = {
   NONE: 0 as BondState,
@@ -81,14 +74,12 @@ export const BondState = {
   BONDED: 2 as BondState,
 };
 
-// Link type as union type
 export type LinkType = 1 | 2;
 export const LINK_TYPE = {
   CLASSIC: 1 as LinkType,
   LOW_ENERGY: 2 as LinkType,
 };
 
-// Bluetooth device statistics
 export interface BluetoothStats {
   total: number;
   paired: number;
@@ -96,7 +87,6 @@ export interface BluetoothStats {
   recentlyConnected: number;
 }
 
-// Bluetooth device actions
 export interface BluetoothDeviceActions {
   onPair?: (device: BluetoothDevice) => void;
   onUnpair?: (device: BluetoothDevice) => void;
@@ -106,7 +96,6 @@ export interface BluetoothDeviceActions {
   onDelete?: (device: BluetoothDevice) => void;
 }
 
-// Bluetooth device list props
 export interface BluetoothDeviceListProps {
   devices: BluetoothDevice[];
   isLoading?: boolean;
@@ -118,12 +107,10 @@ export interface BluetoothDeviceListProps {
   onClearSelection?: () => void;
 }
 
-// Grouped bluetooth devices
 export interface GroupedBluetoothDevices {
   [deviceType: string]: BluetoothDevice[];
 }
 
-// Bluetooth device state
 export interface BluetoothState {
   devices: BluetoothDevice[];
   stats: BluetoothStats;

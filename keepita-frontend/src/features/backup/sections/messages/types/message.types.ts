@@ -29,12 +29,12 @@ export interface Message {
   updated_at: string;
 }
 
-export interface MessageThreadsResponse
-  extends ApiResponseList<MessageThread[]> {}
+export interface MessageThreadsResponse extends ApiResponseList<
+  MessageThread[]
+> {}
 
 export interface MessagesResponse extends ApiResponseList<Message[]> {}
 
-// Extended filters for chat lists
 export interface ChatListFilters {
   backup?: number;
   contact?: string;
@@ -50,12 +50,12 @@ export interface ChatListFilters {
   has_unread?: boolean;
   last_message_after?: string;
   last_message_before?: string;
-  // Search and sort
+
   search?: string;
   ordering?: string;
+  [key: string]: boolean | string | number | undefined;
 }
 
-// Extended filters for messages in a chat
 export interface ChatMessageFilters {
   backup?: number;
   chat_thread?: number;
@@ -76,15 +76,14 @@ export interface ChatMessageFilters {
   contact_name?: string;
   contact_phone?: string;
   address?: string;
-  // Search and sort
+
   search?: string;
   ordering?: string;
-  // Pagination
+
   page?: number;
   page_size?: number;
 }
 
-// Legacy filters interface for backward compatibility
 export interface MessageFilters {
   search?: string;
   contact?: string;

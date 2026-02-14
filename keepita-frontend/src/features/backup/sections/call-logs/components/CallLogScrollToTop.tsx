@@ -2,9 +2,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-/**
- * Floating button to scroll back to top
- */
 const CallLogScrollToTop: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 

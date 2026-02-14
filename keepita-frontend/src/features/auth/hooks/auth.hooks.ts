@@ -1,30 +1,22 @@
 import { useEffect } from "react";
-
 import { useAuthStore } from "../store";
-
-import { verifyToken } from "../api/auth.api";
-
 export const useAuth = () => {
   const authStore = useAuthStore();
-  const { user, access, clearAuth } = authStore;
+  const { user, access, isAuthenticated } = authStore;
 
   useEffect(() => {
-    const validateAuthState = async () => {
-      if (user && access) {
-        try {
-          const isValid = await verifyToken(access);
-
-          if (!isValid) {
-            clearAuth();
-          }
-        } catch {
-          clearAuth();
-        }
-      }
-    };
-
-    validateAuthState();
-  }, [user, access, clearAuth]);
-
+    if (import.meta.env.DEV) {
+      console.log("useAuth - Current State:", {
+        hasUser: !!user,
+        userId: user?.id,
+        username: user?.username,
+        hasAccessToken: !!access,
+        tokenPreview: access ? `${access.slice(0, 20)}...` : null,
+        isAuthenticated,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }, [user, access, isAuthenticated]);
+  
   return authStore;
 };

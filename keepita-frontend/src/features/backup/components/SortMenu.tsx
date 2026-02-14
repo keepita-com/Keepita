@@ -47,7 +47,6 @@ const SortMenu: React.FC<SortMenuProps> = ({
           }}
           className="absolute right-0 mt-3 w-56 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-800/95 to-gray-900/95 backdrop-blur-xl border border-gray-700/40 shadow-2xl shadow-black/20 z-30 sort-menu-container"
         >
-          {/* Header with gradient background */}
           <div className="px-4 py-3 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-b border-gray-700/30">
             <motion.h4
               initial={{ opacity: 0, x: -10 }}
@@ -71,7 +70,6 @@ const SortMenu: React.FC<SortMenuProps> = ({
             </motion.h4>
           </div>
 
-          {/* Content area with improved spacing */}
           <div className="p-3">
             <div className="space-y-1">
               <SortIndicator

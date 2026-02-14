@@ -1,7 +1,3 @@
-/**
- * Message Filter and Sort Constants
- * Defines the filter sections and sort options for message conversations
- */
 import React from "react";
 import {
   User,
@@ -31,7 +27,6 @@ export interface SortOption {
   searchFields: string[];
 }
 
-// Filter sections for message conversations
 export const MESSAGE_FILTER_SECTIONS: FilterSection[] = [
   {
     title: "Contact Filters",
@@ -109,10 +104,6 @@ export const MESSAGE_FILTER_SECTIONS: FilterSection[] = [
   },
 ];
 
-// Backend sort options for chat lists:
-// search_fields = ['address', 'contact__name', 'contact__phone_number']
-// ordering_fields = ['created_at', 'address']
-// ordering = ['-created_at']
 export const MESSAGE_SORT_OPTIONS: SortOption[] = [
   {
     key: "created_at",
@@ -126,7 +117,6 @@ export const MESSAGE_SORT_OPTIONS: SortOption[] = [
   },
 ];
 
-// Sort options for the SamsungSearchAndFilterHeader component
 export const MESSAGE_SORT_OPTIONS_FOR_HEADER = [
   {
     value: "-created_at",
@@ -160,7 +150,6 @@ export const MESSAGE_SORT_OPTIONS_FOR_HEADER = [
   },
 ];
 
-// Filter sections for individual messages within a conversation
 export const MESSAGE_CONVERSATION_FILTER_SECTIONS: FilterSection[] = [
   {
     title: "Message Content",
@@ -220,7 +209,6 @@ export const MESSAGE_CONVERSATION_FILTER_SECTIONS: FilterSection[] = [
   },
 ];
 
-// Sort options for individual messages within conversations
 export const MESSAGE_CONVERSATION_SORT_OPTIONS_FOR_HEADER = [
   {
     value: "date",
@@ -260,7 +248,6 @@ export const MESSAGE_CONVERSATION_SORT_OPTIONS_FOR_HEADER = [
   },
 ];
 
-// Quick filter options for conversation messages
 export interface ConversationQuickFilter {
   key: string;
   label: string;
@@ -309,7 +296,6 @@ export const CONVERSATION_QUICK_FILTERS: ConversationQuickFilter[] = [
   },
 ];
 
-// Quick filter options for main messages page
 export interface MessageQuickFilter {
   key: string;
   label: string;

@@ -1,4 +1,3 @@
-// Message Components
 export { MessageConversation } from "./MessageConversation";
 export { MessageThreadItem } from "./MessageThreadItem";
 export { AdvancedConversationFilters } from "./AdvancedConversationFilters";

@@ -5,11 +5,9 @@ import type {
 } from "../types/contact.types";
 import { buildQueryParams } from "../../../../../shared/utils";
 
-/**
- * Get contact initials from name
- */
+
 export const getInitials = (name: string): string => {
-  // Handle cases where name might be null, undefined, or empty
+  
   if (!name || typeof name !== "string") {
     return "?";
   }
@@ -27,24 +25,22 @@ export const getInitials = (name: string): string => {
     .slice(0, 2);
 };
 
-/**
- * Format phone number for display
- */
+
 export const formatPhoneNumber = (phone: string): string => {
-  // Handle cases where phone might be null or undefined
+  
   if (!phone || typeof phone !== "string") {
     return "No phone";
   }
 
   const cleaned = phone.replace(/\D/g, "");
 
-  // Format US phone numbers
+  
   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
   if (match) {
     return `(${match[1]}) ${match[2]}-${match[3]}`;
   }
 
-  // Format international numbers starting with 98 (Iran)
+  
   if (phone.length === 11 && phone.indexOf("98") === 0) {
     return `+${phone.slice(0, 2)} ${phone.slice(2, 5)} ${phone.slice(
       5,
@@ -55,11 +51,9 @@ export const formatPhoneNumber = (phone: string): string => {
   return phone;
 };
 
-/**
- * Get display name with fallback
- */
+
 export const getDisplayName = (contact: Contact): string => {
-  // Handle cases where name might be null, undefined, or empty
+  
   const name = contact?.name;
   if (name && typeof name === "string" && name.trim()) {
     return name.trim();
@@ -67,9 +61,7 @@ export const getDisplayName = (contact: Contact): string => {
   return contact?.phone_number || "Unknown Contact";
 };
 
-/**
- * Format date of birth for display
- */
+
 export const formatDateOfBirth = (dateString: string | null): string => {
   if (!dateString) return "No birthday";
 
@@ -81,9 +73,7 @@ export const formatDateOfBirth = (dateString: string | null): string => {
   }
 };
 
-/**
- * Get contact avatar color based on name
- */
+
 export const getAvatarColor = (contact: Contact): string => {
   const name = getDisplayName(contact);
   const colors = [
@@ -103,34 +93,26 @@ export const getAvatarColor = (contact: Contact): string => {
   return colors[charCode % colors.length];
 };
 
-/**
- * Validate contact data
- */
+
 export const isValidContact = (contact: Partial<Contact>): boolean => {
   return !!(contact.name?.trim() || contact.phone_number?.trim());
 };
 
-/**
- * Validate phone number format
- */
+
 export const isValidPhoneNumber = (phone: string): boolean => {
   if (!phone || typeof phone !== "string") return false;
   const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
   return phoneRegex.test(phone.replace(/\s/g, ""));
 };
 
-/**
- * Validate email format (if contact has email field)
- */
+
 export const isValidEmail = (email: string): boolean => {
   if (!email || typeof email !== "string") return false;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-/**
- * Check if contact has complete information
- */
+
 export const isCompleteContact = (contact: Contact): boolean => {
   return !!(
     contact.name?.trim() &&
@@ -139,9 +121,7 @@ export const isCompleteContact = (contact: Contact): boolean => {
   );
 };
 
-/**
- * Group contacts by first letter of name
- */
+
 export const groupByLetter = (contacts: Contact[]): GroupedContacts => {
   const groups: GroupedContacts = {};
 
@@ -158,9 +138,7 @@ export const groupByLetter = (contacts: Contact[]): GroupedContacts => {
   return groups;
 };
 
-/**
- * Group contacts by favorite status
- */
+
 export const groupByFavorite = (
   contacts: Contact[]
 ): { favorites: Contact[]; others: Contact[] } => {
@@ -178,9 +156,7 @@ export const groupByFavorite = (
   return { favorites, others };
 };
 
-/**
- * Group contacts by whether they have profile images
- */
+
 export const groupByImage = (
   contacts: Contact[]
 ): { withImages: Contact[]; withoutImages: Contact[] } => {
@@ -198,30 +174,22 @@ export const groupByImage = (
   return { withImages, withoutImages };
 };
 
-/**
- * Check if contact is a favorite
- */
+
 export const isFavorite = (contact: Contact): boolean => {
   return contact.is_favorite;
 };
 
-/**
- * Check if contact has profile image
- */
+
 export const hasProfileImage = (contact: Contact): boolean => {
   return !!contact.profile_image;
 };
 
-/**
- * Check if contact has birthday
- */
+
 export const hasBirthday = (contact: Contact): boolean => {
   return !!contact.date_of_birth;
 };
 
-/**
- * Get contact age if birthday is available
- */
+
 export const getAge = (contact: Contact): number | null => {
   if (!contact.date_of_birth) return null;
 
@@ -244,9 +212,7 @@ export const getAge = (contact: Contact): number | null => {
   }
 };
 
-/**
- * Check if it's contact's birthday today
- */
+
 export const isBirthdayToday = (contact: Contact): boolean => {
   if (!contact.date_of_birth) return false;
 
@@ -263,9 +229,7 @@ export const isBirthdayToday = (contact: Contact): boolean => {
   }
 };
 
-/**
- * Get comprehensive contact info
- */
+
 export const getContactInfo = (contact: Contact) => ({
   name: getDisplayName(contact),
   initials: getInitials(contact.name),
@@ -281,9 +245,7 @@ export const getContactInfo = (contact: Contact) => ({
   isValid: isValidContact(contact),
 });
 
-/**
- * Get contact statistics
- */
+
 export const getContactStats = (contacts: Contact[]) => ({
   total: contacts.length,
   favorites: contacts.filter(isFavorite).length,
@@ -294,9 +256,7 @@ export const getContactStats = (contacts: Contact[]) => ({
   byLetter: groupByLetter(contacts),
 });
 
-/**
- * Build query parameters for contacts API call
- */
+
 export const buildContactsQueryParams = (
   params: Partial<GetContactsParams>
 ) => {

@@ -9,8 +9,24 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState, useMemo } from "react";
+import DatePicker from "react-datepicker";
 import SortMenu from "./SortMenu";
+import { debounce } from "../../../shared/utils/debounce";
+
+const CustomDateInput = forwardRef<
+  HTMLInputElement,
+  { value?: string; onClick?: () => void; placeholder?: string }
+>(({ value, onClick, placeholder }, ref) => (
+  <input
+    ref={ref}
+    onClick={onClick}
+    value={value}
+    placeholder={placeholder}
+    readOnly
+    className="date-picker-input"
+  />
+));
 
 interface SearchAndFilterBarProps {
   onSearch: (query: string) => void;
@@ -20,6 +36,8 @@ interface SearchAndFilterBarProps {
     field: string;
     direction: "asc" | "desc";
   };
+  filters: BackupFilters;
+  searchQuery: string;
 }
 
 export interface BackupFilters {
@@ -33,15 +51,16 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
   onFilterChange,
   onSortChange,
   activeSort,
+  filters,
+  searchQuery: externalSearchQuery,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(externalSearchQuery);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
-  const [filters, setFilters] = useState<BackupFilters>({
-    status: null,
-    customDateFrom: undefined,
-    customDateTo: undefined,
-  });
+
+  useEffect(() => {
+    setSearchQuery(externalSearchQuery);
+  }, [externalSearchQuery]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -59,9 +78,25 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
     };
   }, [showSortMenu]);
 
+  const onSearchRef = useRef(onSearch);
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((query: string) => {
+        onSearchRef.current(query);
+      }, 500),
+    [],
+  );
+
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    onSearch(e.target.value);
   };
 
   const handleFilterClick = () => {
@@ -73,7 +108,6 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
       ...filters,
       [filterType]: value === filters[filterType] ? null : value,
     };
-    setFilters(newFilters);
     onFilterChange(newFilters);
   };
 
@@ -91,7 +125,6 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
       customDateFrom: undefined,
       customDateTo: undefined,
     };
-    setFilters(newFilters);
     setSearchQuery("");
     onSearch("");
     onFilterChange(newFilters);
@@ -101,7 +134,6 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
     let count = 0;
     if (filters.status) count++;
     if (filters.customDateFrom || filters.customDateTo) count++;
-    if (searchQuery) count++;
     return count;
   };
 
@@ -153,22 +185,16 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className={`relative flex-1 sm:flex-auto px-4 py-2.5 rounded-xl flex items-center justify-center space-x-2 transition-all
-              ${
-                showFilterPanel
-                  ? "bg-indigo-600 text-white"
-                  : "backdrop-blur-md text-gray-300 hover:text-white border border-gray-700/30"
-              }
-              }
-            `}
+            className={`relative flex-1 sm:flex-auto px-4 py-2.5 rounded-xl flex items-center justify-center space-x-2 transition-all focus:outline-none focus:ring-0 focus-visible:outline-none ${
+              showFilterPanel
+                ? "bg-indigo-600 text-white border border-transparent"
+                : "bg-gray-800/50 backdrop-blur-md text-gray-300 hover:text-white border border-gray-700/30"
+            }`}
             onClick={handleFilterClick}
+            style={{ outline: "none" }}
           >
             <Filter className="w-5 h-5" />
             <span className="font-medium">Filter</span>
-            <div
-              className="absolute inset-0 -z-10 rounded-xl"
-              style={{ backgroundColor: "rgba(17, 24, 39, 0.95)" }}
-            ></div>
             {filterCount > 0 && (
               <motion.div
                 initial={{ scale: 0 }}
@@ -179,7 +205,7 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
               </motion.div>
             )}
           </motion.button>
-          {/* Sort Button */}
+
           <motion.div className="relative flex-1 sm:flex-auto">
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -199,7 +225,6 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
               <span className="font-medium">Sort</span>
             </motion.button>
 
-            {/* Sort Menu Dropdown */}
             <SortMenu
               isOpen={showSortMenu}
               activeField={activeSort.field}
@@ -210,7 +235,6 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
           </motion.div>
         </div>
       </div>{" "}
-      {/* Filter Panel - Responsive Design */}
       <AnimatePresence>
         {showFilterPanel && (
           <motion.div
@@ -221,7 +245,6 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
             className="mt-3 bg-gray-800/70 backdrop-blur-md border border-gray-700/30 rounded-xl p-4 overflow-hidden z-20"
           >
             <div className="flex flex-col sm:flex-row gap-6">
-              {/* Status Filter */}
               <div className="space-y-2">
                 <h3 className="text-gray-300 font-medium flex items-center">
                   <FileText className="w-4 h-4 mr-2 text-indigo-400" />
@@ -252,47 +275,104 @@ const SearchAndFilterBar: React.FC<SearchAndFilterBarProps> = ({
                 </div>
               </div>
 
-              {/* Date Range Filter */}
               <div className="space-y-2">
                 <h3 className="text-gray-300 font-medium flex items-center">
                   <Calendar className="w-4 h-4 mr-2 text-indigo-400" />
                   Date Range
                 </h3>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div>
-                    <input
-                      type="date"
-                      value={filters.customDateFrom || ""}
-                      onChange={(e) => {
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">From</span>
+                    <DatePicker
+                      selected={
+                        filters.customDateFrom
+                          ? new Date(filters.customDateFrom)
+                          : null
+                      }
+                      onChange={(date: Date | null) => {
                         const newFilters = {
                           ...filters,
-                          customDateFrom: e.target.value,
+                          customDateFrom: date
+                            ? date.toISOString().split("T")[0]
+                            : undefined,
                         };
-                        setFilters(newFilters);
                         onFilterChange(newFilters);
                       }}
-                      className="px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-200 text-sm focus:border-indigo-500 focus:outline-none"
+                      selectsStart
+                      startDate={
+                        filters.customDateFrom
+                          ? new Date(filters.customDateFrom)
+                          : undefined
+                      }
+                      endDate={
+                        filters.customDateTo
+                          ? new Date(filters.customDateTo)
+                          : undefined
+                      }
+                      maxDate={
+                        filters.customDateTo
+                          ? new Date(filters.customDateTo)
+                          : undefined
+                      }
+                      placeholderText="Select date"
+                      customInput={<CustomDateInput />}
+                      dateFormat="yyyy-MM-dd"
+                      popperPlacement="bottom-start"
+                      portalId="root"
+                      popperProps={{
+                        strategy: "fixed",
+                      }}
+                      popperClassName="z-[99999]"
                     />
                   </div>
-                  <div>
-                    <input
-                      type="date"
-                      value={filters.customDateTo || ""}
-                      onChange={(e) => {
+                  <span className="text-gray-500">–</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">To</span>
+                    <DatePicker
+                      selected={
+                        filters.customDateTo
+                          ? new Date(filters.customDateTo)
+                          : null
+                      }
+                      onChange={(date: Date | null) => {
                         const newFilters = {
                           ...filters,
-                          customDateTo: e.target.value,
+                          customDateTo: date
+                            ? date.toISOString().split("T")[0]
+                            : undefined,
                         };
-                        setFilters(newFilters);
                         onFilterChange(newFilters);
                       }}
-                      className="px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-200 text-sm focus:border-indigo-500 focus:outline-none"
+                      selectsEnd
+                      startDate={
+                        filters.customDateFrom
+                          ? new Date(filters.customDateFrom)
+                          : undefined
+                      }
+                      endDate={
+                        filters.customDateTo
+                          ? new Date(filters.customDateTo)
+                          : undefined
+                      }
+                      minDate={
+                        filters.customDateFrom
+                          ? new Date(filters.customDateFrom)
+                          : undefined
+                      }
+                      placeholderText="Select date"
+                      customInput={<CustomDateInput />}
+                      dateFormat="yyyy-MM-dd"
+                      popperPlacement="bottom-start"
+                      portalId="root"
+                      popperProps={{
+                        strategy: "fixed",
+                      }}
+                      popperClassName="z-[99999]"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Additional Options */}
               <div className="flex items-end ml-auto">
                 <motion.button
                   whileHover={{ scale: 1.03 }}

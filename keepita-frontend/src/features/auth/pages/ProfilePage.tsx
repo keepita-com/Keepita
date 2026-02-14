@@ -5,7 +5,7 @@ import { useDocumentTitle } from "../../../shared/hooks/useDocumentTitle";
 import AnimatedBackground from "../../../shared/components/AnimatedBackground";
 
 const ProfilePage: React.FC = () => {
-  useDocumentTitle("Profile | xplorta");
+  useDocumentTitle("Profile | Keepita");
 
   return (
     <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-br from-gray-900 via-gray-900 to-gray-900 relative overflow-hidden">

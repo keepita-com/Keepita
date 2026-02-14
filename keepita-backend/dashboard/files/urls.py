@@ -4,8 +4,8 @@ from rest_framework.routers import DefaultRouter
 from . import views
 
 router = DefaultRouter()
-router.register(r"", views.FileViewSet, basename="file")
+router.register(r'', views.FileViewSet, basename='file')
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path('', include(router.urls)),
 ]

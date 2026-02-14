@@ -4,22 +4,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDocumentTitle } from "../../../shared/hooks/useDocumentTitle";
 import {
   Users,
+  Phone,
   MessageSquare,
   Smartphone,
   Bluetooth,
   FolderOpen,
   ArrowLeft,
+  Clock,
   Wifi,
+  Grid3X3,
   Globe,
   PaintbrushVertical,
   ChevronDown,
-  Moon,
-  Sun,
 } from "lucide-react";
-import { AnimatedBackground } from "@/shared/components";
+import { AnimatedBackground, PageLoader } from "@/shared/components";
 import { useBackupDetails } from "../hooks/backup.hooks";
+import { useBackupTheme } from "../store/backupThemes.store";
+import EmptyState from "../components/EmptyState";
 
-// Define type for sections
 interface BackupSection {
   id: string;
   title: string;
@@ -50,28 +52,52 @@ const CardSkeleton = () => (
 
 const BackupSectionsPage: React.FC = () => {
   const { backupId } = useParams<{ backupId: string }>();
-  useDocumentTitle("Backup Sections | xplorta");
-  const [selectedOsTheme, setSelectedOsTheme] = useState("Apple Theme");
-  const [selectedDarkAndLightTheme, setSelectedDarkAndLightTheme] =
-    useState("Dark Theme");
-  const [isOsThemeOpen, setIsOsThemeOpen] = useState(false);
-  const [isDarkLightThemeOpen, setIsDarkLightThemeOpen] = useState(false);
-  const osThemeRef = useRef<HTMLDivElement>(null);
-  const darkLightThemeRef = useRef<HTMLDivElement>(null);
+  useDocumentTitle("Backup Sections | Keepita");
   const navigate = useNavigate();
 
-  const { backup, isLoading } = useBackupDetails(backupId);
+  const [isOsThemeOpen, setIsOsThemeOpen] = useState(false);
+  const { setBackupTheme, theme } = useBackupTheme();
+  const { backup, isLoading, error } = useBackupDetails(backupId);
+  const osThemeRef = useRef<HTMLDivElement>(null);
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
+  if (error || !backup) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center relative">
+        <AnimatedBackground className="absolute inset-0 z-0" />
+        <div className="max-w-lg w-full z-10 p-4">
+          <EmptyState
+            icon="no-results"
+            title="Backup Not Found"
+            description="The backup you are looking for differs or does not exist."
+          />
+          <motion.div
+            className="text-center -mt-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/backups")}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-colors"
+            >
+              Return to Backups
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   const handleOsThemeSelect = (theme: string) => {
-    setSelectedOsTheme(theme);
+    setBackupTheme(theme);
     setIsOsThemeOpen(false);
     osThemeRef.current?.blur();
-  };
-
-  const handleDarkAndLightModeTheme = (theme: string) => {
-    setSelectedDarkAndLightTheme(theme);
-    setIsDarkLightThemeOpen(false);
-    darkLightThemeRef.current?.blur();
   };
 
   const sections: BackupSection[] = [
@@ -82,6 +108,14 @@ const BackupSectionsPage: React.FC = () => {
       icon: Users,
       count: backup?.contacts_count || 0,
       isAvailable: Boolean(backup?.contacts_count),
+    },
+    {
+      id: "call-logs",
+      title: "Call Logs",
+      description: "Complete call history and duration",
+      icon: Phone,
+      count: backup?.call_logs_count || 0,
+      isAvailable: Boolean(backup?.call_logs_count),
     },
     {
       id: "messages",
@@ -108,6 +142,14 @@ const BackupSectionsPage: React.FC = () => {
       isAvailable: Boolean(backup?.bluetooth_devices_count),
     },
     {
+      id: "alarms",
+      title: "Alarms & Timers",
+      description: "Clock settings and schedules",
+      icon: Clock,
+      count: backup?.alarms_count || 0,
+      isAvailable: Boolean(backup?.alarms_count),
+    },
+    {
       id: "files",
       title: "Files",
       description: "Files and document storage",
@@ -122,6 +164,14 @@ const BackupSectionsPage: React.FC = () => {
       icon: Wifi,
       count: backup?.wifi_networks_count || 0,
       isAvailable: Boolean(backup?.wifi_networks_count),
+    },
+    {
+      id: "homescreen",
+      title: "Home Layout",
+      description: "App arrangements and widgets",
+      icon: Grid3X3,
+      count: backup?.home_screen_items_count || 0,
+      isAvailable: Boolean(backup?.home_screen_items_count),
     },
     {
       id: "browser",
@@ -201,33 +251,56 @@ const BackupSectionsPage: React.FC = () => {
                 </p>
               </div>
             </div>
+
             <motion.div
               initial="hidden"
               animate="visible"
               variants={dropdownVariants}
-              className="flex items-center space-x-2 rounded-xl px-6 py-4 backdrop-blur-sm bg-transparent z-50"
+              className="flex items-center p-1.5 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl shadow-2xl z-50"
             >
-              <Smartphone
-                size={32}
-                className="rounded-3xl w-10 h-10 p-2"
-                style={{
-                  background: "linear-gradient(to right, #8164F6, #527CF6)",
-                }}
-              />
-              <span className="text-white font-bold text-xl">
-                {isLoading ? "Loading..." : backup?.model_name || "No Model"}
-              </span>
-              <div className="h-8 w-px bg-white/20 mx-2"></div>
+              <div className="flex items-center gap-3 pr-6">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+                  <Smartphone className="w-5 h-5 text-indigo-300" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-wider text-white/40 font-bold">
+                    Device Model
+                  </span>
+                  <span className="text-sm font-bold text-white leading-tight">
+                    {isLoading
+                      ? "Loading..."
+                      : backup?.model_name || "Unknown Device"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-px h-8 bg-gradient-to-b from-transparent via-white/10 to-transparent mx-1"></div>
+
               <div className="relative" ref={osThemeRef}>
                 <button
                   onClick={() => setIsOsThemeOpen(!isOsThemeOpen)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 text-white hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-800 transition-colors focus:outline-none"
+                  className={`
+                    flex items-center gap-2.5 px-4 py-2 rounded-xl transition-all duration-300 group
+                    ${
+                      isOsThemeOpen
+                        ? "bg-white/10 text-white"
+                        : "hover:bg-white/5 text-white/70 hover:text-white"
+                    }
+                  `}
                 >
-                  <PaintbrushVertical className="w-5 h-5" />
-                  <div className="h-6 w-px bg-white/10 mx-1"></div>
-                  <span>{selectedOsTheme}</span>
-                  <ChevronDown className="w-5 h-5" />
+                  <div className="p-1.5 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
+                    <PaintbrushVertical className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-sm font-medium capitalize">
+                    {theme || "Samsung"} Theme
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-white/40 transition-transform duration-300 ${
+                      isOsThemeOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
+
                 <AnimatePresence>
                   {isOsThemeOpen && (
                     <motion.ul
@@ -235,111 +308,34 @@ const BackupSectionsPage: React.FC = () => {
                       animate="visible"
                       exit="exit"
                       variants={dropdownVariants}
-                      className="absolute right-0 mt-2 w-52 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl shadow-lg z-50 p-2 space-y-1"
+                      className="absolute right-0 top-full mt-3 w-48 p-1 bg-[#0F1115]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden"
                     >
-                      <li>
-                        <button
-                          className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-white hover:text-white/70 active:text-gray-900 transition-colors ${
-                            selectedOsTheme === "Apple Theme"
-                              ? "text-gray-300 font-semibold"
-                              : ""
-                          }`}
-                          onClick={() => handleOsThemeSelect("Apple Theme")}
-                        >
-                          <div
-                            className="h-6 w-px"
-                            style={{
-                              background:
-                                "linear-gradient(to right, #FFFFFF, #999999)",
-                            }}
-                          ></div>
-                          Apple
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-white hover:text-white/70 active:text-gray-900 transition-colors ${
-                            selectedOsTheme === "Samsung Theme"
-                              ? "text-gray-300 font-semibold"
-                              : ""
-                          }`}
-                          onClick={() => handleOsThemeSelect("Samsung Theme")}
-                        >
-                          <div className="h-6 w-px bg-[#008AFF]"></div>
-                          Samsung
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-white hover:text-white/70 active:text-gray-900 transition-colors ${
-                            selectedOsTheme === "Xiaomi Theme"
-                              ? "text-gray-300 font-semibold"
-                              : ""
-                          }`}
-                          onClick={() => handleOsThemeSelect("Xiaomi Theme")}
-                        >
-                          <div className="h-6 w-px bg-[#FF6900]"></div>
-                          Xiaomi
-                        </button>
-                      </li>
-                    </motion.ul>
-                  )}
-                </AnimatePresence>
-              </div>
-              <div className="h-8 w-px bg-white/20 mx-2"></div>
-              <div className="relative" ref={darkLightThemeRef}>
-                <button
-                  onClick={() => setIsDarkLightThemeOpen(!isDarkLightThemeOpen)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 text-white hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-800 transition-colors focus:outline-none"
-                >
-                  {selectedDarkAndLightTheme === "Dark Theme" ? (
-                    <Moon className="w-5 h-5" />
-                  ) : (
-                    <Sun className="w-5 h-5" />
-                  )}
-                  <div className="h-6 w-px bg-white/10 mx-1"></div>
-                  <span>{selectedDarkAndLightTheme}</span>
-                  <ChevronDown className="w-5 h-5" />
-                </button>
-                <AnimatePresence>
-                  {isDarkLightThemeOpen && (
-                    <motion.ul
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      variants={dropdownVariants}
-                      className="absolute right-0 mt-2 w-52 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl shadow-lg z-50 p-2 space-y-1"
-                    >
-                      <li>
-                        <button
-                          className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-white hover:text-white/70 active:text-gray-900 transition-colors ${
-                            selectedDarkAndLightTheme === "Dark Theme"
-                              ? "text-gray-300 font-semibold"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            handleDarkAndLightModeTheme("Dark Theme")
-                          }
-                        >
-                          <Moon className="w-5 h-5" />
-                          Dark
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-white hover:text-white/70 active:text-gray-900 transition-colors ${
-                            selectedDarkAndLightTheme === "Light Theme"
-                              ? "text-gray-300 font-semibold"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            handleDarkAndLightModeTheme("Light Theme")
-                          }
-                        >
-                          <Sun className="w-5 h-5" />
-                          Light
-                        </button>
-                      </li>
+                      {["Apple", "Samsung", "Xiaomi"].map((os) => (
+                        <li key={os}>
+                          <button
+                            className={`
+                              w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200
+                              ${
+                                theme?.toLowerCase() === os.toLowerCase()
+                                  ? "bg-indigo-500/20 text-indigo-300 font-medium"
+                                  : "text-white/60 hover:text-white hover:bg-white/5"
+                              }
+                            `}
+                            onClick={() => handleOsThemeSelect(os)}
+                          >
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                os === "Apple"
+                                  ? "bg-gray-200"
+                                  : os === "Samsung"
+                                    ? "bg-blue-500"
+                                    : "bg-orange-500"
+                              }`}
+                            ></div>
+                            {os}
+                          </button>
+                        </li>
+                      ))}
                     </motion.ul>
                   )}
                 </AnimatePresence>
@@ -353,7 +349,7 @@ const BackupSectionsPage: React.FC = () => {
             ? Array.from({ length: 10 }).map((_, index) => (
                 <CardSkeleton key={index} />
               ))
-            : sections.map((section, index) => {
+            : sections.map((section: BackupSection, index: number) => {
                 const Icon = section.icon;
                 const isDisabled = !section.isAvailable;
 
@@ -377,7 +373,7 @@ const BackupSectionsPage: React.FC = () => {
                     role="button"
                     aria-label={`View ${section.title} section`}
                   >
-                    {/* Disabled overlay */}
+                    {}
                     {isDisabled && (
                       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-xl flex items-center justify-center">
                         <div className="text-center">
@@ -386,7 +382,7 @@ const BackupSectionsPage: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Content */}
+                    {}
                     <div className="relative z-10 flex flex-col h-full">
                       <div className="flex items-center justify-between mb-3">
                         <motion.div

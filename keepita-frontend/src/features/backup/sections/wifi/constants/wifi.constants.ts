@@ -1,8 +1,5 @@
 import type { SecurityType, FrequencyBand } from "../types/wifi.types";
 
-/**
- * WiFi sort options for dropdowns and filters
- */
 export const WIFI_SORT_OPTIONS = [
   { key: "created_at", label: "Date Added", direction: "desc" },
   { key: "created_at", label: "Date Added (Oldest)", direction: "asc" },
@@ -13,9 +10,6 @@ export const WIFI_SORT_OPTIONS = [
   { key: "security_type", label: "Security Type", direction: "asc" },
 ] as const;
 
-/**
- * WiFi security type filter options with icons
- */
 export const WIFI_SECURITY_TYPE_FILTERS = [
   {
     key: "WPA2_PSK" as SecurityType,
@@ -37,9 +31,6 @@ export const WIFI_SECURITY_TYPE_FILTERS = [
   },
 ] as const;
 
-/**
- * WiFi frequency band filter options with icons
- */
 export const WIFI_FREQUENCY_BAND_FILTERS = [
   {
     key: "2.4GHz" as FrequencyBand,
@@ -61,9 +52,6 @@ export const WIFI_FREQUENCY_BAND_FILTERS = [
   },
 ] as const;
 
-/**
- * WiFi network status filter options with colors
- */
 export const WIFI_STATUS_FILTERS = [
   {
     key: "is_saved",
@@ -81,9 +69,6 @@ export const WIFI_STATUS_FILTERS = [
   },
 ] as const;
 
-/**
- * Common WiFi connection status options
- */
 export const WIFI_CONNECTION_STATUS = {
   CONNECTED: "Connected",
   SAVED: "Saved",
@@ -91,9 +76,6 @@ export const WIFI_CONNECTION_STATUS = {
   FAILED: "Failed",
 } as const;
 
-/**
- * WiFi export format options
- */
 export const WIFI_EXPORT_FORMATS = [
   {
     key: "csv",
@@ -111,21 +93,15 @@ export const WIFI_EXPORT_FORMATS = [
   },
 ] as const;
 
-/**
- * Default WiFi pagination settings
- */
 export const WIFI_PAGINATION_DEFAULTS = {
   PAGE_SIZE: 20,
   MAX_PAGE_SIZE: 100,
   DEFAULT_PAGE: 1,
 } as const;
 
-/**
- * WiFi API cache settings (in milliseconds)
- */
 export const WIFI_CACHE_SETTINGS = {
-  STALE_TIME: 5 * 60 * 1000, // 5 minutes
-  GC_TIME: 10 * 60 * 1000, // 10 minutes
-  RETRY_DELAY: 1000, // 1 second
+  STALE_TIME: 5 * 60 * 1000,
+  GC_TIME: 10 * 60 * 1000,
+  RETRY_DELAY: 1000,
   MAX_RETRIES: 3,
 } as const;

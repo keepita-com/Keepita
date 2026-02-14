@@ -9,9 +9,9 @@ import { Toaster as SoonerToaster } from "sonner";
 import { NuqsAdapter } from "nuqs/adapters/react";
 
 function App() {
-  // Preload critical routes after initial render
+  
   React.useEffect(() => {
-    // Delay preloading to not interfere with initial load
+    
     const timer = setTimeout(() => {
       preloadCriticalRoutes();
     }, 1000);

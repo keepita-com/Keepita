@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 import { User, Settings, LogOut, UserRoundPen, LogIn } from "lucide-react";
@@ -18,25 +18,38 @@ const Sidebar: React.FC<SidebarProps> = ({ navItems, onDrawerClose }) => {
   const { clearAuth, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        onDrawerClose();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, [onDrawerClose]);
+
   const handleLogout = () => {
     clearAuth();
     navigate("/login");
     onDrawerClose();
   };
+
   return (
     <div className="p-4 w-80 bg-gray-900/95 backdrop-blur-lg text-gray-100 flex flex-col h-full border-l border-white/10">
-      {/* logo, title */}
+      {}
       <div className="flex items-center gap-3 px-3 py-4 border-b border-gray-700/30">
         <div className="bg-gradient-to-r from-sky-500 to-violet-500 h-10 w-10 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/20">
-          <span className="text-white font-bold text-xl">S</span>
+          <span className="text-white font-bold text-xl">K</span>
         </div>
         <div className="text-xl font-bold bg-gradient-to-r from-sky-400 to-violet-500 bg-clip-text text-transparent">
-          xplorta
+          Keepita
         </div>
       </div>
-      {/* navigation */}
+      {}
       <ul className="pt-6 space-y-2">
-        {/* title */}
+        {}
         <li className="text-xs uppercase text-gray-500 font-semibold tracking-wider px-4 pb-2">
           Navigation
         </li>
@@ -57,10 +70,10 @@ const Sidebar: React.FC<SidebarProps> = ({ navItems, onDrawerClose }) => {
           </li>
         ))}
       </ul>
-      {/* account */}
+      {}
       <div className="mt-auto border-t border-gray-800/30 pt-5">
         <ul className="space-y-2">
-          {/* title */}
+          {}
           <li className="text-xs uppercase text-gray-500 font-semibold tracking-wider px-4 pb-2">
             Account
           </li>

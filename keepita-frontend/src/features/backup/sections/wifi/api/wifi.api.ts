@@ -14,12 +14,9 @@ const WIFI_API_ENDPOINTS = {
     `${RESOURCE}/backups/${backupId}/wifi/list/${wifiId}/`,
 };
 
-/**
- * Get WiFi networks for a backup (function-based)
- */
 export const getWiFiNetworks = async (
   backupId: string,
-  params: Partial<WiFiQueryParams> = {}
+  params: Partial<WiFiQueryParams> = {},
 ): Promise<WiFiListResponse> => {
   if (!backupId) {
     throw new Error("Backup ID is required");
@@ -44,12 +41,9 @@ export const getWiFiNetworks = async (
   }
 };
 
-/**
- * Get a single WiFi network details (function-based)
- */
 export const getWiFiNetwork = async (
   backupId: string,
-  wifiId: string
+  wifiId: string,
 ): Promise<WiFiNetwork> => {
   if (!backupId || !wifiId) {
     throw new Error("Backup ID and WiFi ID are required");

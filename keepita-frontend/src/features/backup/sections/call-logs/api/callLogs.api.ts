@@ -12,12 +12,9 @@ const CALL_LOGS_API_ENDPOINTS = {
     `${RESOURCE}/backups/${backupId}/call_logs/list/`,
 } as const;
 
-/**
- * Get call logs for a specific backup with optional filtering and pagination
- */
 export const getCallLogs = async (
   backupId: number | string | undefined,
-  params: Partial<GetCallLogsParams> = {}
+  params: Partial<GetCallLogsParams> = {},
 ): Promise<CallLogsApiResponse> => {
   if (!backupId) {
     throw new Error("Backup ID is required");
@@ -42,7 +39,7 @@ export const getCallLogs = async (
     "CallLogs API: Making request to",
     endpoint,
     "with params:",
-    queryParams
+    queryParams,
   );
 
   try {

@@ -25,7 +25,7 @@ export interface BackupFilters {
 }
 
 export interface BackupSortConfig {
-  ordering?: string; // e.g., "-created_at", "name", "size"
+  ordering?: string;
 }
 
 export interface GetBackupsParams {
@@ -47,6 +47,8 @@ export interface CreateBackupWithProgressParams {
   name: string;
   backup_file: File;
   onUploadProgress?: (progressEvent: any) => void;
+  device_brand: string;
+  ios_password?: string;
 }
 
 export interface UpdateBackupParams {
@@ -83,11 +85,11 @@ export interface BackupProgressResponse {
 
 export const useBackupApi = () => {
   const getBackupProgress = async (
-    logId: string
+    logId: string,
   ): Promise<BackupProgressResponse> => {
     try {
       const response = await DataProvider.get<BackupProgressResponse>(
-        `${DASHBOARD_API_ENDPOINTS.BACKUP_PROGRESS}${logId}/`
+        `${DASHBOARD_API_ENDPOINTS.BACKUP_PROGRESS}${logId}/`,
       );
 
       const responseData = response.data;
@@ -102,7 +104,7 @@ export const useBackupApi = () => {
         throw error;
       } else {
         throw new Error(
-          "An error occurred while fetching backup progress. Please try again later."
+          "An error occurred while fetching backup progress. Please try again later.",
         );
       }
     }
@@ -110,28 +112,23 @@ export const useBackupApi = () => {
 
   const getBackups = async (params: GetBackupsParams = {}) => {
     try {
-      // Build query parameters
       const queryParams: Record<string, any> = {
         page: params.page || 1,
         page_size: params.page_size || 6,
       };
 
-      // Add search parameter
       if (params.search) {
         queryParams.search = params.search;
       }
 
-      // Add ordering parameter
       if (params.ordering) {
         queryParams.ordering = params.ordering;
       }
 
-      // Add status filter
       if (params.status) {
         queryParams.status = params.status;
       }
 
-      // Add date filters
       if (params.created_after) {
         queryParams.created_after = params.created_after;
       }
@@ -143,7 +140,7 @@ export const useBackupApi = () => {
         DASHBOARD_API_ENDPOINTS.BACKUPS,
         {
           params: queryParams,
-        }
+        },
       );
 
       return response.data;
@@ -154,7 +151,7 @@ export const useBackupApi = () => {
         throw error;
       } else {
         throw new Error(
-          "An error occurred while fetching the backups list. Please try again later."
+          "An error occurred while fetching the backups list. Please try again later.",
         );
       }
     }
@@ -163,7 +160,7 @@ export const useBackupApi = () => {
   const getBackup = async (id: string) => {
     try {
       const response = await DataProvider.get<BackupItem>(
-        `${DASHBOARD_API_ENDPOINTS.BACKUPS}${id}/`
+        `${DASHBOARD_API_ENDPOINTS.BACKUPS}${id}/`,
       );
       return response.data;
     } catch (error) {
@@ -173,7 +170,7 @@ export const useBackupApi = () => {
         throw error;
       } else {
         throw new Error(
-          "An error occurred while fetching the backup details. Please try again later."
+          "An error occurred while fetching the backup details. Please try again later.",
         );
       }
     }
@@ -183,7 +180,7 @@ export const useBackupApi = () => {
     try {
       const response = await DataProvider.post<CreateBackupResponse>(
         DASHBOARD_API_ENDPOINTS.BACKUPS,
-        params
+        params,
       );
       return response.data;
     } catch (error) {
@@ -193,26 +190,30 @@ export const useBackupApi = () => {
         throw error;
       } else {
         throw new Error(
-          "An error occurred while creating the backup. Please try again later."
+          "An error occurred while creating the backup. Please try again later.",
         );
       }
     }
   };
 
   const createBackupWithProgress = async (
-    params: CreateBackupWithProgressParams
+    params: CreateBackupWithProgressParams,
   ) => {
     try {
       const formData = new FormData();
       formData.append("name", params.name);
       formData.append("backup_file", params.backup_file);
+      formData.append("device_brand", params.device_brand);
+      if (params.ios_password) {
+        formData.append("password", params.ios_password);
+      }
 
       const response = await DataProvider.post<CreateBackupResponse>(
         DASHBOARD_API_ENDPOINTS.BACKUPS,
         formData,
         {
           onUploadProgress: params.onUploadProgress,
-        }
+        },
       );
       return response.data;
     } catch (error) {
@@ -222,7 +223,7 @@ export const useBackupApi = () => {
         throw error;
       } else {
         throw new Error(
-          "An error occurred while creating the backup. Please try again later."
+          "An error occurred while creating the backup. Please try again later.",
         );
       }
     }
@@ -232,7 +233,7 @@ export const useBackupApi = () => {
     try {
       const response = await DataProvider.patch<{ data: BackupItem }>(
         `${DASHBOARD_API_ENDPOINTS.BACKUPS}${id}/`,
-        params
+        params,
       );
       return response.data;
     } catch (error) {
@@ -242,7 +243,7 @@ export const useBackupApi = () => {
         throw error;
       } else {
         throw new Error(
-          "An error occurred while updating the backup. Please try again later."
+          "An error occurred while updating the backup. Please try again later.",
         );
       }
     }
@@ -251,7 +252,7 @@ export const useBackupApi = () => {
   const deleteBackup = async (id: string) => {
     try {
       const response = await DataProvider.delete(
-        `${DASHBOARD_API_ENDPOINTS.BACKUPS}${id}/`
+        `${DASHBOARD_API_ENDPOINTS.BACKUPS}${id}/`,
       );
       return response.data;
     } catch (error) {
@@ -261,7 +262,7 @@ export const useBackupApi = () => {
         throw error;
       } else {
         throw new Error(
-          "An error occurred while deleting the backup. Please try again later."
+          "An error occurred while deleting the backup. Please try again later.",
         );
       }
     }
@@ -280,7 +281,7 @@ export const useBackupApi = () => {
 
 export const getBackupsStats = async () => {
   const response = await DataProvider.get<BackupsStatsResponse>(
-    "dashboard/backups/statistics"
+    "dashboard/backups/statistics",
   );
 
   return response.data;
@@ -288,7 +289,7 @@ export const getBackupsStats = async () => {
 
 export const getBackupMedia = async (fileId: string | number) => {
   const response = await DataProvider.get<BackupMediaResponse>(
-    `dashboard/files/${fileId}/download/`
+    `dashboard/files/${fileId}/download/`,
   );
 
   return response.data;

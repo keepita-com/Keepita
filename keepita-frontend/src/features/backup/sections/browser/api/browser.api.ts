@@ -17,7 +17,7 @@ const RESOURCE_ROOT = (backupId: string | number) =>
 const buildParams = (
   filters?: BrowserFilters,
   sortConfig?: BrowserSortConfig,
-  page?: number
+  page?: number,
 ) => {
   const params = new URLSearchParams();
   if (page) params.append("page", page.toString());
@@ -40,14 +40,11 @@ const buildParams = (
   return params;
 };
 
-// === API Functions ===
-
-// 1. Bookmarks
 export const getBookmarks = async (
   backupId: string | number,
   filters?: BrowserFilters,
   sortConfig?: BrowserSortConfig,
-  page: number = 1
+  page: number = 1,
 ): Promise<BookmarksResponse> => {
   const endpoint = `${RESOURCE_ROOT(backupId)}/bookmarks/`;
   const params = buildParams(filters, sortConfig, page);
@@ -55,12 +52,11 @@ export const getBookmarks = async (
     .data;
 };
 
-// 2. History
 export const getHistory = async (
   backupId: string | number,
   filters?: BrowserFilters,
   sortConfig?: BrowserSortConfig,
-  page: number = 1
+  page: number = 1,
 ): Promise<HistoryResponse> => {
   const endpoint = `${RESOURCE_ROOT(backupId)}/history/`;
   const params = buildParams(filters, sortConfig, page);
@@ -68,12 +64,11 @@ export const getHistory = async (
     .data;
 };
 
-// 3. Downloads
 export const getDownloads = async (
   backupId: string | number,
   filters?: BrowserFilters,
   sortConfig?: BrowserSortConfig,
-  page: number = 1
+  page: number = 1,
 ): Promise<DownloadsResponse> => {
   const endpoint = `${RESOURCE_ROOT(backupId)}/downloads/`;
   const params = buildParams(filters, sortConfig, page);
@@ -82,18 +77,17 @@ export const getDownloads = async (
 };
 
 export const getDownloadStats = async (
-  backupId: string | number
+  backupId: string | number,
 ): Promise<DownloadStats> => {
   const endpoint = `${RESOURCE_ROOT(backupId)}/downloads/statistics/`;
   return (await DataProvider.get<DownloadStats>(endpoint)).data;
 };
 
-// 4. Searches
 export const getSearches = async (
   backupId: string | number,
   filters?: BrowserFilters,
   sortConfig?: BrowserSortConfig,
-  page: number = 1
+  page: number = 1,
 ): Promise<SearchesResponse> => {
   const endpoint = `${RESOURCE_ROOT(backupId)}/searches/`;
   const params = buildParams(filters, sortConfig, page);
@@ -101,28 +95,26 @@ export const getSearches = async (
     .data;
 };
 
-// 5. Tabs
 export const getTabs = async (
   backupId: string | number,
   filters?: BrowserFilters,
   sortConfig?: BrowserSortConfig,
-  page: number = 1
+  page: number = 1,
 ): Promise<TabsResponse> => {
   const endpoint = `${RESOURCE_ROOT(backupId)}/tabs/`;
   const params = buildParams(filters, sortConfig, page);
   return (await DataProvider.get<TabsResponse>(`${endpoint}?${params}`)).data;
 };
 
-// 6. Overview
 export const getBrowserOverview = async (
-  backupId: string | number
+  backupId: string | number,
 ): Promise<BrowserOverviewInterface> => {
   const endpoint = `${RESOURCE_ROOT(backupId)}/overview/`;
   return (await DataProvider.get<BrowserOverviewInterface>(endpoint)).data;
 };
 
 export const getBrowserStatistics = async (
-  backupId: string | number
+  backupId: string | number,
 ): Promise<BrowserStatistics> => {
   const endpoint = `${RESOURCE_ROOT(backupId)}/overview/statistics/`;
   return (await DataProvider.get<BrowserStatistics>(endpoint)).data;

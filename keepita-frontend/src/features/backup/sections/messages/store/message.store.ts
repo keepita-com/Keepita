@@ -6,30 +6,20 @@ import type {
   ChatMessageFilters,
 } from "../types/message.types";
 
-// ================================
-// CLIENT-SIDE STATE ONLY
-// Server state (threads, messages, loading, error) is managed by React Query
-// ================================
-
 interface MessageClientState {
-  // UI State - Client-side only
   selectedThreadId: number | null;
   selectedMessageIds: number[];
 
-  // Filter State - Client-side preferences
   chatListFilters: ChatListFilters;
   chatMessageFilters: ChatMessageFilters;
-  filters: MessageFilters; // Legacy support
+  filters: MessageFilters;
 
-  // UI Preferences
   viewMode: "list" | "grid";
   sortBy: string;
   groupBy: "date" | "contact" | "none";
 
-  // Thread View State
   isConversationOpen: boolean;
 
-  // Actions for client state only
   setSelectedThreadId: (threadId: number | null) => void;
   setSelectedMessageIds: (messageIds: number[]) => void;
   toggleMessageSelection: (messageId: number) => void;
@@ -50,7 +40,6 @@ interface MessageClientState {
 export const useMessageStore = create<MessageClientState>()(
   devtools(
     (set) => ({
-      // Initial client state
       selectedThreadId: null,
       selectedMessageIds: [],
       chatListFilters: {},
@@ -61,7 +50,6 @@ export const useMessageStore = create<MessageClientState>()(
       groupBy: "date",
       isConversationOpen: false,
 
-      // Client state actions
       setSelectedThreadId: (threadId) =>
         set({ selectedThreadId: threadId }, false, "setSelectedThreadId"),
 
@@ -76,7 +64,7 @@ export const useMessageStore = create<MessageClientState>()(
               : [...state.selectedMessageIds, messageId],
           }),
           false,
-          "toggleMessageSelection"
+          "toggleMessageSelection",
         ),
 
       clearMessageSelection: () =>
@@ -85,14 +73,10 @@ export const useMessageStore = create<MessageClientState>()(
       setChatListFilters: (newFilters) =>
         set(
           (state) => {
-
-            // Merge filters and remove undefined values
             const updatedFilters = { ...state.chatListFilters, ...newFilters };
 
-            // Remove properties that are explicitly set to undefined
             Object.keys(newFilters).forEach((key) => {
               if (newFilters[key as keyof ChatListFilters] === undefined) {
-             
                 delete updatedFilters[key as keyof ChatListFilters];
               }
             });
@@ -100,19 +84,17 @@ export const useMessageStore = create<MessageClientState>()(
             return { chatListFilters: updatedFilters };
           },
           false,
-          "setChatListFilters"
+          "setChatListFilters",
         ),
 
       setChatMessageFilters: (newFilters) =>
         set(
           (state) => {
-            // Merge filters and remove undefined values
             const updatedFilters = {
               ...state.chatMessageFilters,
               ...newFilters,
             };
 
-            // Remove properties that are explicitly set to undefined
             Object.keys(newFilters).forEach((key) => {
               if (newFilters[key as keyof ChatMessageFilters] === undefined) {
                 delete updatedFilters[key as keyof ChatMessageFilters];
@@ -122,16 +104,14 @@ export const useMessageStore = create<MessageClientState>()(
             return { chatMessageFilters: updatedFilters };
           },
           false,
-          "setChatMessageFilters"
+          "setChatMessageFilters",
         ),
 
       setFilters: (newFilters) =>
         set(
           (state) => {
-            // Merge filters and remove undefined values
             const updatedFilters = { ...state.filters, ...newFilters };
 
-            // Remove properties that are explicitly set to undefined
             Object.keys(newFilters).forEach((key) => {
               if (newFilters[key as keyof MessageFilters] === undefined) {
                 delete updatedFilters[key as keyof MessageFilters];
@@ -141,7 +121,7 @@ export const useMessageStore = create<MessageClientState>()(
             return { filters: updatedFilters };
           },
           false,
-          "setFilters"
+          "setFilters",
         ),
 
       clearAllFilters: () =>
@@ -152,7 +132,7 @@ export const useMessageStore = create<MessageClientState>()(
             filters: {},
           },
           false,
-          "clearAllFilters"
+          "clearAllFilters",
         ),
 
       setViewMode: (mode) => set({ viewMode: mode }, false, "setViewMode"),
@@ -166,6 +146,6 @@ export const useMessageStore = create<MessageClientState>()(
     }),
     {
       name: "message-client-store",
-    }
-  )
+    },
+  ),
 );

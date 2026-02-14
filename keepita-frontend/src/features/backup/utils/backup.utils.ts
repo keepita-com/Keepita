@@ -6,7 +6,7 @@ import JSZip from "jszip";
 
 export const filterBackups = (
   backups: BackupItem[],
-  searchQuery: string
+  searchQuery: string,
 ): BackupItem[] => {
   if (!backups || !Array.isArray(backups)) {
     return [];
@@ -27,7 +27,7 @@ export const filterBackups = (
 export const sortBackups = (
   backups: BackupItem[],
   field: string,
-  direction: "asc" | "desc"
+  direction: "asc" | "desc",
 ): BackupItem[] => {
   if (!backups || !Array.isArray(backups)) {
     return [];
@@ -62,7 +62,7 @@ export const filterAndSortBackups = (
   backups: BackupItem[],
   searchQuery: string,
   sortField: string,
-  sortDirection: "asc" | "desc"
+  sortDirection: "asc" | "desc",
 ): BackupItem[] => {
   const filteredBackups = filterBackups(backups, searchQuery);
   return sortBackups(filteredBackups, sortField, sortDirection);
@@ -72,12 +72,10 @@ const getDateRange = (customDateFrom?: string, customDateTo?: string) => {
   const result: Record<string, string> = {};
 
   if (customDateFrom) {
-    // For date-only input, add time to start of day
     const fromDate = new Date(customDateFrom + "T00:00:00");
     result.created_after = fromDate.toISOString();
   }
   if (customDateTo) {
-    // For date-only input, add time to end of day
     const toDate = new Date(customDateTo + "T23:59:59");
     result.created_before = toDate.toISOString();
   }
@@ -90,28 +88,24 @@ export const buildBackupParams = (
   pageSize: number,
   searchQuery: string,
   filters: BackupFilters,
-  sortConfig: { field: string; direction: "asc" | "desc" }
+  sortConfig: { field: string; direction: "asc" | "desc" },
 ): GetBackupsParams => {
   const params: GetBackupsParams = {
     page,
     page_size: pageSize,
   };
 
-  // Add search
   if (searchQuery.trim()) {
     params.search = searchQuery.trim();
   }
 
-  // Add status filter
   if (filters.status) {
     params.status = filters.status;
   }
 
-  // Add date range filter
   const dateRange = getDateRange(filters.customDateFrom, filters.customDateTo);
   Object.assign(params, dateRange);
 
-  // Add ordering
   const orderingPrefix = sortConfig.direction === "desc" ? "-" : "";
   params.ordering = `${orderingPrefix}${sortConfig.field}`;
 
@@ -126,7 +120,7 @@ export const formatBytes = (bytes: number) => {
 };
 
 export const downloadMedias = async (
-  files: { blob: Blob | string; name: string }[]
+  files: { blob: Blob | string; name: string }[],
 ) => {
   if (files.length === 1) {
     downloadBlob(files[0].blob, files[0].name);

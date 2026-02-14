@@ -14,6 +14,7 @@ import {
 import type { BackupItem as BackupItemType } from "../store/backup.store";
 import { formatFileSize } from "../../../shared/utils/formatting";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import { useBackupTheme } from "../store/backupThemes.store";
 
 interface BackupItemProps {
   backup: BackupItemType;
@@ -31,6 +32,7 @@ const BackupItem: React.FC<BackupItemProps> = ({
   const formattedSize = formatFileSize(backup.size);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { setBackupTheme } = useBackupTheme();
 
   const handleDeleteClick = () => {
     setIsDeleteModalOpen(true);
@@ -47,10 +49,16 @@ const BackupItem: React.FC<BackupItemProps> = ({
   };
 
   const handleViewBackup = () => {
+    setBackupTheme(
+      backup.device_brand === "xiaomi"
+        ? "Xiaomi"
+        : backup.device_brand === "samsung"
+          ? "Samsung"
+          : "Apple",
+    );
     navigate(`/backups/${backup.id}`);
   };
 
-  // Icon for the backup item
   const icon = <FileText className="w-4 h-4 text-blue-400" />;
   return (
     <>
@@ -246,7 +254,6 @@ const BackupItem: React.FC<BackupItemProps> = ({
             </motion.div>
           </div>
 
-          {/* Action Buttons */}
           <div className="mt-4">
             <motion.button
               whileHover={{

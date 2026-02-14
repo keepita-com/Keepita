@@ -10,7 +10,6 @@ const BackupListSkeleton: React.FC<BackupListSkeletonProps> = ({
   count = 3,
   isProcessing = false,
 }) => {
-  // Enhanced staggered animation sequence based on column position
   const getColumnDelay = (index: number): number => {
     return 0.08 * (index % 3) + 0.05 * Math.floor(index / 3);
   };
@@ -46,7 +45,6 @@ const BackupListSkeleton: React.FC<BackupListSkeletonProps> = ({
         >
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-          {/* Shimmer effect overlay */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="shimmer-effect"></div>
           </div>

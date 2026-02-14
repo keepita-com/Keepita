@@ -10,13 +10,9 @@ import type {
 } from "../types/bluetooth.types";
 import { isPaired, isAudioDevice } from "../utils/bluetooth.utils";
 
-/**
- * Hook for fetching bluetooth devices with pagination
- * React Query is the single source of truth for server state
- */
 export const useBluetoothDevices = (
   backupId: number,
-  params: GetBluetoothDevicesParams = {}
+  params: GetBluetoothDevicesParams = {},
 ) => {
   const queryKey = [
     "bluetooth-devices",
@@ -41,20 +37,15 @@ export const useBluetoothDevices = (
     queryKey,
     queryFn: () => getBluetoothDevices(backupId, params),
     enabled: !!backupId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 };
 
-/**
- * Hook for infinite scroll bluetooth devices
- * React Query manages all server state
- */
 export const useBluetoothDevicesInfinite = (
   backupId: number,
-  buildParams: () => GetBluetoothDevicesParams
+  buildParams: () => GetBluetoothDevicesParams,
 ) => {
-  // Create dynamic query key that includes current parameters
   const currentParams = buildParams();
   const queryKey = [
     "bluetooth-devices-infinite",
@@ -83,18 +74,14 @@ export const useBluetoothDevicesInfinite = (
     },
     initialPageParam: 1,
     enabled: !!backupId,
-    staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time to prevent flashing
-    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
     refetchOnWindowFocus: false,
-    refetchOnMount: false, // Don't refetch on mount if data exists
-    placeholderData: (previousData) => previousData, // Keep previous data while loading new
+    refetchOnMount: false,
+    placeholderData: (previousData) => previousData,
   });
 };
 
-/**
- * Hook for bluetooth device filtering and search
- * Only manages client-side filter state
- */
 export const useBluetoothFilters = () => {
   const { filters, searchQuery, setFilters, setSearchQuery, resetFilters } =
     useBluetoothStore();
@@ -103,7 +90,7 @@ export const useBluetoothFilters = () => {
     (newFilters: Partial<BluetoothFilters>) => {
       setFilters(newFilters);
     },
-    [setFilters]
+    [setFilters],
   );
 
   const clearFilters = useCallback(() => {
@@ -114,49 +101,49 @@ export const useBluetoothFilters = () => {
     (search: string) => {
       setSearchQuery(search);
     },
-    [setSearchQuery]
+    [setSearchQuery],
   );
 
   const setPairedOnly = useCallback(
     (pairedOnly: boolean) => {
       setFilters({ is_paired: pairedOnly });
     },
-    [setFilters]
+    [setFilters],
   );
 
   const setDeviceClass = useCallback(
     (deviceClass: number | undefined) => {
       setFilters({ device_class: deviceClass });
     },
-    [setFilters]
+    [setFilters],
   );
 
   const setBondState = useCallback(
     (bondState: number | undefined) => {
       setFilters({ bond_state: bondState });
     },
-    [setFilters]
+    [setFilters],
   );
 
   const setDateRange = useCallback(
     (dateFrom?: string, dateTo?: string) => {
       setFilters({ date_from: dateFrom, date_to: dateTo });
     },
-    [setFilters]
+    [setFilters],
   );
 
   const setNameFilter = useCallback(
     (name: string | undefined) => {
       setFilters({ name });
     },
-    [setFilters]
+    [setFilters],
   );
 
   const setAddressFilter = useCallback(
     (address: string | undefined) => {
       setFilters({ address });
     },
-    [setFilters]
+    [setFilters],
   );
 
   return {
@@ -174,23 +161,16 @@ export const useBluetoothFilters = () => {
   };
 };
 
-/**
- * Hook for bluetooth device management
- * React Query handles server state, Zustand handles client state
- */
 export const useBluetoothManager = (backupId: number) => {
   const store = useBluetoothStore();
 
-  // Build API parameters from store state (client-side filters)
   const buildParams = useCallback((): GetBluetoothDevicesParams => {
     const params: GetBluetoothDevicesParams = {};
 
-    // Search query (searches name and address fields)
     if (store.searchQuery) {
       params.search = store.searchQuery;
     }
 
-    // Individual field filters
     if (store.filters.name) {
       params.name = store.filters.name;
     }
@@ -199,23 +179,20 @@ export const useBluetoothManager = (backupId: number) => {
       params.address = store.filters.address;
     }
 
-    // Handle device_type filter by converting to device_class
     if (store.filters.device_type) {
-      // Map device types to their corresponding device class values
       const deviceTypeToClass: Record<string, number> = {
-        tv: 6160908, // 5E020C hex
-        phone: 5898764, // 5A020C hex
-        audio: 2360324, // Audio devices
-        computer: 256, // Computer devices
-        input: 1280, // Input devices (keyboard, mouse)
-        peripheral: 1536, // Other peripheral devices
+        tv: 6160908,
+        phone: 5898764,
+        audio: 2360324,
+        computer: 256,
+        input: 1280,
+        peripheral: 1536,
       };
 
       if (deviceTypeToClass[store.filters.device_type]) {
         params.device_class = deviceTypeToClass[store.filters.device_type];
       }
     } else if (store.filters.device_class !== undefined) {
-      // Use direct device_class if device_type is not specified
       params.device_class = store.filters.device_class;
     }
 
@@ -231,7 +208,6 @@ export const useBluetoothManager = (backupId: number) => {
       params.link_type = store.filters.link_type;
     }
 
-    // Date filters
     if (store.filters.date_from) {
       params.last_connected_after = store.filters.date_from;
     }
@@ -240,7 +216,6 @@ export const useBluetoothManager = (backupId: number) => {
       params.last_connected_before = store.filters.date_to;
     }
 
-    // Sorting
     if (store.sortConfig.ordering) {
       params.ordering = store.sortConfig.ordering;
     }
@@ -260,23 +235,19 @@ export const useBluetoothManager = (backupId: number) => {
     store.sortConfig.ordering,
   ]);
 
-  // Use infinite scroll query for Samsung-style device loading
   const infiniteQuery = useBluetoothDevicesInfinite(backupId, buildParams);
 
-  // Flatten all device pages into a single array (computed from React Query data)
   const allDevices = useMemo(() => {
     if (!infiniteQuery.data) return [];
     return infiniteQuery.data.pages.flatMap((page) => page.results);
   }, [infiniteQuery.data]);
 
-  // Calculate stats based on all devices from React Query data
   const stats: BluetoothStats = useMemo(() => {
-    // Get total count from the first page response
     const totalFromBackend = infiniteQuery.data?.pages[0]?.total_results || 0;
 
     const paired = allDevices.filter((device) => isPaired(device)).length;
     const audioDevices = allDevices.filter((device) =>
-      isAudioDevice(device)
+      isAudioDevice(device),
     ).length;
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -286,7 +257,7 @@ export const useBluetoothManager = (backupId: number) => {
     }).length;
 
     return {
-      total: totalFromBackend, // Use backend total for accurate count
+      total: totalFromBackend,
       paired,
       audioDevices,
       recentlyConnected,
@@ -294,7 +265,6 @@ export const useBluetoothManager = (backupId: number) => {
   }, [allDevices, infiniteQuery.data]);
 
   return {
-    // Server state from React Query
     devices: allDevices,
     stats,
     totalDevices: stats.total,
@@ -309,12 +279,10 @@ export const useBluetoothManager = (backupId: number) => {
     refetch: infiniteQuery.refetch,
     refreshDevices: () => infiniteQuery.refetch(),
 
-    // Client state from Zustand
     selectedDevice: store.selectedDevice,
     selectedDevices: store.selectedDevices,
     viewMode: store.viewMode,
 
-    // Client actions from Zustand
     selectDevice: store.selectDevice,
     toggleDeviceSelection: store.toggleDeviceSelection,
     clearSelection: store.clearSelection,
