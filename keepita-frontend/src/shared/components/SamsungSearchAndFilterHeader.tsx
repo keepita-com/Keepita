@@ -1,7 +1,3 @@
-/**
- * SamsungSearchAndFilterHeader.tsx
- * Samsung One UI style search and filter header component
- */
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, ArrowUpDown, SortAsc, SortDesc } from "lucide-react";
@@ -21,31 +17,25 @@ interface SortOption {
 }
 
 interface SamsungSearchAndFilterHeaderProps {
-  // Search
   searchQuery: string;
   onSearchChange: (query: string) => void;
   searchPlaceholder?: string;
 
-  // Filters - New flexible approach
   filters?: Record<string, any>;
   onFiltersChange?: (filters: Record<string, any>) => void;
   filterOptions?: FilterOption[];
 
-  // Custom filter elements for full reusability
   customFilterElements?: React.ReactNode;
 
-  // Clear filters function for custom filters
   onClearFilters?: () => void;
   hasActiveFilters?: boolean;
 
-  // Sort
   sortConfig: { field: string; direction: "asc" | "desc" };
   onSortChange: (config: { field: string; direction: "asc" | "desc" }) => void;
   sortOptions: SortOption[];
 
-  // Results count
   resultsCount?: number;
-  resultsLabel?: string; // e.g., "devices", "contacts", "files"
+  resultsLabel?: string;
 }
 
 const SamsungSearchAndFilterHeader: React.FC<
@@ -69,7 +59,6 @@ const SamsungSearchAndFilterHeader: React.FC<
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
 
-  // Debounce search input
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (localSearchQuery !== searchQuery) {
@@ -80,7 +69,6 @@ const SamsungSearchAndFilterHeader: React.FC<
     return () => clearTimeout(timeoutId);
   }, [localSearchQuery, searchQuery, onSearchChange]);
 
-  // Update local search when external search changes
   React.useEffect(() => {
     setLocalSearchQuery(searchQuery);
   }, [searchQuery]);
@@ -95,7 +83,7 @@ const SamsungSearchAndFilterHeader: React.FC<
       };
       onFiltersChange(newFilters);
     },
-    [filters, onFiltersChange]
+    [filters, onFiltersChange],
   );
 
   const handleSortSelect = React.useCallback(
@@ -106,18 +94,16 @@ const SamsungSearchAndFilterHeader: React.FC<
       });
       setShowSortDropdown(false);
     },
-    [onSortChange]
+    [onSortChange],
   );
 
   return (
     <div>
-      {/* Search and Filter Bar - Exactly like My Files */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-2xl p-4 mb-4 border border-gray-100 shadow-sm mx-4 mt-4"
       >
-        {/* Main Search Bar */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -143,7 +129,6 @@ const SamsungSearchAndFilterHeader: React.FC<
             </AnimatePresence>
           </div>
 
-          {/* Sort Dropdown */}
           <div className="relative">
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -160,7 +145,6 @@ const SamsungSearchAndFilterHeader: React.FC<
               )}
             </motion.button>
 
-            {/* Sort Dropdown Menu */}
             <AnimatePresence>
               {showSortDropdown && (
                 <>
@@ -206,12 +190,10 @@ const SamsungSearchAndFilterHeader: React.FC<
           </div>
         </div>
 
-        {/* Filter Categories */}
         {customFilterElements ? (
           <div className="space-y-3">
             {customFilterElements}
 
-            {/* Clear filters and active status for custom filters */}
             {hasActiveFilters && onClearFilters && (
               <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                 <p className="text-sm text-gray-600">Filters active</p>
@@ -266,7 +248,6 @@ const SamsungSearchAndFilterHeader: React.FC<
           )
         )}
 
-        {/* Results Count */}
         {resultsCount !== undefined && (
           <div className="mt-3 pt-3 border-t border-gray-100">
             <p className="text-sm text-gray-500">
