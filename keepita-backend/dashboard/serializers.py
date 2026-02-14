@@ -61,7 +61,6 @@ from .extractors import (
     AndroidAppExtractor,
     AndroidFileExtractor,
     AndroidMessageExtractor,
-    AndroidDecryptionProxy,
 )
 from .utils.notification import send_notification
 
@@ -301,13 +300,13 @@ class BackupUploadSerializer(serializers.ModelSerializer):
                 ('bluetooth', IOSBluetoothExtractor(str(extract_dir), backup_id))
             ]
 
-        elif backup_type == 'android':
-            extractors = [
-                ('proxy', AndroidDecryptionProxy(str(extract_dir), backup_id)),
-                ('apps', AndroidAppExtractor(str(extract_dir), backup_id)),
-                ('files', AndroidFileExtractor(str(extract_dir), backup_id)),
-                ('messages', AndroidMessageExtractor(str(extract_dir), backup_id)),
-            ]
+        # elif backup_type == 'android':
+        #     extractors = [
+        #         ('proxy', AndroidDecryptionProxy(str(extract_dir), backup_id)),
+        #         ('apps', AndroidAppExtractor(str(extract_dir), backup_id)),
+        #         ('files', AndroidFileExtractor(str(extract_dir), backup_id)),
+        #         ('messages', AndroidMessageExtractor(str(extract_dir), backup_id)),
+        #     ]
             
         elif backup_type == 'samsung': 
             extractors = [
